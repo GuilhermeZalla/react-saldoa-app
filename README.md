@@ -106,13 +106,20 @@ O comando `php artisan migrate --seed` cria uma conta com lançamentos e metas d
 
 ## Próximos passos
 
-O repositório não contém um `ROADMAP.md`. Como ponto de partida para um roadmap futuro, ficam estas ideias:
+### Versão 1.1
 
 - Criar lançamentos recorrentes.
 - Exportar lançamentos para CSV.
 - Acompanhar metas de economia.
+- Terminar terminar a conta demo
+- CI com GitHub Actions
+- Revisão de segurança, acessibilidade e desempenho
+- Deploy
 
 ## Prints e deploy
+
+## Home Page
+![Home Page](docs/images/home.gif)
 
 <!-- TODO: adicionar capturas do dashboard, da lista de lançamentos e das categorias. -->
 
