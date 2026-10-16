@@ -1,5 +1,11 @@
-import { Form, Head, Link } from '@inertiajs/react';
-import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight } from 'lucide-react';
+﻿import { Form, Head, Link } from '@inertiajs/react';
+import {
+    ArrowDown,
+    ArrowUp,
+    ChevronLeft,
+    ChevronRight,
+    Target,
+} from 'lucide-react';
 import TransactionController from '@/actions/App/Http/Controllers/TransactionController';
 import { DashboardCharts } from '@/components/dashboard-charts';
 import { Button } from '@/components/ui/button';
@@ -13,7 +19,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { dashboard } from '@/routes';
+import budgets from '@/routes/budgets';
 import type {
+    BudgetAlert,
     DashboardExpenseCategory,
     DashboardMonthNavigation,
     DashboardMonthlyComparison,
@@ -42,6 +50,8 @@ type DashboardProps = {
     recentTransactions: DashboardRecentTransaction[];
     hasTransactionsInMonth: boolean;
     hasTransactionsInChartRange: boolean;
+    budgetAlerts: BudgetAlert[];
+    hasBudgets: boolean;
 };
 
 function MonthlyComparison({
@@ -88,6 +98,8 @@ export default function Dashboard({
     recentTransactions,
     hasTransactionsInMonth,
     hasTransactionsInChartRange,
+    budgetAlerts,
+    hasBudgets,
 }: DashboardProps) {
     const summaryCards = [
         {
@@ -119,6 +131,8 @@ export default function Dashboard({
             comparison: summary.monthlyComparison.balance,
         },
     ];
+
+    const hasAlerts = budgetAlerts.length > 0;
 
     return (
         <>
@@ -235,6 +249,74 @@ export default function Dashboard({
                         </Card>
                     ))}
                 </section>
+
+                {hasBudgets && (
+                    <Card className="rounded-2xl shadow-sm">
+                        <CardHeader className="flex flex-row items-center justify-between gap-4">
+                            <div className="space-y-1">
+                                <CardTitle className="flex items-center gap-2">
+                                    <Target
+                                        className="size-5"
+                                        aria-hidden="true"
+                                    />
+                                    <span>Metas do mês</span>
+                                </CardTitle>
+                                <CardDescription>
+                                    {hasAlerts
+                                        ? 'Acompanhe suas categorias que precisam de atenção.'
+                                        : 'Todas as suas metas estão dentro do limite.'}
+                                </CardDescription>
+                            </div>
+                            <Button
+                                variant="link"
+                                asChild
+                                className="shrink-0 px-0"
+                            >
+                                <Link href={budgets.index()}>Ver metas</Link>
+                            </Button>
+                        </CardHeader>
+                        <CardContent>
+                            {hasAlerts ? (
+                                <ul className="space-y-3">
+                                    {budgetAlerts.map((alert) => (
+                                        <li
+                                            key={alert.category_name}
+                                            className="flex items-center justify-between gap-3 rounded-lg border border-border/60 p-3"
+                                        >
+                                            <div className="min-w-0">
+                                                <p className="truncate font-medium">
+                                                    {alert.category_name}
+                                                </p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {alert.status === 'warning'
+                                                        ? 'Atenção: próximo do limite'
+                                                        : 'Limite estourado'}
+                                                </p>
+                                            </div>
+                                            <p
+                                                className={`shrink-0 text-lg font-semibold tabular-nums ${
+                                                    alert.status === 'warning'
+                                                        ? 'text-warning'
+                                                        : 'text-expense-text'
+                                                }`}
+                                            >
+                                                {percentageFormatter.format(
+                                                    alert.percentage,
+                                                )}
+                                                %
+                                            </p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="py-2 text-sm text-muted-foreground">
+                                    Todas as suas categorias estão dentro do
+                                    limite estabelecido.
+                                </p>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
 
                 <DashboardCharts
                     expensesByCategory={expensesByCategory}

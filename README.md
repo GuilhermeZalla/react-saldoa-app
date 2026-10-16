@@ -1,4 +1,4 @@
-# Saldoa
+﻿# Saldoa
 
 Aplicação web de controle financeiro pessoal criada para organizar receitas e despesas, acompanhar os gastos e visualizar a evolução das finanças em um dashboard.
 
@@ -9,6 +9,7 @@ Aplicação web de controle financeiro pessoal criada para organizar receitas e 
 - Cadastro, edição, listagem e exclusão de receitas e despesas.
 - Filtros de lançamentos por mês, tipo, categoria e texto, com paginação.
 - Dashboard com saldo geral, resumo mensal, despesas por categoria, comparação dos últimos meses e lançamentos recentes.
+- **Metas de gasto por categoria:** defina limites mensais para suas categorias de despesa e acompanhe o uso em tempo real. Metas abaixo de 80% aparecem como "ok", de 80% a menos de 100% aparecem com aviso de atenção, e a partir de 100% aparecem como estouradas. O dashboard exibe alertas das metas que precisam de atenção.
 - Proteção dos dados por usuário, com autorização no back-end.
 - Interface responsiva em português, com valores em reais e datas no formato brasileiro.
 
@@ -91,7 +92,7 @@ php artisan test --compact
 
 ## Usuário de demonstração
 
-O comando `php artisan migrate --seed` cria uma conta com lançamentos de exemplo distribuídos pelos últimos três meses:
+O comando `php artisan migrate --seed` cria uma conta com lançamentos e metas de exemplo distribuídos pelos últimos três meses. Para ativar o login por 1 clique, defina `DEMO_LOGIN_ENABLED=true` no seu arquivo `.env`:
 
 - **E-mail:** `demo@exemplo.com`
 - **Senha:** `demo1234`
@@ -108,7 +109,6 @@ O comando `php artisan migrate --seed` cria uma conta com lançamentos de exempl
 O repositório não contém um `ROADMAP.md`. Como ponto de partida para um roadmap futuro, ficam estas ideias:
 
 - Criar lançamentos recorrentes.
-- Definir orçamentos mensais por categoria.
 - Exportar lançamentos para CSV.
 - Acompanhar metas de economia.
 

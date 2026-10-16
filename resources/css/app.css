@@ -1,4 +1,4 @@
-@import '@fontsource-variable/dm-sans';
+﻿@import '@fontsource-variable/dm-sans';
 @import '@fontsource-variable/space-grotesk';
 @import 'tailwindcss';
 
@@ -109,6 +109,7 @@
     --expense-text: #d51f28;
     --success: var(--income);
     --error: var(--expense-text);
+    --warning: #b45309;
     --overlay: rgb(5 5 5 / 80%);
     --action-hover: #d46a00;
 
@@ -164,7 +165,6 @@
     --expense: #e31b23;
     --expense-text: #ff5c62;
     --warning: #f59e0b;
-    --warning: #b45309;
     --success: var(--income);
     --error: var(--expense-text);
     --overlay: rgb(5 5 5 / 80%);

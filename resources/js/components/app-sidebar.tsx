@@ -1,5 +1,6 @@
-import { Link } from '@inertiajs/react';
-import { ArrowLeftRight, LayoutGrid, Tags } from 'lucide-react';
+﻿import { Link } from '@inertiajs/react';
+import { ArrowLeftRight, LayoutGrid, Tags, Target } from 'lucide-react';
+import BudgetController from '@/actions/App/Http/Controllers/BudgetController';
 import CategoryController from '@/actions/App/Http/Controllers/CategoryController';
 import TransactionController from '@/actions/App/Http/Controllers/TransactionController';
 import AppLogo from '@/components/app-logo';
@@ -32,6 +33,11 @@ const mainNavItems: NavItem[] = [
         title: 'Categorias',
         href: CategoryController.index(),
         icon: Tags,
+    },
+    {
+        title: 'Metas',
+        href: BudgetController.index(),
+        icon: Target,
     },
 ];
 

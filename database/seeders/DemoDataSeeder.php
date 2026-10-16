@@ -146,5 +146,27 @@ class DemoDataSeeder extends Seeder
                 }
             }
         }
+
+        // Criar metas para ter 1 de cada status no mês atual
+        // Para o mês atual, os gastos são (índice 0 do monthlyAmounts):
+        // Alimentação: 625.40 -> limite 1000 = 62% (ok)
+        // Lazer: 198.00 -> limite 220 = 90% (warning)
+        // Transporte: 189.00 -> limite 150 = 126% (exceeded)
+        // Saúde: 83.50 -> limite 200 = 41% (ok, mantém sem alerta)
+
+        /** @var array<string, string> $budgetDefinitions */
+        $budgetDefinitions = [
+            'Alimentação' => '1000.00',
+            'Lazer' => '220.00',
+            'Transporte' => '150.00',
+            'Saúde' => '200.00',
+        ];
+
+        foreach ($budgetDefinitions as $categoryName => $amount) {
+            $demoUser->budgets()->updateOrCreate(
+                ['category_id' => $categories[$categoryName]->id],
+                ['amount' => $amount]
+            );
+        }
     }
 }

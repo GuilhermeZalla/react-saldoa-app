@@ -1,4 +1,4 @@
-export type DashboardSummary = {
+﻿export type DashboardSummary = {
     overallBalance: string;
     monthlyIncome: string;
     monthlyExpense: string;

@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+﻿import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
@@ -14,9 +14,10 @@ import { request } from '@/routes/password';
 type Props = {
     status?: string;
     canResetPassword: boolean;
+    demoLoginEnabled: boolean;
 };
 
-export default function Login({ status, canResetPassword }: Props) {
+export default function Login({ status, canResetPassword, demoLoginEnabled }: Props) {
     return (
         <>
             <Head title="Entrar" />
@@ -90,6 +91,39 @@ export default function Login({ status, canResetPassword }: Props) {
                                 Entrar
                             </Button>
                         </div>
+
+                        {demoLoginEnabled && (
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t" />
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                    <span className="bg-background px-2 text-muted-foreground">
+                                        ou
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+
+                        {demoLoginEnabled && (
+                            <Form
+                                method="post"
+                                action="/demo-login"
+                                className="flex flex-col gap-4"
+                            >
+                                <Button
+                                    type="submit"
+                                    variant="outline"
+                                    className="w-full"
+                                >
+                                    Entrar com conta de demonstração
+                                </Button>
+                                <p className="text-center text-xs text-muted-foreground">
+                                    Explore a aplicação com dados pré-carregados.
+                                    Não é possível alterar senha ou excluir esta conta.
+                                </p>
+                            </Form>
+                        )}
 
                         <div className="text-center text-sm text-muted-foreground">
                             Ainda não tem uma conta?{' '}
