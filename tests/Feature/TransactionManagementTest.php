@@ -286,3 +286,27 @@ test('transactions are paginated and ordered by most recent date first', functio
             ->where('transactions.last_page', 2)
             ->where('transactions.data.0.formattedDate', '12/01/2025'));
 });
+
+test('restoring a transaction that does not exist returns not found', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('transactions.restore', 999999))
+        ->assertNotFound();
+});
+
+test('a transaction cannot be restored after its category was removed permanently', function () {
+    $user = User::factory()->create();
+    $category = Category::factory()->for($user)->create(['type' => 'expense']);
+    $transaction = Transaction::factory()
+        ->for($user)
+        ->for($category)
+        ->create(['type' => 'expense']);
+
+    $this->actingAs($user);
+
+    $this->delete(route('transactions.destroy', $transaction));
+    $this->delete(route('categories.destroy', $category));
+
+    $this->post(route('transactions.restore', $transaction->id))->assertNotFound();
+});
