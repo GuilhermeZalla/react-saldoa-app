@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
