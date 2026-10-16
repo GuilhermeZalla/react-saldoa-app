@@ -89,7 +89,71 @@ test('a user can create, edit, and delete their transactions', function () {
         ...$filters,
     ]))->assertRedirect(route('transactions.index', $filters));
 
-    expect($transaction->fresh())->toBeNull();
+    expect(Transaction::withTrashed()->find($transaction->id)?->trashed())->toBeTrue();
+});
+
+test('a user can restore a deleted transaction and the undo toast keeps the active filters', function () {
+    $user = User::factory()->create();
+    $category = Category::factory()->for($user)->create(['type' => 'expense']);
+    $transaction = Transaction::factory()->for($user)->for($category)->create([
+        'description' => 'Mercado para restaurar',
+        'type' => 'expense',
+        'date' => '2025-05-10',
+    ]);
+    $filters = [
+        'month' => '2025-05',
+        'type' => 'expense',
+        'category_id' => (string) $category->id,
+        'search' => 'Mercado',
+    ];
+
+    $this->actingAs($user)
+        ->delete(route('transactions.destroy', [
+            'transaction' => $transaction->id,
+            ...$filters,
+        ]))
+        ->assertRedirect(route('transactions.index', $filters))
+        ->assertSessionHas('inertia.flash_data.toast.duration', 8000)
+        ->assertSessionHas('inertia.flash_data.toast.message', "Lan\u{00e7}amento exclu\u{00ed}do")
+        ->assertSessionHas('inertia.flash_data.toast.action.label', 'Desfazer')
+        ->assertSessionHas('inertia.flash_data.toast.action.method', 'post')
+        ->assertSessionHas('inertia.flash_data.toast.action.url', route('transactions.restore', [
+            'transaction' => $transaction->id,
+            ...$filters,
+        ]));
+
+    $this->post(route('transactions.restore', [
+        'transaction' => $transaction->id,
+        ...$filters,
+    ]))
+        ->assertRedirect(route('transactions.index', $filters))
+        ->assertSessionHas('inertia.flash_data.toast.message', "Lan\u{00e7}amento restaurado.");
+
+    expect($transaction->fresh())->not->toBeNull();
+});
+
+test('restoring a transaction that is already active responds safely', function () {
+    $user = User::factory()->create();
+    $category = Category::factory()->for($user)->create(['type' => 'income']);
+    $transaction = Transaction::factory()->for($user)->for($category)->create();
+
+    $this->actingAs($user)
+        ->post(route('transactions.restore', [
+            'transaction' => $transaction->id,
+            'month' => '2025-05',
+            'type' => 'income',
+            'category_id' => 'all',
+            'search' => '',
+        ]))
+        ->assertRedirect(route('transactions.index', [
+            'month' => '2025-05',
+            'type' => 'income',
+            'category_id' => 'all',
+            'search' => '',
+        ]))
+        ->assertSessionHas('inertia.flash_data.toast.message', "Este lan\u{00e7}amento j\u{00e1} est\u{00e1} ativo.");
+
+    expect($transaction->fresh())->not->toBeNull();
 });
 
 test('a transaction requires an amount greater than zero', function () {
@@ -161,7 +225,11 @@ test('a user cannot view or change another users transactions', function () {
 
     $this->delete(route('transactions.destroy', $transaction))->assertForbidden();
 
-    expect($transaction->refresh()->description)->toBe('Lançamento privado');
+    $transaction->delete();
+
+    $this->post(route('transactions.restore', $transaction))->assertForbidden();
+
+    expect(Transaction::withTrashed()->findOrFail($transaction->id)->description)->toBe('Lançamento privado');
 });
 
 test('a transaction must use a category owned by the user with the same type', function () {

@@ -257,6 +257,38 @@ test('filters stay in the URL while editing and deleting a transaction', functio
     ]))->assertRedirect(route('transactions.index', $filters));
 });
 
+test('filter summaries and results exclude soft-deleted transactions', function () {
+    $user = User::factory()->create();
+    $category = Category::factory()->for($user)->create(['type' => 'expense']);
+    Transaction::factory()->for($user)->for($category)->create([
+        'description' => 'Compra ativa',
+        'amount' => '42.50',
+        'type' => 'expense',
+        'date' => '2025-05-10',
+    ]);
+    $deletedTransaction = Transaction::factory()->for($user)->for($category)->create([
+        'description' => 'Compra excluida',
+        'amount' => '900.00',
+        'type' => 'expense',
+        'date' => '2025-05-11',
+    ]);
+    $deletedTransaction->delete();
+
+    $this->actingAs($user)
+        ->get(route('transactions.index', [
+            'month' => '2025-05',
+            'type' => 'expense',
+            'category_id' => $category->id,
+        ]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('transactions.data', 1)
+            ->where('transactions.data.0.description', 'Compra ativa')
+            ->where('summary.income', '0.00')
+            ->where('summary.expense', '42.50')
+            ->where('summary.balance', '-42.50'));
+});
+
 test('pagination links keep the active filters', function () {
     $user = User::factory()->create();
     $category = Category::factory()->for($user)->create(['type' => 'expense']);

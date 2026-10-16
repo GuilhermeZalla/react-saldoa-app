@@ -98,7 +98,7 @@ export default function CategoriesIndex({
                                                         size="sm"
                                                         className="flex-1"
                                                         disabled
-                                                        title="Remova os lançamentos antes de excluir esta categoria."
+                                                        title="Remova os lançamentos ativos antes de excluir esta categoria."
                                                     >
                                                         Excluir
                                                     </Button>
@@ -204,7 +204,7 @@ export default function CategoriesIndex({
                                                                     variant="ghost"
                                                                     size="sm"
                                                                     disabled
-                                                                    title="Remova os lançamentos antes de excluir esta categoria."
+                                                                    title="Remova os lançamentos ativos antes de excluir esta categoria."
                                                                 >
                                                                     Excluir
                                                                 </Button>

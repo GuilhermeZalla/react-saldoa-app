@@ -85,7 +85,7 @@ test('a user cannot view or change another users categories', function () {
     expect($category->refresh()->name)->toBe('Categoria privada');
 });
 
-test('a category with transactions cannot be deleted', function () {
+test('a category with active transactions cannot be deleted', function () {
     $user = User::factory()->create();
     $category = Category::factory()->for($user)->create([
         'type' => 'expense',
@@ -96,10 +96,35 @@ test('a category with transactions cannot be deleted', function () {
     ]);
 
     $this->actingAs($user)
-        ->delete(route('categories.destroy', $category))
-        ->assertRedirect(route('categories.index'));
+        ->get(route('categories.index'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('categories.0.transactionsCount', 1));
+
+    $this->delete(route('categories.destroy', $category))
+        ->assertRedirect(route('categories.index'))
+        ->assertSessionHas('inertia.flash_data.toast.message', "N\u{00e3}o \u{00e9} poss\u{00ed}vel excluir uma categoria que possui lan\u{00e7}amentos ativos.");
 
     expect($category->fresh())->not->toBeNull();
+});
+
+test('a category with only soft-deleted transactions can be removed and purged', function () {
+    $user = User::factory()->create();
+    $category = Category::factory()->for($user)->create(['type' => 'expense']);
+    $transaction = Transaction::factory()->for($user)->for($category)->create(['type' => 'expense']);
+    $transaction->delete();
+
+    $this->actingAs($user)
+        ->get(route('categories.index'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('categories.0.transactionsCount', 0));
+
+    $this->delete(route('categories.destroy', $category))
+        ->assertRedirect(route('categories.index'));
+
+    expect(Category::query()->find($category->id))->toBeNull()
+        ->and(Transaction::withTrashed()->find($transaction->id))->toBeNull();
+
+    $this->post(route('transactions.restore', $transaction->id))->assertNotFound();
 });
 
 test('category form requests reject invalid values', function () {

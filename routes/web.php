@@ -11,6 +11,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('categories', CategoryController::class)->except(['show']);
+    Route::post('transactions/{transaction}/restore', [TransactionController::class, 'restore'])
+        ->withTrashed()
+        ->name('transactions.restore');
     Route::resource('transactions', TransactionController::class)->except(['show']);
 });
 

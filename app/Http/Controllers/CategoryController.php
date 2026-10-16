@@ -8,6 +8,7 @@ use App\Models\Category;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -101,16 +102,24 @@ class CategoryController extends Controller
     {
         $this->authorize('delete', $category);
 
-        if ($category->transactions()->exists()) {
+        $deleted = DB::transaction(function () use ($category): bool {
+            if ($category->transactions()->exists()) {
+                return false;
+            }
+
+            $category->transactions()->onlyTrashed()->forceDelete();
+
+            return (bool) $category->delete();
+        });
+
+        if (! $deleted) {
             Inertia::flash('toast', [
                 'type' => 'error',
-                'message' => 'Não é possível excluir uma categoria que possui lançamentos.',
+                'message' => 'Não é possível excluir uma categoria que possui lançamentos ativos.',
             ]);
 
             return to_route('categories.index');
         }
-
-        $category->delete();
 
         Inertia::flash('toast', [
             'type' => 'success',

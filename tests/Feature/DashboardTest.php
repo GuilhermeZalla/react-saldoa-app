@@ -423,3 +423,71 @@ test('dashboard measures a worsening negative balance against its absolute previ
             ->where('summary.monthlyComparison.balance.percentageChange', -100)
             ->where('summary.monthlyComparison.balance.sentiment', 'negative'));
 });
+
+test('dashboard aggregates exclude soft-deleted transactions from every widget', function () {
+    $user = User::factory()->create();
+    $incomeCategory = Category::factory()->for($user)->create(['type' => 'income']);
+    $expenseCategory = Category::factory()->for($user)->create(['type' => 'expense']);
+
+    $activeTransactions = [
+        ['description' => 'January income', 'amount' => '10.00', 'type' => 'income', 'date' => '2025-01-10', 'category' => $incomeCategory],
+        ['description' => 'March expense', 'amount' => '5.00', 'type' => 'expense', 'date' => '2025-03-10', 'category' => $expenseCategory],
+        ['description' => 'May income', 'amount' => '50.00', 'type' => 'income', 'date' => '2025-05-10', 'category' => $incomeCategory],
+        ['description' => 'May expense', 'amount' => '20.00', 'type' => 'expense', 'date' => '2025-05-11', 'category' => $expenseCategory],
+        ['description' => 'June income', 'amount' => '100.00', 'type' => 'income', 'date' => '2025-06-10', 'category' => $incomeCategory],
+        ['description' => 'June expense', 'amount' => '25.00', 'type' => 'expense', 'date' => '2025-06-11', 'category' => $expenseCategory],
+    ];
+
+    foreach ($activeTransactions as $attributes) {
+        $category = $attributes['category'];
+        unset($attributes['category']);
+
+        Transaction::factory()->for($user)->for($category)->create($attributes);
+    }
+
+    $deletedTransactions = [
+        ['description' => 'Deleted February income', 'amount' => '700.00', 'type' => 'income', 'date' => '2025-02-10', 'category' => $incomeCategory],
+        ['description' => 'Deleted May income', 'amount' => '500.00', 'type' => 'income', 'date' => '2025-05-12', 'category' => $incomeCategory],
+        ['description' => 'Deleted May expense', 'amount' => '400.00', 'type' => 'expense', 'date' => '2025-05-13', 'category' => $expenseCategory],
+        ['description' => 'Deleted June income', 'amount' => '900.00', 'type' => 'income', 'date' => '2025-06-29', 'category' => $incomeCategory],
+        ['description' => 'Deleted June expense', 'amount' => '600.00', 'type' => 'expense', 'date' => '2025-06-30', 'category' => $expenseCategory],
+    ];
+
+    foreach ($deletedTransactions as $attributes) {
+        $category = $attributes['category'];
+        unset($attributes['category']);
+
+        Transaction::factory()->for($user)->for($category)->create($attributes)->delete();
+    }
+
+    $this->actingAs($user)
+        ->get(route('dashboard', ['month' => '2025-06']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('summary.overallBalance', '110.00')
+            ->where('summary.monthlyIncome', '100.00')
+            ->where('summary.monthlyExpense', '25.00')
+            ->where('summary.monthlyBalance', '75.00')
+            ->where('summary.monthlyComparison.income.previousValue', '50.00')
+            ->where('summary.monthlyComparison.income.percentageChange', 100)
+            ->where('summary.monthlyComparison.expense.previousValue', '20.00')
+            ->where('summary.monthlyComparison.expense.percentageChange', 25)
+            ->where('summary.monthlyComparison.balance.previousValue', '30.00')
+            ->where('summary.monthlyComparison.balance.percentageChange', 150)
+            ->has('expensesByCategory', 1)
+            ->where('expensesByCategory.0.id', $expenseCategory->id)
+            ->where('expensesByCategory.0.total', '25.00')
+            ->has('monthlyTrend', 6)
+            ->where('monthlyTrend.0.month', '2025-01')
+            ->where('monthlyTrend.0.income', 10)
+            ->where('monthlyTrend.1.month', '2025-02')
+            ->where('monthlyTrend.1.income', 0)
+            ->where('monthlyTrend.4.income', 50)
+            ->where('monthlyTrend.4.expense', 20)
+            ->where('monthlyTrend.5.income', 100)
+            ->where('monthlyTrend.5.expense', 25)
+            ->has('recentTransactions', 5)
+            ->where('recentTransactions.0.description', 'June expense')
+            ->where('recentTransactions.1.description', 'June income')
+            ->where('recentTransactions.4.description', 'March expense'));
+});

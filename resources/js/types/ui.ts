@@ -11,6 +11,12 @@ export type AppVariant = 'header' | 'sidebar';
 export type FlashToast = {
     type: 'success' | 'info' | 'warning' | 'error';
     message: string;
+    duration?: number;
+    action?: {
+        label: string;
+        url: string;
+        method: 'post';
+    };
 };
 
 export type AuthLayoutProps = {

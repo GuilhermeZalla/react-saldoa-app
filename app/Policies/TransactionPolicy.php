@@ -46,4 +46,12 @@ class TransactionPolicy
     {
         return $user->id === $transaction->user_id;
     }
+
+    /**
+     * Determine whether the user can restore the model.
+     */
+    public function restore(User $user, Transaction $transaction): bool
+    {
+        return $user->id === $transaction->user_id;
+    }
 }

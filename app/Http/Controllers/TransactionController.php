@@ -164,7 +164,44 @@ class TransactionController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => 'Lançamento excluído com sucesso.',
+            'message' => 'Lançamento excluído',
+            'duration' => 8000,
+            'action' => [
+                'label' => 'Desfazer',
+                'url' => route('transactions.restore', [
+                    'transaction' => $transaction->id,
+                    ...$this->filtersFor($request),
+                ]),
+                'method' => 'post',
+            ],
+        ]);
+
+        return to_route('transactions.index', $this->filtersFor($request));
+    }
+
+    /**
+     * Restore a soft-deleted transaction.
+     */
+    public function restore(Request $request, Transaction $transaction): RedirectResponse
+    {
+        $this->authorize('restore', $transaction);
+
+        if (! $transaction->trashed()) {
+            Inertia::flash('toast', [
+                'type' => 'info',
+                'message' => 'Este lançamento já está ativo.',
+                'duration' => 3000,
+            ]);
+
+            return to_route('transactions.index', $this->filtersFor($request));
+        }
+
+        $transaction->restore();
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Lançamento restaurado.',
+            'duration' => 3000,
         ]);
 
         return to_route('transactions.index', $this->filtersFor($request));
