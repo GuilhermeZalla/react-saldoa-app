@@ -1,0 +1,209 @@
+@import '@fontsource-variable/dm-sans';
+@import '@fontsource-variable/space-grotesk';
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    --font-sans:
+        'DM Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-heading:
+        'Space Grotesk', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-income: var(--income);
+    --color-expense: var(--expense);
+    --color-expense-text: var(--expense-text);
+    --color-action-hover: var(--action-hover);
+
+    --color-category-amber: var(--category-amber);
+    --color-category-petrol: var(--category-petrol);
+    --color-category-purple: var(--category-purple);
+    --color-category-blue-gray: var(--category-blue-gray);
+    --color-category-rose: var(--category-rose);
+    --color-category-aqua: var(--category-aqua);
+
+    --color-chart-1: var(--category-amber);
+    --color-chart-2: var(--category-petrol);
+    --color-chart-3: var(--category-purple);
+    --color-chart-4: var(--category-blue-gray);
+    --color-chart-5: var(--category-rose);
+    --color-chart-6: var(--category-aqua);
+
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+    color-scheme: light;
+
+    --background: #f4f5f7;
+    --foreground: #171a1f;
+    --card: #ffffff;
+    --card-foreground: #171a1f;
+    --popover: #ffffff;
+    --popover-foreground: #171a1f;
+    --primary: #c85f00;
+    --primary-foreground: #050505;
+    --secondary: #e7eaee;
+    --secondary-foreground: #171a1f;
+    --muted: #e7eaee;
+    --muted-foreground: #535d68;
+    --accent: #eceff2;
+    --accent-foreground: #171a1f;
+    --destructive: #535d68;
+    --destructive-foreground: #ffffff;
+    --border: #d9dee5;
+    --input: #d9dee5;
+    --ring: #b04e00;
+
+    --income: #18794e;
+    --expense: #d51f28;
+    --expense-text: #d51f28;
+    --action-hover: #d46a00;
+
+    --category-amber: #925d00;
+    --category-petrol: #146f79;
+    --category-purple: #7756a5;
+    --category-blue-gray: #526b80;
+    --category-rose: #9d526a;
+    --category-aqua: #247c70;
+
+    --radius: 0.625rem;
+
+    --sidebar: #050505;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #c85f00;
+    --sidebar-primary-foreground: #050505;
+    --sidebar-accent: #232830;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #2e343c;
+    --sidebar-ring: #c85f00;
+}
+
+.dark {
+    color-scheme: dark;
+
+    --background: #1b1f24;
+    --foreground: #ffffff;
+    --card: #232830;
+    --card-foreground: #ffffff;
+    --popover: #232830;
+    --popover-foreground: #ffffff;
+    --primary: #ff8500;
+    --primary-foreground: #050505;
+    --secondary: #2e343c;
+    --secondary-foreground: #ffffff;
+    --muted: #2e343c;
+    --muted-foreground: #9aa3ae;
+    --accent: #2e343c;
+    --accent-foreground: #ffffff;
+    --destructive: #535d68;
+    --destructive-foreground: #ffffff;
+    --border: #2e343c;
+    --input: #2e343c;
+    --ring: #ff8500;
+
+    --income: #2fcb7a;
+    --expense: #e31b23;
+    --expense-text: #ff5c62;
+    --action-hover: #ff9a2e;
+
+    --category-amber: #f2c66d;
+    --category-petrol: #65cfc4;
+    --category-purple: #b7a5e8;
+    --category-blue-gray: #a2b9cc;
+    --category-rose: #d8a3b2;
+    --category-aqua: #79d4c3;
+
+    --sidebar: #050505;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #ff8500;
+    --sidebar-primary-foreground: #050505;
+    --sidebar-accent: #232830;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #2e343c;
+    --sidebar-ring: #ff8500;
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    html {
+        background-color: var(--background);
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: var(--font-heading);
+    }
+
+    .money-value {
+        font-family: var(--font-heading);
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
