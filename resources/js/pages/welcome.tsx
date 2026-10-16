@@ -17,8 +17,8 @@ export default function Welcome() {
 
     return (
         <>
-            <Head title="Início" />
-            <div className="min-h-svh overflow-hidden bg-background text-foreground">
+            <Head title="Bem-vindo" />
+            <div className="page-atmosphere min-h-svh overflow-hidden text-foreground">
                 <header className="border-b border-border/70">
                     <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
                         <Link

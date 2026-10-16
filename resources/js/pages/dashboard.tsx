@@ -1,5 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import TransactionController from '@/actions/App/Http/Controllers/TransactionController';
 import { DashboardCharts } from '@/components/dashboard-charts';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { dashboard } from '@/routes';
 import type {
     DashboardExpenseCategory,
     DashboardMonthNavigation,
+    DashboardMonthlyComparison,
     DashboardMonthlyTotal,
     DashboardRecentTransaction,
     DashboardSummary,
@@ -24,6 +25,10 @@ import type {
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
+});
+const percentageFormatter = new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
 });
 
 type DashboardProps = {
@@ -38,6 +43,41 @@ type DashboardProps = {
     hasTransactionsInMonth: boolean;
     hasTransactionsInChartRange: boolean;
 };
+
+function MonthlyComparison({
+    comparison,
+}: {
+    comparison: DashboardMonthlyComparison;
+}) {
+    if (comparison.state === 'none') {
+        return null;
+    }
+
+    if (comparison.state === 'unchanged') {
+        return (
+            <p className="text-xs font-medium text-muted-foreground">
+                0% vs. mês anterior
+            </p>
+        );
+    }
+
+    const isPositive = comparison.sentiment === 'positive';
+    const DirectionIcon = isPositive ? ArrowUp : ArrowDown;
+    const className = isPositive ? 'text-income' : 'text-expense-text';
+    const label =
+        comparison.state === 'new'
+            ? 'Novo'
+            : `${isPositive ? 'Melhorou' : 'Piorou'} ${percentageFormatter.format(Math.abs(comparison.percentageChange ?? 0))}% vs. mês anterior`;
+
+    return (
+        <p
+            className={`flex items-center gap-1.5 text-xs font-medium ${className}`}
+        >
+            <DirectionIcon className="size-3.5" aria-hidden="true" />
+            <span>{label}</span>
+        </p>
+    );
+}
 
 export default function Dashboard({
     filters,
@@ -55,24 +95,28 @@ export default function Dashboard({
             value: summary.overallBalance,
             description: 'Receitas menos despesas desde o início.',
             valueClassName: '',
+            comparison: null,
         },
         {
             title: 'Receitas do mês',
             value: summary.monthlyIncome,
             description: monthNavigation.label,
-            valueClassName: 'text-green-700 dark:text-green-400',
+            valueClassName: 'text-income',
+            comparison: summary.monthlyComparison.income,
         },
         {
             title: 'Despesas do mês',
             value: summary.monthlyExpense,
             description: monthNavigation.label,
-            valueClassName: 'text-red-700 dark:text-red-400',
+            valueClassName: 'text-expense-text',
+            comparison: summary.monthlyComparison.expense,
         },
         {
             title: 'Saldo do mês',
             value: summary.monthlyBalance,
             description: 'Receitas menos despesas no período.',
             valueClassName: '',
+            comparison: summary.monthlyComparison.balance,
         },
     ];
 
@@ -179,6 +223,11 @@ export default function Dashboard({
                                         Number(summaryCard.value),
                                     )}
                                 </CardTitle>
+                                {summaryCard.comparison && (
+                                    <MonthlyComparison
+                                        comparison={summaryCard.comparison}
+                                    />
+                                )}
                                 <p className="text-xs text-muted-foreground">
                                     {summaryCard.description}
                                 </p>
@@ -189,6 +238,8 @@ export default function Dashboard({
 
                 <DashboardCharts
                     expensesByCategory={expensesByCategory}
+                    selectedMonth={filters.month}
+                    selectedMonthLabel={monthNavigation.label}
                     monthlyTrend={monthlyTrend}
                     hasTransactionsInChartRange={hasTransactionsInChartRange}
                 />
@@ -233,7 +284,7 @@ export default function Dashboard({
                                             </p>
                                         </div>
                                         <p
-                                            className={`shrink-0 font-medium tabular-nums ${transaction.type === 'income' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}
+                                            className={`shrink-0 font-medium tabular-nums ${transaction.type === 'income' ? 'text-income' : 'text-expense-text'}`}
                                         >
                                             {transaction.type === 'income'
                                                 ? '+ '

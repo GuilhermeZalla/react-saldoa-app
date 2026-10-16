@@ -24,8 +24,14 @@ class DashboardController extends Controller
         $month = $this->monthFor($request);
         $monthStart = Carbon::parse($month.'-01')->startOfMonth();
         $monthEnd = $monthStart->copy()->endOfMonth();
+        $previousMonthStart = $monthStart->copy()->subMonth()->startOfMonth();
+        $previousMonthEnd = $monthStart->copy()->subDay();
         $chartStart = $monthStart->copy()->subMonths(5)->startOfMonth();
         $dateRange = [$monthStart->toDateString(), $monthEnd->toDateString()];
+        $previousMonthDateRange = [
+            $previousMonthStart->toDateString(),
+            $previousMonthEnd->toDateString(),
+        ];
 
         $allTimeTotals = $user->transactions()
             ->selectRaw(
@@ -43,6 +49,16 @@ class DashboardController extends Controller
                 .'COALESCE(SUM(CASE WHEN type = ? THEN amount ELSE 0 END), 0) AS expense_total, '
                 .'COALESCE(SUM(CASE WHEN type = ? THEN amount WHEN type = ? THEN -amount ELSE 0 END), 0) AS balance_total, '
                 .'COUNT(*) AS transaction_count',
+                ['income', 'expense', 'income', 'expense'],
+            )
+            ->first();
+
+        $previousMonthTotals = $user->transactions()
+            ->whereBetween('date', $previousMonthDateRange)
+            ->selectRaw(
+                'COALESCE(SUM(CASE WHEN type = ? THEN amount ELSE 0 END), 0) AS income_total, '
+                .'COALESCE(SUM(CASE WHEN type = ? THEN amount ELSE 0 END), 0) AS expense_total, '
+                .'COALESCE(SUM(CASE WHEN type = ? THEN amount WHEN type = ? THEN -amount ELSE 0 END), 0) AS balance_total',
                 ['income', 'expense', 'income', 'expense'],
             )
             ->first();
@@ -134,6 +150,23 @@ class DashboardController extends Controller
                 'monthlyIncome' => $this->decimalAmount(data_get($monthTotals, 'income_total', 0)),
                 'monthlyExpense' => $this->decimalAmount(data_get($monthTotals, 'expense_total', 0)),
                 'monthlyBalance' => $this->decimalAmount(data_get($monthTotals, 'balance_total', 0)),
+                'monthlyComparison' => [
+                    'income' => $this->compareMonthlyAmounts(
+                        data_get($monthTotals, 'income_total', 0),
+                        data_get($previousMonthTotals, 'income_total', 0),
+                        'income',
+                    ),
+                    'expense' => $this->compareMonthlyAmounts(
+                        data_get($monthTotals, 'expense_total', 0),
+                        data_get($previousMonthTotals, 'expense_total', 0),
+                        'expense',
+                    ),
+                    'balance' => $this->compareMonthlyAmounts(
+                        data_get($monthTotals, 'balance_total', 0),
+                        data_get($previousMonthTotals, 'balance_total', 0),
+                        'balance',
+                    ),
+                ],
             ],
             'expensesByCategory' => $categoryExpenses,
             'monthlyTrend' => $monthlyTrend,
@@ -168,5 +201,73 @@ class DashboardController extends Controller
     private function decimalAmount(mixed $amount): string
     {
         return number_format((float) $amount, 2, '.', '');
+    }
+
+    /**
+     * @param  'income'|'expense'|'balance'  $metric
+     * @return array{previousValue: string, percentageChange: float|null, state: 'none'|'new'|'unchanged'|'percentage', sentiment: 'positive'|'negative'|'neutral'}
+     */
+    private function compareMonthlyAmounts(mixed $currentAmount, mixed $previousAmount, string $metric): array
+    {
+        $currentMinorUnits = $this->amountInMinorUnits($currentAmount);
+        $previousMinorUnits = $this->amountInMinorUnits($previousAmount);
+        $differenceMinorUnits = $currentMinorUnits - $previousMinorUnits;
+
+        if ($previousMinorUnits === 0) {
+            return [
+                'previousValue' => $this->decimalAmount($previousAmount),
+                'percentageChange' => null,
+                'state' => $currentMinorUnits === 0 ? 'none' : 'new',
+                'sentiment' => $currentMinorUnits === 0
+                    ? 'neutral'
+                    : $this->sentimentForNewAmount($currentMinorUnits, $metric),
+            ];
+        }
+
+        if ($differenceMinorUnits === 0) {
+            return [
+                'previousValue' => $this->decimalAmount($previousAmount),
+                'percentageChange' => 0.0,
+                'state' => 'unchanged',
+                'sentiment' => 'neutral',
+            ];
+        }
+
+        $percentageChange = round(
+            ($differenceMinorUnits / abs($previousMinorUnits)) * 100,
+            1,
+        );
+        $isFavorable = match ($metric) {
+            'income', 'balance' => $differenceMinorUnits > 0,
+            'expense' => $differenceMinorUnits < 0,
+        };
+
+        return [
+            'previousValue' => $this->decimalAmount($previousAmount),
+            'percentageChange' => $percentageChange,
+            'state' => 'percentage',
+            'sentiment' => $isFavorable ? 'positive' : 'negative',
+        ];
+    }
+
+    /**
+     * @param  'income'|'expense'|'balance'  $metric
+     * @return 'positive'|'negative'
+     */
+    private function sentimentForNewAmount(int $amountInMinorUnits, string $metric): string
+    {
+        return match ($metric) {
+            'income' => $amountInMinorUnits > 0 ? 'positive' : 'negative',
+            'expense' => $amountInMinorUnits > 0 ? 'negative' : 'positive',
+            'balance' => $amountInMinorUnits > 0 ? 'positive' : 'negative',
+        };
+    }
+
+    private function amountInMinorUnits(mixed $amount): int
+    {
+        $formattedAmount = $this->decimalAmount($amount);
+        $digits = (int) str_replace('.', '', ltrim($formattedAmount, '-'));
+
+        return str_starts_with($formattedAmount, '-') ? -$digits : $digits;
     }
 }

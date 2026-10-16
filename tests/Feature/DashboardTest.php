@@ -38,6 +38,10 @@ test('dashboard shows an empty state and navigation for a month without transact
             ->where('summary.monthlyIncome', '0.00')
             ->where('summary.monthlyExpense', '0.00')
             ->where('summary.monthlyBalance', '0.00')
+            ->where('summary.monthlyComparison.income.previousValue', '0.00')
+            ->where('summary.monthlyComparison.income.state', 'none')
+            ->where('summary.monthlyComparison.expense.state', 'none')
+            ->where('summary.monthlyComparison.balance.state', 'none')
             ->has('expensesByCategory', 0)
             ->has('monthlyTrend', 6)
             ->has('recentTransactions', 0)
@@ -157,6 +161,7 @@ test('dashboard groups the selected months expenses by category', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->has('expensesByCategory', 2)
+            ->where('expensesByCategory.0.id', $housingCategory->id)
             ->where('expensesByCategory.0.name', 'Moradia')
             ->where('expensesByCategory.0.total', '800.00')
             ->where('expensesByCategory.1.name', 'Alimentação')
@@ -217,4 +222,204 @@ test('dashboard shows demo data when browsing a seeded previous month', function
             ->where('summary.monthlyExpense', '320.50')
             ->where('hasTransactionsInMonth', true)
             ->where('hasTransactionsInChartRange', true));
+});
+
+test('dashboard calculates favorable percentage changes from aggregate monthly totals', function () {
+    $user = User::factory()->create();
+    $incomeCategory = Category::factory()->for($user)->create(['type' => 'income']);
+    $expenseCategory = Category::factory()->for($user)->create(['type' => 'expense']);
+
+    foreach ([
+        ['date' => '2025-04-10', 'amount' => '100.00', 'type' => 'income', 'category' => $incomeCategory],
+        ['date' => '2025-04-11', 'amount' => '80.00', 'type' => 'expense', 'category' => $expenseCategory],
+        ['date' => '2025-05-10', 'amount' => '112.50', 'type' => 'income', 'category' => $incomeCategory],
+        ['date' => '2025-05-11', 'amount' => '60.00', 'type' => 'expense', 'category' => $expenseCategory],
+    ] as $transaction) {
+        Transaction::factory()->for($user)->for($transaction['category'])->create([
+            'amount' => $transaction['amount'],
+            'type' => $transaction['type'],
+            'date' => $transaction['date'],
+        ]);
+    }
+
+    $this->actingAs($user)
+        ->get(route('dashboard', ['month' => '2025-05']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('summary.monthlyComparison.income.previousValue', '100.00')
+            ->where('summary.monthlyComparison.income.percentageChange', 12.5)
+            ->where('summary.monthlyComparison.income.sentiment', 'positive')
+            ->where('summary.monthlyComparison.expense.previousValue', '80.00')
+            ->where('summary.monthlyComparison.expense.percentageChange', -25)
+            ->where('summary.monthlyComparison.expense.sentiment', 'positive')
+            ->where('summary.monthlyComparison.balance.previousValue', '20.00')
+            ->where('summary.monthlyComparison.balance.percentageChange', 162.5)
+            ->where('summary.monthlyComparison.balance.sentiment', 'positive'));
+});
+
+test('dashboard marks unfavorable percentage changes and negative balances correctly', function () {
+    $user = User::factory()->create();
+    $incomeCategory = Category::factory()->for($user)->create(['type' => 'income']);
+    $expenseCategory = Category::factory()->for($user)->create(['type' => 'expense']);
+
+    foreach ([
+        ['date' => '2025-05-10', 'amount' => '100.00', 'type' => 'income', 'category' => $incomeCategory],
+        ['date' => '2025-05-11', 'amount' => '80.00', 'type' => 'expense', 'category' => $expenseCategory],
+        ['date' => '2025-06-10', 'amount' => '75.00', 'type' => 'income', 'category' => $incomeCategory],
+        ['date' => '2025-06-11', 'amount' => '100.00', 'type' => 'expense', 'category' => $expenseCategory],
+    ] as $transaction) {
+        Transaction::factory()->for($user)->for($transaction['category'])->create([
+            'amount' => $transaction['amount'],
+            'type' => $transaction['type'],
+            'date' => $transaction['date'],
+        ]);
+    }
+
+    $this->actingAs($user)
+        ->get(route('dashboard', ['month' => '2025-06']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('summary.monthlyComparison.income.percentageChange', -25)
+            ->where('summary.monthlyComparison.income.sentiment', 'negative')
+            ->where('summary.monthlyComparison.expense.percentageChange', 25)
+            ->where('summary.monthlyComparison.expense.sentiment', 'negative')
+            ->where('summary.monthlyComparison.balance.previousValue', '20.00')
+            ->where('summary.monthlyComparison.balance.percentageChange', -225)
+            ->where('summary.monthlyComparison.balance.sentiment', 'negative'));
+});
+
+test('dashboard labels nonzero values as new when the previous month is zero', function () {
+    $user = User::factory()->create();
+    $incomeCategory = Category::factory()->for($user)->create(['type' => 'income']);
+    $expenseCategory = Category::factory()->for($user)->create(['type' => 'expense']);
+
+    Transaction::factory()->for($user)->for($incomeCategory)->create([
+        'amount' => '100.00',
+        'type' => 'income',
+        'date' => '2025-08-10',
+    ]);
+    Transaction::factory()->for($user)->for($expenseCategory)->create([
+        'amount' => '40.00',
+        'type' => 'expense',
+        'date' => '2025-08-11',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('dashboard', ['month' => '2025-08']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('summary.monthlyComparison.income.previousValue', '0.00')
+            ->where('summary.monthlyComparison.income.state', 'new')
+            ->where('summary.monthlyComparison.income.sentiment', 'positive')
+            ->where('summary.monthlyComparison.expense.previousValue', '0.00')
+            ->where('summary.monthlyComparison.expense.state', 'new')
+            ->where('summary.monthlyComparison.expense.sentiment', 'negative')
+            ->where('summary.monthlyComparison.balance.previousValue', '0.00')
+            ->where('summary.monthlyComparison.balance.state', 'new')
+            ->where('summary.monthlyComparison.balance.sentiment', 'positive'));
+});
+
+test('dashboard marks equal nonzero monthly totals as an unchanged variation', function () {
+    $user = User::factory()->create();
+    $incomeCategory = Category::factory()->for($user)->create(['type' => 'income']);
+    $expenseCategory = Category::factory()->for($user)->create(['type' => 'expense']);
+
+    foreach (['2025-09-10', '2025-10-10'] as $date) {
+        Transaction::factory()->for($user)->for($incomeCategory)->create([
+            'amount' => '100.00',
+            'type' => 'income',
+            'date' => $date,
+        ]);
+        Transaction::factory()->for($user)->for($expenseCategory)->create([
+            'amount' => '50.00',
+            'type' => 'expense',
+            'date' => $date,
+        ]);
+    }
+
+    $this->actingAs($user)
+        ->get(route('dashboard', ['month' => '2025-10']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('summary.monthlyComparison.income.percentageChange', 0)
+            ->where('summary.monthlyComparison.income.state', 'unchanged')
+            ->where('summary.monthlyComparison.expense.state', 'unchanged')
+            ->where('summary.monthlyComparison.balance.state', 'unchanged'));
+});
+
+test('dashboard compares January with December of the previous year for the current user only', function () {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $incomeCategory = Category::factory()->for($user)->create(['type' => 'income']);
+    $expenseCategory = Category::factory()->for($user)->create(['type' => 'expense']);
+    $otherIncomeCategory = Category::factory()->for($otherUser)->create(['type' => 'income']);
+    $otherExpenseCategory = Category::factory()->for($otherUser)->create(['type' => 'expense']);
+
+    foreach ([
+        [$user, $incomeCategory, '100.00', 'income', '2024-12-10'],
+        [$user, $expenseCategory, '200.00', 'expense', '2024-12-11'],
+        [$user, $incomeCategory, '150.00', 'income', '2025-01-10'],
+        [$user, $expenseCategory, '150.00', 'expense', '2025-01-11'],
+        [$user, $incomeCategory, '900.00', 'income', '2024-11-10'],
+        [$user, $expenseCategory, '900.00', 'expense', '2025-12-10'],
+        [$otherUser, $otherIncomeCategory, '10000.00', 'income', '2024-12-10'],
+        [$otherUser, $otherExpenseCategory, '10.00', 'expense', '2024-12-11'],
+        [$otherUser, $otherIncomeCategory, '8000.00', 'income', '2025-01-10'],
+        [$otherUser, $otherExpenseCategory, '10.00', 'expense', '2025-01-11'],
+    ] as [$transactionUser, $category, $amount, $type, $date]) {
+        Transaction::factory()->for($transactionUser)->for($category)->create([
+            'amount' => $amount,
+            'type' => $type,
+            'date' => $date,
+        ]);
+    }
+
+    $this->actingAs($user)
+        ->get(route('dashboard', ['month' => '2025-01']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('summary.monthlyIncome', '150.00')
+            ->where('summary.monthlyExpense', '150.00')
+            ->where('summary.monthlyComparison.income.previousValue', '100.00')
+            ->where('summary.monthlyComparison.income.percentageChange', 50)
+            ->where('summary.monthlyComparison.expense.previousValue', '200.00')
+            ->where('summary.monthlyComparison.expense.percentageChange', -25)
+            ->where('summary.monthlyComparison.balance.previousValue', '-100.00')
+            ->where('summary.monthlyComparison.balance.percentageChange', 100)
+            ->where('summary.monthlyComparison.balance.sentiment', 'positive'));
+});
+
+test('dashboard measures a worsening negative balance against its absolute previous value', function () {
+    $user = User::factory()->create();
+    $incomeCategory = Category::factory()->for($user)->create(['type' => 'income']);
+    $expenseCategory = Category::factory()->for($user)->create(['type' => 'expense']);
+
+    Transaction::factory()->for($user)->for($incomeCategory)->create([
+        'amount' => '100.00',
+        'type' => 'income',
+        'date' => '2025-05-10',
+    ]);
+    Transaction::factory()->for($user)->for($expenseCategory)->create([
+        'amount' => '200.00',
+        'type' => 'expense',
+        'date' => '2025-05-11',
+    ]);
+    Transaction::factory()->for($user)->for($incomeCategory)->create([
+        'amount' => '100.00',
+        'type' => 'income',
+        'date' => '2025-06-10',
+    ]);
+    Transaction::factory()->for($user)->for($expenseCategory)->create([
+        'amount' => '300.00',
+        'type' => 'expense',
+        'date' => '2025-06-11',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('dashboard', ['month' => '2025-06']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('summary.monthlyComparison.balance.previousValue', '-100.00')
+            ->where('summary.monthlyComparison.balance.percentageChange', -100)
+            ->where('summary.monthlyComparison.balance.sentiment', 'negative'));
 });

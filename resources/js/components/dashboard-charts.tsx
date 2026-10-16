@@ -1,3 +1,4 @@
+import { Link, router } from '@inertiajs/react';
 import {
     Bar,
     BarChart,
@@ -6,10 +7,12 @@ import {
     Pie,
     PieChart,
     ResponsiveContainer,
+    Sector,
     Tooltip,
     XAxis,
     YAxis,
 } from 'recharts';
+import TransactionController from '@/actions/App/Http/Controllers/TransactionController';
 import {
     Card,
     CardContent,
@@ -28,26 +31,38 @@ const currencyFormatter = new Intl.NumberFormat('pt-BR', {
 });
 
 const expenseColors = [
-    '#991b1b',
-    '#b91c1c',
-    '#dc2626',
-    '#ef4444',
-    '#f87171',
-    '#7f1d1d',
-    '#fecaca',
+    'var(--chart-1)',
+    'var(--chart-2)',
+    'var(--chart-3)',
+    'var(--chart-4)',
+    'var(--chart-5)',
+    'var(--chart-6)',
 ];
 
 type DashboardChartsProps = {
     expensesByCategory: DashboardExpenseCategory[];
+    selectedMonth: string;
+    selectedMonthLabel: string;
     monthlyTrend: DashboardMonthlyTotal[];
     hasTransactionsInChartRange: boolean;
 };
 
 export function DashboardCharts({
     expensesByCategory,
+    selectedMonth,
+    selectedMonthLabel,
     monthlyTrend,
     hasTransactionsInChartRange,
 }: DashboardChartsProps) {
+    const transactionListUrl = (categoryId: number) =>
+        TransactionController.index({
+            query: {
+                month: selectedMonth,
+                type: 'expense',
+                category_id: String(categoryId),
+            },
+        }).url;
+
     return (
         <section className="grid gap-6 lg:grid-cols-2">
             <Card className="rounded-2xl shadow-sm">
@@ -71,6 +86,27 @@ export function DashboardCharts({
                                             outerRadius="82%"
                                             paddingAngle={2}
                                             stroke="none"
+                                            activeShape={(shapeProps) => (
+                                                <Sector
+                                                    {...shapeProps}
+                                                    outerRadius={
+                                                        (shapeProps.outerRadius ??
+                                                            0) + 6
+                                                    }
+                                                />
+                                            )}
+                                            onClick={(_, index) => {
+                                                const category =
+                                                    expensesByCategory[index];
+
+                                                if (category) {
+                                                    router.visit(
+                                                        transactionListUrl(
+                                                            category.id,
+                                                        ),
+                                                    );
+                                                }
+                                            }}
                                         >
                                             {expensesByCategory.map(
                                                 (category, index) => (
@@ -82,47 +118,78 @@ export function DashboardCharts({
                                                                     expenseColors.length
                                                             ]
                                                         }
+                                                        className="cursor-pointer"
                                                     />
                                                 ),
                                             )}
                                         </Pie>
                                         <Tooltip
-                                            formatter={(value) =>
-                                                currencyFormatter.format(
-                                                    Number(value ?? 0),
-                                                )
-                                            }
+                                            content={({ active, payload }) => {
+                                                if (
+                                                    !active ||
+                                                    !payload?.length
+                                                ) {
+                                                    return null;
+                                                }
+
+                                                const category = payload[0]
+                                                    .payload as DashboardExpenseCategory;
+
+                                                return (
+                                                    <div className="space-y-1 rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-md">
+                                                        <p className="text-sm font-medium">
+                                                            {category.name}
+                                                        </p>
+                                                        <p className="text-sm text-expense-text tabular-nums">
+                                                            {currencyFormatter.format(
+                                                                Number(
+                                                                    category.total,
+                                                                ),
+                                                            )}
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Clique para ver os
+                                                            lançamentos
+                                                        </p>
+                                                    </div>
+                                                );
+                                            }}
                                         />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
                             <ul className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
                                 {expensesByCategory.map((category, index) => (
-                                    <li
-                                        key={category.id}
-                                        className="flex min-w-0 items-center justify-between gap-3 text-sm"
-                                    >
-                                        <span className="flex min-w-0 items-center gap-2">
-                                            <span
-                                                aria-hidden="true"
-                                                className="size-2.5 shrink-0 rounded-full"
-                                                style={{
-                                                    backgroundColor:
-                                                        expenseColors[
-                                                            index %
-                                                                expenseColors.length
-                                                        ],
-                                                }}
-                                            />
-                                            <span className="truncate">
-                                                {category.name}
-                                            </span>
-                                        </span>
-                                        <span className="shrink-0 font-medium text-red-700 dark:text-red-400">
-                                            {currencyFormatter.format(
-                                                Number(category.total),
+                                    <li key={category.id} className="min-w-0">
+                                        <Link
+                                            href={transactionListUrl(
+                                                category.id,
                                             )}
-                                        </span>
+                                            aria-label={`Ver lançamentos de ${category.name} em ${selectedMonthLabel}`}
+                                            className="group flex min-w-0 items-center justify-between gap-3 rounded-md px-2 py-1.5 text-sm transition-colors duration-200 hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+                                        >
+                                            <span className="flex min-w-0 items-center gap-2">
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="size-2.5 shrink-0 rounded-full"
+                                                    style={{
+                                                        backgroundColor:
+                                                            expenseColors[
+                                                                index %
+                                                                    expenseColors.length
+                                                            ],
+                                                    }}
+                                                />
+                                                <span className="truncate">
+                                                    {category.name}
+                                                </span>
+                                            </span>
+                                            <span className="shrink-0 font-medium text-expense-text">
+                                                {currencyFormatter.format(
+                                                    Number(category.total),
+                                                )}
+                                            </span>
+                                        </Link>
                                     </li>
                                 ))}
                             </ul>
@@ -147,11 +214,11 @@ export function DashboardCharts({
                         <>
                             <div className="mb-3 flex flex-wrap justify-end gap-4 text-xs text-muted-foreground">
                                 <span className="flex items-center gap-2">
-                                    <span className="size-2.5 rounded-full bg-green-600" />
+                                    <span className="size-2.5 rounded-full bg-income" />
                                     Receitas
                                 </span>
                                 <span className="flex items-center gap-2">
-                                    <span className="size-2.5 rounded-full bg-red-600" />
+                                    <span className="size-2.5 rounded-full bg-expense" />
                                     Despesas
                                 </span>
                             </div>
@@ -204,13 +271,13 @@ export function DashboardCharts({
                                         <Bar
                                             dataKey="income"
                                             name="Receitas"
-                                            fill="#16a34a"
+                                            fill="var(--income)"
                                             radius={[4, 4, 0, 0]}
                                         />
                                         <Bar
                                             dataKey="expense"
                                             name="Despesas"
-                                            fill="#dc2626"
+                                            fill="var(--expense)"
                                             radius={[4, 4, 0, 0]}
                                         />
                                     </BarChart>

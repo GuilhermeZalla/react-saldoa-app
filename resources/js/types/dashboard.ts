@@ -3,6 +3,18 @@ export type DashboardSummary = {
     monthlyIncome: string;
     monthlyExpense: string;
     monthlyBalance: string;
+    monthlyComparison: {
+        income: DashboardMonthlyComparison;
+        expense: DashboardMonthlyComparison;
+        balance: DashboardMonthlyComparison;
+    };
+};
+
+export type DashboardMonthlyComparison = {
+    previousValue: string;
+    percentageChange: number | null;
+    state: 'none' | 'new' | 'unchanged' | 'percentage';
+    sentiment: 'positive' | 'negative' | 'neutral';
 };
 
 export type DashboardMonthNavigation = {

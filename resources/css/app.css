@@ -218,6 +218,27 @@
     }
 }
 
+.page-atmosphere {
+    background-color: var(--background);
+    background-image:
+        radial-gradient(
+            ellipse at center top,
+            color-mix(in srgb, var(--primary) 12%, transparent),
+            transparent 68%
+        ),
+        radial-gradient(
+            color-mix(in srgb, var(--foreground) 9%, transparent) 1px,
+            transparent 1px
+        );
+    background-position:
+        center top,
+        0 0;
+    background-repeat: no-repeat, repeat;
+    background-size:
+        100% 36rem,
+        24px 24px;
+}
+
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

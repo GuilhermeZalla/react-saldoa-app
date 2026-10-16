@@ -103,13 +103,19 @@ test('transactions can be filtered by a category owned by the user', function ()
     $this->actingAs($user)
         ->get(route('transactions.index', [
             'month' => '2025-05',
+            'type' => 'expense',
             'category_id' => $selectedCategory->id,
         ]))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->has('transactions.data', 1)
             ->where('transactions.data.0.description', 'Aluguel')
+            ->where('transactions.data.0.type', 'expense')
+            ->where('filters.month', '2025-05')
+            ->where('filters.type', 'expense')
             ->where('filters.category_id', (string) $selectedCategory->id)
+            ->where('summary.expense', '900.00')
+            ->where('summary.balance', '-900.00')
             ->has('categories', 2)
             ->where('categories.0.name', 'Moradia')
             ->where('categories.1.name', 'Transporte'));
