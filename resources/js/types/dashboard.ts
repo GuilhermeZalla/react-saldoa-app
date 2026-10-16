@@ -47,3 +47,9 @@ export type DashboardRecentTransaction = {
     formattedDate: string;
     category: string;
 };
+
+export type BudgetAlert = {
+    category_name: string;
+    percentage: number;
+    status: 'warning' | 'exceeded';
+};

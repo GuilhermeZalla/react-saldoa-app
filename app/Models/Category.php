@@ -34,4 +34,14 @@ class Category extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+
+    /**
+     * Get the budget associated with the category.
+     *
+     * @return HasMany<Budget, $this>
+     */
+    public function budgets(): HasMany
+    {
+        return $this->hasMany(Budget::class);
+    }
 }

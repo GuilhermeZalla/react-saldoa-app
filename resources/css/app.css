@@ -53,6 +53,7 @@
     --color-expense-text: var(--expense-text);
     --color-success: var(--success);
     --color-error: var(--error);
+    --color-warning: var(--warning);
     --color-overlay: var(--overlay);
     --color-action-hover: var(--action-hover);
 
@@ -162,6 +163,8 @@
     --income: #2fcb7a;
     --expense: #e31b23;
     --expense-text: #ff5c62;
+    --warning: #f59e0b;
+    --warning: #b45309;
     --success: var(--income);
     --error: var(--expense-text);
     --overlay: rgb(5 5 5 / 80%);

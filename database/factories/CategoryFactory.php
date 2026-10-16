@@ -24,4 +24,20 @@ class CategoryFactory extends Factory
             'type' => fake()->randomElement(['income', 'expense']),
         ];
     }
+
+    /**
+     * Indicate that the category is an expense category.
+     */
+    public function expense(): static
+    {
+        return $this->state(['type' => 'expense']);
+    }
+
+    /**
+     * Indicate that the category is an income category.
+     */
+    public function income(): static
+    {
+        return $this->state(['type' => 'income']);
+    }
 }

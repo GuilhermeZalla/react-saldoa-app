@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TransactionController;
@@ -15,6 +16,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->withTrashed()
         ->name('transactions.restore');
     Route::resource('transactions', TransactionController::class)->except(['show']);
+    Route::resource('budgets', BudgetController::class)->only(['index', 'store', 'update', 'destroy']);
 });
 
 require __DIR__.'/settings.php';

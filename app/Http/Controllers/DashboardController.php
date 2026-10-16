@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use App\Services\BudgetSummaryService;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -173,7 +174,30 @@ class DashboardController extends Controller
             'recentTransactions' => $recentTransactions,
             'hasTransactionsInMonth' => (int) data_get($monthTotals, 'transaction_count', 0) > 0,
             'hasTransactionsInChartRange' => $monthlyTotals->isNotEmpty(),
+            'budgetAlerts' => $this->budgetAlerts($user, $monthStart, $monthEnd),
+            'hasBudgets' => $user->budgets()->exists(),
         ]);
+    }
+
+    /**
+     * Get budget alerts (warning or exceeded) for the current month, ordered by percentage descending.
+     */
+    private function budgetAlerts(\App\Models\User $user, \Illuminate\Support\Carbon $monthStart, \Illuminate\Support\Carbon $monthEnd): array
+    {
+        $summary = (new BudgetSummaryService())->getSummary($user, (int) $monthStart->format('Y'), (int) $monthStart->format('m'));
+
+        return $summary
+            ->filter(fn (array $item): bool => in_array($item['status']->value, ['warning', 'exceeded']))
+            ->sortByDesc(fn (array $item): float => (float) $item['percentage'])
+            ->map(function (array $item): array {
+                return [
+                    'category_name' => $item['budget']->category->name,
+                    'percentage' => (float) $item['percentage'],
+                    'status' => $item['status']->value,
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     private function monthFor(Request $request): string
