@@ -116,11 +116,35 @@ O comando `php artisan migrate --seed` cria uma conta com lançamentos e metas d
 - Revisão de segurança, acessibilidade e desempenho
 - Deploy
 
-## Prints e deploy
+## Overview e deploy
 
-## Home Page
+## Home
 ![Home Page](docs/images/home.gif)
+
+## Login & Register
+![Login & Register](docs/images/auth.gif)
+
+## Dashboard
+
+[soon]
+
+## Transactions
+
+[soon]
+
+## Categories
+
+[soon]
+
+## Settings
+
+[soon]
+
+## Metas
+
+[soon]
+
 
 <!-- TODO: adicionar capturas do dashboard, da lista de lançamentos e das categorias. -->
 
-**Deploy:** <!-- TODO: adicionar o link da aplicação publicada. -->
+**Deploy (soon):** <!-- TODO: adicionar o link da aplicação publicada. -->
