@@ -51,6 +51,9 @@
     --color-income: var(--income);
     --color-expense: var(--expense);
     --color-expense-text: var(--expense-text);
+    --color-success: var(--success);
+    --color-error: var(--error);
+    --color-overlay: var(--overlay);
     --color-action-hover: var(--action-hover);
 
     --color-category-amber: var(--category-amber);
@@ -60,12 +63,12 @@
     --color-category-rose: var(--category-rose);
     --color-category-aqua: var(--category-aqua);
 
-    --color-chart-1: var(--category-amber);
-    --color-chart-2: var(--category-petrol);
-    --color-chart-3: var(--category-purple);
-    --color-chart-4: var(--category-blue-gray);
-    --color-chart-5: var(--category-rose);
-    --color-chart-6: var(--category-aqua);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-chart-6: var(--chart-6);
 
     --color-sidebar: var(--sidebar);
     --color-sidebar-foreground: var(--sidebar-foreground);
@@ -103,14 +106,23 @@
     --income: #18794e;
     --expense: #d51f28;
     --expense-text: #d51f28;
+    --success: var(--income);
+    --error: var(--expense-text);
+    --overlay: rgb(5 5 5 / 80%);
     --action-hover: #d46a00;
 
-    --category-amber: #925d00;
-    --category-petrol: #146f79;
-    --category-purple: #7756a5;
-    --category-blue-gray: #526b80;
-    --category-rose: #9d526a;
-    --category-aqua: #247c70;
+    --chart-1: #925d00;
+    --chart-2: #146f79;
+    --chart-3: #7756a5;
+    --chart-4: #526b80;
+    --chart-5: #9d526a;
+    --chart-6: #247c70;
+    --category-amber: var(--chart-1);
+    --category-petrol: var(--chart-2);
+    --category-purple: var(--chart-3);
+    --category-blue-gray: var(--chart-4);
+    --category-rose: var(--chart-5);
+    --category-aqua: var(--chart-6);
 
     --radius: 0.625rem;
 
@@ -150,14 +162,23 @@
     --income: #2fcb7a;
     --expense: #e31b23;
     --expense-text: #ff5c62;
+    --success: var(--income);
+    --error: var(--expense-text);
+    --overlay: rgb(5 5 5 / 80%);
     --action-hover: #ff9a2e;
 
-    --category-amber: #f2c66d;
-    --category-petrol: #65cfc4;
-    --category-purple: #b7a5e8;
-    --category-blue-gray: #a2b9cc;
-    --category-rose: #d8a3b2;
-    --category-aqua: #79d4c3;
+    --chart-1: #f2c66d;
+    --chart-2: #65cfc4;
+    --chart-3: #b7a5e8;
+    --chart-4: #a2b9cc;
+    --chart-5: #d8a3b2;
+    --chart-6: #79d4c3;
+    --category-amber: var(--chart-1);
+    --category-petrol: var(--chart-2);
+    --category-purple: var(--chart-3);
+    --category-blue-gray: var(--chart-4);
+    --category-rose: var(--chart-5);
+    --category-aqua: var(--chart-6);
 
     --sidebar: #050505;
     --sidebar-foreground: #ffffff;
