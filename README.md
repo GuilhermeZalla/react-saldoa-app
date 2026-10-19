@@ -2,7 +2,7 @@
 
 O Saldoa ajuda a acompanhar o dinheiro que entra e sai. Você registra receitas e despesas, organiza tudo por categoria, define limites mensais e vê um resumo das finanças no dashboard. É um projeto de portfólio feito com Laravel, React e Inertia.
 
-## O que dá para fazer
+## Features da aplicação
 
 - Criar uma conta e manter os dados separados por usuário.
 - Registrar receitas e despesas, filtrar os lançamentos e exportar os resultados para CSV.
@@ -68,8 +68,14 @@ Os testes de comportamento ficam em `tests/Feature/`; factories e seeders ajudam
 
 ## Demonstração
 
+### Tela Inicial
+
 ![Tela inicial do Saldoa](docs/images/home.gif)
+
+### Login e cadastro
 
 ![Login e cadastro](docs/images/auth.gif)
 
-O app ainda não tem uma URL pública de produção.
+## Deploy
+
+O app ainda não possui uma URL pública de produção.
