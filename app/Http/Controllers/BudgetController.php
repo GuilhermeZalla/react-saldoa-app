@@ -8,8 +8,8 @@ use App\Models\Budget;
 use App\Models\Category;
 use App\Services\BudgetSummaryService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -28,7 +28,7 @@ class BudgetController extends Controller
         $month = $request->query('month', now()->format('Y-m'));
         [$year, $monthNumber] = explode('-', $month);
 
-        $summary = (new BudgetSummaryService())->getSummary($user, (int) $year, (int) $monthNumber);
+        $summary = (new BudgetSummaryService)->getSummary($user, (int) $year, (int) $monthNumber);
 
         $budgets = $summary->map(function (array $item): array {
             return [
@@ -49,7 +49,7 @@ class BudgetController extends Controller
         $categoriesWithoutBudget = Category::query()
             ->where('user_id', $user->id)
             ->where('type', 'expense')
-            ->when(!empty($budgetedCategoryIds), function ($query) use ($budgetedCategoryIds) {
+            ->when(! empty($budgetedCategoryIds), function ($query) use ($budgetedCategoryIds) {
                 $query->whereNotIn('id', $budgetedCategoryIds);
             })
             ->orderBy('name')

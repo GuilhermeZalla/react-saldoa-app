@@ -4,7 +4,7 @@ use App\Models\User;
 
 test('demo login works when enabled and user exists', function () {
     config()->set('demo.enabled', true);
-    
+
     $demoUser = User::factory()->create([
         'email' => config('demo.email'),
     ]);
@@ -37,7 +37,7 @@ test('demo login returns 404 when demo user does not exist', function () {
 
 test('demo login respects throttle', function () {
     config()->set('demo.enabled', true);
-    
+
     User::factory()->create([
         'email' => config('demo.email'),
     ]);

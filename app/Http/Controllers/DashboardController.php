@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use App\Models\User;
 use App\Services\BudgetSummaryService;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -182,9 +183,9 @@ class DashboardController extends Controller
     /**
      * Get budget alerts (warning or exceeded) for the current month, ordered by percentage descending.
      */
-    private function budgetAlerts(\App\Models\User $user, \Illuminate\Support\Carbon $monthStart, \Illuminate\Support\Carbon $monthEnd): array
+    private function budgetAlerts(User $user, Carbon $monthStart, Carbon $monthEnd): array
     {
-        $summary = (new BudgetSummaryService())->getSummary($user, (int) $monthStart->format('Y'), (int) $monthStart->format('m'));
+        $summary = (new BudgetSummaryService)->getSummary($user, (int) $monthStart->format('Y'), (int) $monthStart->format('m'));
 
         return $summary
             ->filter(fn (array $item): bool => in_array($item['status']->value, ['warning', 'exceeded']))
