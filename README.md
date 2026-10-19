@@ -76,6 +76,22 @@ Os testes de comportamento ficam em `tests/Feature/`; factories e seeders ajudam
 
 ![Login e cadastro](docs/images/auth.gif)
 
+### Dashboard
+
+![Dashboard](docs/images/dashboard.gif)
+
+### Lançamentos
+
+![Lançamentos](docs/images/transactions.gif)
+
+## Categorias
+
+![Categorias](docs/images/categories.gif)
+
+## Meta
+
+![Meta](docs/images/meta.gif)
+
 ## Deploy
 
 O app ainda não possui uma URL pública de produção.
