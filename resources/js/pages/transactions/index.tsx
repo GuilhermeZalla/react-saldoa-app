@@ -69,13 +69,13 @@ export default function TransactionsIndex({
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row">
                         <Button variant="outline" asChild>
-                            <Link
-                                href={TransactionController.export({
+                            <a
+                                href={TransactionController.export.url({
                                     query: filters,
                                 })}
                             >
                                 Exportar CSV
-                            </Link>
+                            </a>
                         </Button>
                         <Button asChild>
                             <Link href={TransactionController.create()}>
