@@ -103,7 +103,7 @@ class CategoryController extends Controller
         $this->authorize('delete', $category);
 
         $deleted = DB::transaction(function () use ($category): bool {
-            if ($category->transactions()->exists()) {
+            if ($category->transactions()->exists() || $category->recurringTransactions()->exists()) {
                 return false;
             }
 
@@ -115,7 +115,7 @@ class CategoryController extends Controller
         if (! $deleted) {
             Inertia::flash('toast', [
                 'type' => 'error',
-                'message' => 'Não é possível excluir uma categoria que possui lançamentos ativos.',
+                'message' => 'Não é possível excluir uma categoria que possui lançamentos ativos ou recorrências.',
             ]);
 
             return to_route('categories.index');

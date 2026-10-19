@@ -6,12 +6,14 @@ use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
 use App\Models\Category;
 use App\Models\Transaction;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TransactionController extends Controller
 {
@@ -26,25 +28,8 @@ class TransactionController extends Controller
 
         $filters = $this->filtersFor($request);
         $monthStart = Carbon::parse($filters['month'].'-01')->startOfMonth();
-        $monthEnd = $monthStart->copy()->endOfMonth();
 
-        $query = $request->user()->transactions()
-            ->whereBetween('date', [
-                $monthStart->toDateString(),
-                $monthEnd->toDateString(),
-            ]);
-
-        if ($filters['type'] !== 'all') {
-            $query->where('type', $filters['type']);
-        }
-
-        if ($filters['category_id'] !== 'all') {
-            $query->where('category_id', $filters['category_id']);
-        }
-
-        if ($filters['search'] !== '') {
-            $query->where('description', 'like', '%'.$filters['search'].'%');
-        }
+        $query = $this->filteredTransactions($request, $filters);
 
         $totals = (clone $query)->selectRaw(
             'COALESCE(SUM(CASE WHEN type = ? THEN amount ELSE 0 END), 0) AS income_total, '
@@ -87,6 +72,47 @@ class TransactionController extends Controller
                 'expense' => $this->decimalAmount($totals->expense_total),
                 'balance' => $this->decimalAmount($totals->balance_total),
             ],
+        ]);
+    }
+
+    /**
+     * Export the filtered transactions as a spreadsheet-friendly CSV file.
+     */
+    public function export(Request $request): StreamedResponse
+    {
+        $this->authorize('viewAny', Transaction::class);
+
+        $filters = $this->filtersFor($request);
+        $transactions = $this->filteredTransactions($request, $filters)
+            ->with('category:id,name')
+            ->orderBy('date')
+            ->orderBy('id');
+
+        return response()->streamDownload(function () use ($transactions): void {
+            $output = fopen('php://output', 'w');
+
+            if ($output === false) {
+                return;
+            }
+
+            fwrite($output, "\xEF\xBB\xBF");
+            fputcsv($output, ['Data', 'Tipo', 'Categoria', 'Descrição', 'Valor'], ';', '"', '', "\r\n");
+
+            $transactions->chunk(500, function ($transactionChunk) use ($output): void {
+                foreach ($transactionChunk as $transaction) {
+                    fputcsv($output, [
+                        $transaction->date->format('d/m/Y'),
+                        $transaction->type === 'income' ? 'Receita' : 'Despesa',
+                        $this->safeCsvValue($transaction->category->name),
+                        $this->safeCsvValue($transaction->description),
+                        str_replace('.', ',', (string) $transaction->amount),
+                    ], ';', '"', '', "\r\n");
+                }
+            });
+
+            fclose($output);
+        }, 'lancamentos-'.$filters['month'].'.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
 
@@ -267,6 +293,45 @@ class TransactionController extends Controller
             'category_id' => $categoryId,
             'search' => $search,
         ];
+    }
+
+    /**
+     * Build the user's transaction query using the normalized list filters.
+     *
+     * @param  array{month: string, type: string, category_id: string, search: string}  $filters
+     * @return Builder<Transaction>
+     */
+    private function filteredTransactions(Request $request, array $filters): Builder
+    {
+        $monthStart = Carbon::parse($filters['month'].'-01')->startOfMonth();
+        $monthEnd = $monthStart->copy()->endOfMonth();
+
+        $query = $request->user()->transactions()->getQuery()
+            ->whereBetween('date', [
+                $monthStart->toDateString(),
+                $monthEnd->toDateString(),
+            ]);
+
+        if ($filters['type'] !== 'all') {
+            $query->where('type', $filters['type']);
+        }
+
+        if ($filters['category_id'] !== 'all') {
+            $query->where('category_id', $filters['category_id']);
+        }
+
+        if ($filters['search'] !== '') {
+            $query->where('description', 'like', '%'.$filters['search'].'%');
+        }
+
+        return $query;
+    }
+
+    private function safeCsvValue(string $value): string
+    {
+        return preg_match('/^[\x00-\x20]*[=+\-@]/u', $value) === 1
+            ? "'".$value
+            : $value;
     }
 
     private function decimalAmount(mixed $amount): string

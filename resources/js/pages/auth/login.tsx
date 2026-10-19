@@ -17,7 +17,11 @@ type Props = {
     demoLoginEnabled: boolean;
 };
 
-export default function Login({ status, canResetPassword, demoLoginEnabled }: Props) {
+export default function Login({
+    status,
+    canResetPassword,
+    demoLoginEnabled,
+}: Props) {
     return (
         <>
             <Head title="Entrar" />
@@ -119,8 +123,9 @@ export default function Login({ status, canResetPassword, demoLoginEnabled }: Pr
                                     Entrar com conta de demonstração
                                 </Button>
                                 <p className="text-center text-xs text-muted-foreground">
-                                    Explore a aplicação com dados pré-carregados.
-                                    Não é possível alterar senha ou excluir esta conta.
+                                    Explore a aplicação com dados
+                                    pré-carregados. Não é possível alterar senha
+                                    ou excluir esta conta.
                                 </p>
                             </Form>
                         )}

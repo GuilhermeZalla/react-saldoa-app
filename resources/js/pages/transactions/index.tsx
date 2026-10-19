@@ -67,11 +67,22 @@ export default function TransactionsIndex({
                             Acompanhe suas receitas e despesas.
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href={TransactionController.create()}>
-                            Novo lançamento
-                        </Link>
-                    </Button>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                        <Button variant="outline" asChild>
+                            <Link
+                                href={TransactionController.export({
+                                    query: filters,
+                                })}
+                            >
+                                Exportar CSV
+                            </Link>
+                        </Button>
+                        <Button asChild>
+                            <Link href={TransactionController.create()}>
+                                Novo lançamento
+                            </Link>
+                        </Button>
+                    </div>
                 </header>
 
                 <TransactionFiltersPanel

@@ -61,6 +61,23 @@ test('password can be updated', function () {
     expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
 });
 
+test('demo user cannot update password', function () {
+    config()->set('demo.enabled', true);
+
+    $user = User::factory()->create(['email' => config('demo.email')]);
+    $originalPassword = $user->password;
+
+    $this->actingAs($user)
+        ->put(route('user-password.update'), [
+            'current_password' => 'password',
+            'password' => 'new-password',
+            'password_confirmation' => 'new-password',
+        ])
+        ->assertForbidden();
+
+    expect($user->refresh()->password)->toBe($originalPassword);
+});
+
 test('correct password must be provided to update password', function () {
     $user = User::factory()->create();
 

@@ -26,6 +26,18 @@ test('demo login returns 404 when disabled', function () {
         ->assertNotFound();
 });
 
+test('authenticated user is redirected when trying demo login', function () {
+    config()->set('demo.enabled', true);
+
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('demo.login'))
+        ->assertRedirect();
+
+    $this->assertAuthenticatedAs($user);
+});
+
 test('demo login returns 404 when demo user does not exist', function () {
     config()->set('demo.enabled', true);
 

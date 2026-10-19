@@ -102,7 +102,7 @@ test('a category with active transactions cannot be deleted', function () {
 
     $this->delete(route('categories.destroy', $category))
         ->assertRedirect(route('categories.index'))
-        ->assertSessionHas('inertia.flash_data.toast.message', "N\u{00e3}o \u{00e9} poss\u{00ed}vel excluir uma categoria que possui lan\u{00e7}amentos ativos.");
+        ->assertSessionHas('inertia.flash_data.toast.message', 'Não é possível excluir uma categoria que possui lançamentos ativos ou recorrências.');
 
     expect($category->fresh())->not->toBeNull();
 });

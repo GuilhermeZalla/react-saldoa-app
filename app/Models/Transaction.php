@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['category_id', 'description', 'amount', 'type', 'date'])]
+#[Fillable(['category_id', 'recurring_transaction_id', 'description', 'amount', 'type', 'date'])]
 class Transaction extends Model
 {
     /** @use HasFactory<TransactionFactory> */
@@ -48,5 +48,15 @@ class Transaction extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Get the recurring rule that generated this transaction, if any.
+     *
+     * @return BelongsTo<RecurringTransaction, $this>
+     */
+    public function recurringTransaction(): BelongsTo
+    {
+        return $this->belongsTo(RecurringTransaction::class);
     }
 }

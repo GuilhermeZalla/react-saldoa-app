@@ -11,10 +11,11 @@ import type { Auth } from '@/types';
 
 type PageProps = {
     auth: Auth;
+    isDemoUser: boolean;
 };
 
 export default function Profile() {
-    const { auth } = usePage<PageProps>().props;
+    const { auth, isDemoUser } = usePage<PageProps>().props;
 
     return (
         <>
@@ -29,68 +30,74 @@ export default function Profile() {
                     description="Atualize seu nome e seu e-mail."
                 />
 
-                <Form
-                    {...ProfileController.update.form()}
-                    options={{
-                        preserveScroll: true,
-                    }}
-                    className="space-y-6"
-                >
-                    {({ processing, errors }) => (
-                        <>
-                            <div className="grid gap-2">
-                                <Label htmlFor="name">Nome</Label>
+                {isDemoUser ? (
+                    <p className="text-sm text-muted-foreground" role="status">
+                        A conta de demonstração não pode ser alterada.
+                    </p>
+                ) : (
+                    <Form
+                        {...ProfileController.update.form()}
+                        options={{
+                            preserveScroll: true,
+                        }}
+                        className="space-y-6"
+                    >
+                        {({ processing, errors }) => (
+                            <>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="name">Nome</Label>
 
-                                <Input
-                                    id="name"
-                                    className="mt-1 block w-full"
-                                    defaultValue={auth.user.name}
-                                    name="name"
-                                    required
-                                    autoComplete="name"
-                                    placeholder="Nome completo"
-                                />
+                                    <Input
+                                        id="name"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.name}
+                                        name="name"
+                                        required
+                                        autoComplete="name"
+                                        placeholder="Nome completo"
+                                    />
 
-                                <InputError
-                                    className="mt-2"
-                                    message={errors.name}
-                                />
-                            </div>
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.name}
+                                    />
+                                </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">E-mail</Label>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="email">E-mail</Label>
 
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    className="mt-1 block w-full"
-                                    defaultValue={auth.user.email}
-                                    name="email"
-                                    required
-                                    autoComplete="username"
-                                    placeholder="E-mail"
-                                />
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.email}
+                                        name="email"
+                                        required
+                                        autoComplete="username"
+                                        placeholder="E-mail"
+                                    />
 
-                                <InputError
-                                    className="mt-2"
-                                    message={errors.email}
-                                />
-                            </div>
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.email}
+                                    />
+                                </div>
 
-                            <div className="flex items-center gap-4">
-                                <Button
-                                    disabled={processing}
-                                    data-test="update-profile-button"
-                                >
-                                    Salvar alterações
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                </Form>
+                                <div className="flex items-center gap-4">
+                                    <Button
+                                        disabled={processing}
+                                        data-test="update-profile-button"
+                                    >
+                                        Salvar alterações
+                                    </Button>
+                                </div>
+                            </>
+                        )}
+                    </Form>
+                )}
             </div>
 
-            <DeleteUser />
+            {!isDemoUser && <DeleteUser />}
         </>
     );
 }

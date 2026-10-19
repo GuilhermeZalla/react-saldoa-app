@@ -4,6 +4,7 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DemoAuthController;
+use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,7 +22,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('transactions/{transaction}/restore', [TransactionController::class, 'restore'])
         ->withTrashed()
         ->name('transactions.restore');
+    Route::get('transactions/export', [TransactionController::class, 'export'])
+        ->name('transactions.export');
     Route::resource('transactions', TransactionController::class)->except(['show']);
+    Route::resource('recurring-transactions', RecurringTransactionController::class)
+        ->parameters(['recurring-transactions' => 'recurringTransaction'])
+        ->except(['show']);
     Route::resource('budgets', BudgetController::class)->only(['index', 'store', 'update', 'destroy']);
 });
 

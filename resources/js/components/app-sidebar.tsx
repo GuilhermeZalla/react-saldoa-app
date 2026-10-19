@@ -1,7 +1,8 @@
 ﻿import { Link } from '@inertiajs/react';
-import { ArrowLeftRight, LayoutGrid, Tags, Target } from 'lucide-react';
+import { ArrowLeftRight, LayoutGrid, Repeat, Tags, Target } from 'lucide-react';
 import BudgetController from '@/actions/App/Http/Controllers/BudgetController';
 import CategoryController from '@/actions/App/Http/Controllers/CategoryController';
+import RecurringTransactionController from '@/actions/App/Http/Controllers/RecurringTransactionController';
 import TransactionController from '@/actions/App/Http/Controllers/TransactionController';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -28,6 +29,11 @@ const mainNavItems: NavItem[] = [
         title: 'Lançamentos',
         href: TransactionController.index(),
         icon: ArrowLeftRight,
+    },
+    {
+        title: 'Recorrências',
+        href: RecurringTransactionController.index(),
+        icon: Repeat,
     },
     {
         title: 'Categorias',
