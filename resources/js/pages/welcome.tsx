@@ -46,7 +46,7 @@ export default function Welcome() {
                                     asChild
                                     className="duration-200"
                                 >
-                                    <Link href={dashboard()}>Abrir painel</Link>
+                                    <Link href={dashboard()}>Dashboard</Link>
                                 </Button>
                             ) : (
                                 <>
