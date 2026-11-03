@@ -114,9 +114,11 @@ Para executar em desenvolvimento:
 Copy-Item mobile/.env.example mobile/.env
 Set-Location mobile
 npm install
-npm run android
+npm start -- --go --lan
 ```
 
-Edite `mobile/.env` com os endereços base das APIs, sem acrescentar `/api/v1`. O Android Emulator normalmente alcança o Laravel local em `http://10.0.2.2:8000`; em dispositivo físico, use o IP LAN do computador. Configure a URL demo somente quando houver uma instância demo separada. Builds de distribuição aceitam apenas HTTPS.
+Instale o **Expo Go** no celular, conecte o celular e o computador à mesma rede Wi-Fi e leia o QR code mostrado pelo comando. Para testar com o backend local em um aparelho físico, edite `mobile/.env` e use o IP LAN do computador em `EXPO_PUBLIC_API_URL`, sem acrescentar `/api/v1`; inicie o Laravel com `php artisan serve --host=0.0.0.0` para permitir o acesso pela rede local. Configure `EXPO_PUBLIC_API_URL_DEMO` somente quando houver uma instância demo separada.
+
+Esse modo serve para pré-visualizar e testar o app durante o desenvolvimento; não gera um APK nem substitui um build de distribuição. Para usar um emulador com `npm run android` ou fazer um build local, é necessário instalar JDK e Android Studio/SDK. Builds de distribuição aceitam apenas HTTPS.
 
 Antes de um teste fechado na Play Store, ainda é necessário configurar e validar URLs reais de produção e demo, confirmar o identificador Android do aplicativo, preparar os ícones finais e credenciais de assinatura, e publicar em HTTPS uma política de privacidade e o fluxo público de exclusão de conta em `/account-deletion`. O aplicativo ainda não foi validado manualmente contra uma implantação real nem foi gerado como pacote assinado de distribuição.

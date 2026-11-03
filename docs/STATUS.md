@@ -9,7 +9,7 @@ Projeto: app de controle financeiro pessoal (portfólio). Laravel + React (Inert
 - A sessão armazena o token e a URL da instância correspondente. A demo fica em somente leitura no cliente e o backend também bloqueia suas mutações.
 - Verificações atuais do cliente: TypeScript, Expo lint, checagem de compatibilidade das dependências Expo, Expo Doctor e exportação do bundle Android passaram.
 - A suíte Laravel passou com 153 testes aprovados e 2 ignorados.
-- Ainda falta validar todos os fluxos em emulador/dispositivo e contra instâncias reais; configurar URLs HTTPS; finalizar identificador, ícones e assinatura; e publicar política de privacidade e exclusão de conta antes de teste na Play Store.
+- O projeto pode ser pré-visualizado em aparelho físico com Expo Go pela rede local; ainda falta executar essa validação manual e testar todos os fluxos contra instâncias reais. Para gerar APK localmente, este ambiente ainda precisa de JDK e Android SDK; para distribuição também faltam URLs HTTPS, identificador/ícones definitivos, assinatura e publicação de política de privacidade e exclusão de conta.
 - `npm audit` reporta avisos moderados de `glob`/`minimatch` na árvore do Expo/ESLint. O reparo forçado proposto pelo npm implicaria downgrade incompatível do Expo; nenhum downgrade foi aplicado.
 
 ## Concluído
