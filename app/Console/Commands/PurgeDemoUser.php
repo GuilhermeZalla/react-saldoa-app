@@ -27,6 +27,13 @@ class PurgeDemoUser extends Command
             return self::SUCCESS;
         }
 
+        $this->line("Demo account to delete: {$demoUser->email}");
+        $this->line('Records to delete:');
+        $this->line('Transactions: '.$demoUser->transactions()->withTrashed()->count());
+        $this->line('Recurring transactions: '.$demoUser->recurringTransactions()->count());
+        $this->line('Budgets: '.$demoUser->budgets()->count());
+        $this->line('Categories: '.$demoUser->categories()->count());
+
         if (! $this->option('force')
             && ! $this->confirm("Delete the demonstration account [{$demoUser->email}] and all of its data?", false)) {
             $this->warn('Demo account purge canceled.');

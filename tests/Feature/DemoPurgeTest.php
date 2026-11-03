@@ -10,6 +10,12 @@ test('demo purge requires confirmation and leaves data unchanged when canceled',
     $demoUser = User::factory()->create(['email' => config('demo.email')]);
 
     $this->artisan('demo:purge')
+        ->expectsOutput("Demo account to delete: {$demoUser->email}")
+        ->expectsOutput('Records to delete:')
+        ->expectsOutput('Transactions: 0')
+        ->expectsOutput('Recurring transactions: 0')
+        ->expectsOutput('Budgets: 0')
+        ->expectsOutput('Categories: 0')
         ->expectsConfirmation("Delete the demonstration account [{$demoUser->email}] and all of its data?", 'no')
         ->expectsOutput('Demo account purge canceled.')
         ->assertSuccessful();
@@ -47,6 +53,12 @@ test('demo purge removes only the configured demo account and all its data', fun
     $this->app['env'] = 'production';
 
     $this->artisan('demo:purge', ['--force' => true])
+        ->expectsOutput("Demo account to delete: {$demoUser->email}")
+        ->expectsOutput('Records to delete:')
+        ->expectsOutput('Transactions: 2')
+        ->expectsOutput('Recurring transactions: 1')
+        ->expectsOutput('Budgets: 1')
+        ->expectsOutput('Categories: 1')
         ->expectsOutput("Demonstration account [{$demoUser->email}] and its data were deleted.")
         ->assertSuccessful();
 

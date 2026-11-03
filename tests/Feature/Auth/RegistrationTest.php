@@ -60,3 +60,43 @@ test('registration is rate limited by email and ip', function () {
         'password_confirmation' => 'password',
     ])->assertStatus(429);
 });
+
+test('registration is rate limited by ip across different email addresses', function () {
+    for ($attempt = 0; $attempt < 20; $attempt++) {
+        $this->post(route('register.store'), [
+            'name' => 'Test User',
+            'email' => "ip-limit-{$attempt}@example.com",
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertRedirect();
+
+        if ($this->isAuthenticated()) {
+            $this->post(route('logout'));
+        }
+    }
+
+    $this->post(route('register.store'), [
+        'name' => 'Test User',
+        'email' => 'another-ip-limit@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ])->assertStatus(429);
+});
+
+test('registration rate limit treats email casing variations as the same address', function () {
+    foreach ([
+        'CaseLimit@example.com',
+        'caselimit@example.com',
+        'CASELIMIT@example.com',
+        'CaseLimit@EXAMPLE.COM',
+        'caselimit@EXAMPLE.com',
+    ] as $email) {
+        $this->post(route('register.store'), [
+            'email' => $email,
+        ])->assertSessionHasErrors(['name', 'password']);
+    }
+
+    $this->post(route('register.store'), [
+        'email' => 'CASELIMIT@EXAMPLE.COM',
+    ])->assertStatus(429);
+});
