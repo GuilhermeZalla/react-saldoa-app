@@ -227,7 +227,7 @@ export default function AuthScreen({ onAuthenticated }: Props) {
                     <ActionButton
                         onPress={() => void authenticate(true)}
                         variant="secondary"
-                        disabled={busy}
+                        disabled={busy || demoApiUrl === null}
                         loading={busy}
                     >
                         Experimentar demo

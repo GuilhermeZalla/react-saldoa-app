@@ -250,7 +250,7 @@ export default function RecurringScreen({ session }: Props) {
                     />
                     <ActionButton
                         onPress={() => void createRecurring()}
-                        disabled={saving || availableCategories.length === 0}
+                        disabled={saving}
                         loading={saving}
                     >
                         Criar recorrência

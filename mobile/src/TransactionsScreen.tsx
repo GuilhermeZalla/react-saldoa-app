@@ -280,7 +280,7 @@ export default function TransactionsScreen({ session }: Props) {
                     />
                     <ActionButton
                         onPress={() => void saveTransaction()}
-                        disabled={saving || availableCategories.length === 0}
+                        disabled={saving}
                         loading={saving}
                     >
                         {editingId === null ? 'Adicionar lançamento' : 'Salvar alterações'}

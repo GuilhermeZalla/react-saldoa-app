@@ -158,7 +158,7 @@ export default function CategoriesScreen({ session }: Props) {
                     <ActionButton
                         onPress={() => void createCategory()}
                         loading={saving}
-                        disabled={saving || !name.trim()}
+                        disabled={saving}
                     >
                         Adicionar categoria
                     </ActionButton>
