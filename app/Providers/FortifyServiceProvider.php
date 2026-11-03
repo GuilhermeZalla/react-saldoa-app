@@ -79,5 +79,17 @@ class FortifyServiceProvider extends ServiceProvider
 
             return Limit::perMinute(5)->by($throttleKey);
         });
+
+        foreach (['register', 'password-email', 'password-update'] as $limiter) {
+            RateLimiter::for($limiter, fn (Request $request): Limit => $this->emailIpLimit($request));
+        }
+    }
+
+    private function emailIpLimit(Request $request): Limit
+    {
+        $email = Str::lower(trim((string) $request->input(Fortify::email())));
+        $key = hash('sha256', $email.'|'.$request->ip());
+
+        return Limit::perMinute(5)->by($key);
     }
 }

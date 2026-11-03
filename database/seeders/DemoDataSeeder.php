@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
 class DemoDataSeeder extends Seeder
 {
@@ -14,9 +15,13 @@ class DemoDataSeeder extends Seeder
      */
     public function run(): void
     {
+        if (app()->environment('production')) {
+            throw new RuntimeException('Demo data cannot be seeded in production.');
+        }
+
         $today = now();
         $demoUser = User::query()->updateOrCreate(
-            ['email' => 'demo@exemplo.com'],
+            ['email' => config('demo.email')],
             [
                 'name' => 'Usuário de Demonstração',
                 'password' => 'demo1234',

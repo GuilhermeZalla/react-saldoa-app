@@ -13,6 +13,7 @@ class DemoAuthController extends Controller
      */
     public function login(): RedirectResponse
     {
+        abort_if(app()->environment('production'), 404);
         abort_unless(config('demo.enabled'), 404);
 
         $demoUser = User::query()

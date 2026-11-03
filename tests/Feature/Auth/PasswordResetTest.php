@@ -76,3 +76,35 @@ test('password cannot be reset with invalid token', function () {
 
     $response->assertSessionHasErrors('email');
 });
+
+test('password reset link requests are rate limited by email and ip', function () {
+    $email = 'limited-reset-link@example.com';
+
+    for ($attempt = 0; $attempt < 5; $attempt++) {
+        $this->post(route('password.email'), ['email' => $email])
+            ->assertRedirect();
+    }
+
+    $this->post(route('password.email'), ['email' => $email])
+        ->assertStatus(429);
+});
+
+test('password reset submissions are rate limited by email and ip', function () {
+    $user = User::factory()->create();
+
+    for ($attempt = 0; $attempt < 5; $attempt++) {
+        $this->post(route('password.update'), [
+            'token' => 'invalid-token',
+            'email' => $user->email,
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+        ])->assertRedirect();
+    }
+
+    $this->post(route('password.update'), [
+        'token' => 'invalid-token',
+        'email' => $user->email,
+        'password' => 'newpassword123',
+        'password_confirmation' => 'newpassword123',
+    ])->assertStatus(429);
+});

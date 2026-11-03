@@ -26,6 +26,24 @@ test('demo login returns 404 when disabled', function () {
         ->assertNotFound();
 });
 
+test('demo login is unavailable in production even when enabled', function () {
+    config()->set('demo.enabled', true);
+    $this->app['env'] = 'production';
+
+    User::factory()->create([
+        'email' => config('demo.email'),
+    ]);
+
+    $csrfToken = 'demo-production-test-token';
+
+    $this->withSession(['_token' => $csrfToken])
+        ->withHeader('X-CSRF-TOKEN', $csrfToken)
+        ->post(route('demo.login'))
+        ->assertNotFound();
+
+    $this->assertGuest();
+});
+
 test('authenticated user is redirected when trying demo login', function () {
     config()->set('demo.enabled', true);
 

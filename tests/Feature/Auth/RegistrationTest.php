@@ -38,3 +38,25 @@ test('registration validation messages are shown in Portuguese', function () {
         ->and($errors->first('email'))->toBe('Informe um endereço de e-mail válido.')
         ->and($errors->first('password'))->toBe('A confirmação de senha não confere.');
 });
+
+test('registration is rate limited by email and ip', function () {
+    for ($attempt = 0; $attempt < 5; $attempt++) {
+        $this->post(route('register.store'), [
+            'name' => 'Test User',
+            'email' => 'limited-registration@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertRedirect();
+
+        if ($this->isAuthenticated()) {
+            $this->post(route('logout'));
+        }
+    }
+
+    $this->post(route('register.store'), [
+        'name' => 'Test User',
+        'email' => 'limited-registration@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ])->assertStatus(429);
+});

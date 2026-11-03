@@ -47,7 +47,9 @@ Inicie a aplicação e o Vite:
 composer run dev
 ```
 
-Abra [http://localhost:8000](http://localhost:8000). O seeder cria dados de exemplo, incluindo a conta `demo@exemplo.com` (senha `demo1234`). O botão de acesso em um clique depende de `DEMO_LOGIN_ENABLED=true` no `.env`.
+Abra [http://localhost:8000](http://localhost:8000). Em ambiente local, o seeder cria dados de exemplo, incluindo a conta `demo@exemplo.com` (senha `demo1234`). O botão de acesso em um clique depende de `DEMO_LOGIN_ENABLED=true` no `.env`.
+
+**A conta e a senha de demonstração são apenas para desenvolvimento local/portfólio e jamais devem existir em produção.** O `DatabaseSeeder` não cria essa conta em produção, e o login de demonstração é recusado nesse ambiente. Antes de publicar um ambiente que já tenha recebido os dados demo, execute `php artisan demo:purge --force` e confirme que a conta não existe mais.
 
 ## Rodar as verificações
 
@@ -59,6 +61,8 @@ npm run build
 ```
 
 O workflow do GitHub Actions também executa o setup e as verificações em pushes para `main` e em pull requests.
+
+Para remover manualmente os dados de demonstração, execute `php artisan demo:purge`. O comando pede confirmação; `--force` dispensa a confirmação e é apropriado para um passo explícito do checklist de deploy.
 
 ## Como o app é organizado
 
