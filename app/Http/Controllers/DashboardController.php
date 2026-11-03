@@ -133,7 +133,7 @@ class DashboardController extends Controller
                 'type' => $transaction->type,
                 'date' => $transaction->date->format('Y-m-d'),
                 'formattedDate' => $transaction->date->format('d/m/Y'),
-                'category' => $transaction->category?->name ?? 'Categoria indisponível',
+                'category' => $transaction->category->name ?? 'Categoria indisponível',
             ])
             ->all();
 

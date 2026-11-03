@@ -274,7 +274,7 @@ class TransactionController extends Controller
         $categoryId = 'all';
         $requestedCategoryId = $request->query('category_id');
 
-        if (is_string($requestedCategoryId) || is_int($requestedCategoryId)) {
+        if (is_string($requestedCategoryId)) {
             $validatedCategoryId = filter_var($requestedCategoryId, FILTER_VALIDATE_INT);
 
             if ($validatedCategoryId !== false
