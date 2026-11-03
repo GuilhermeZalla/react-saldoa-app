@@ -1,6 +1,6 @@
 # API móvel
 
-Esta API fornece o backend JSON para um futuro cliente Expo/React Native. Ela não inclui telas, navegação ou configuração de um aplicativo Android.
+Esta API fornece o backend JSON autenticado por tokens Sanctum para o aplicativo Expo/React Native em `mobile/`. A interface nativa cobre autenticação, leitura do dashboard e gestão de lançamentos, categorias, metas e recorrências, além de exportação e gestão da conta. O cliente ainda precisa ser validado contra instâncias publicadas antes de qualquer distribuição.
 
 ## Endereços e instâncias
 
@@ -9,7 +9,9 @@ Use uma implantação e um banco separados para cada ambiente:
 - Produção: `EXPO_PUBLIC_API_URL` aponta para a URL HTTPS da API principal.
 - Demonstração: `EXPO_PUBLIC_API_URL_DEMO` aponta para a URL HTTPS da instância demo isolada.
 
-O cliente pode oferecer **Experimentar demo** na tela inicial e, antes de autenticar, trocar o cliente HTTP para a URL demo. A instância demo deve usar `DEMO_INSTANCE=true` e `DEMO_LOGIN_ENABLED=true`; nunca deve compartilhar banco, credenciais, backups ou acesso administrativo com a produção. A tela e a troca de URL ainda precisam ser implementadas no aplicativo Expo.
+O cliente oferece **Experimentar demo** na tela de autenticação e, antes de autenticar, usa a URL demo. A sessão salva o host de origem junto com o token para impedir que um token demo seja enviado ao host de produção ou vice-versa. A instância demo deve usar `DEMO_INSTANCE=true` e `DEMO_LOGIN_ENABLED=true`; nunca deve compartilhar banco, credenciais, backups ou acesso administrativo com a produção.
+
+Para desenvolvimento local, copie `mobile/.env.example` para `mobile/.env` e configure as URLs base sem `/api/v1`. No Android Emulator, o Laravel na máquina hospedeira costuma ser acessível em `http://10.0.2.2:8000`; em dispositivo físico, use o IP LAN do computador. HTTP é permitido apenas em desenvolvimento; builds de release exigem HTTPS.
 
 ## Autenticação
 
@@ -78,4 +80,6 @@ Antes de publicar ou iniciar teste fechado na Play Store:
 - Execute migrations com `php artisan migrate --force`.
 - Configure o cron do Laravel Scheduler e um worker de fila se a configuração de e-mail ou outras tarefas de produção usarem fila. O scheduler também gera lançamentos recorrentes, limpa pedidos de exclusão expirados e, somente na instância demo, executa `demo:reset` diariamente.
 - Na produção principal, valide primeiro o alvo e execute `php artisan demo:purge --force`; confirme que a conta demo não existe. Na instância isolada de demonstração, configure banco e domínio próprios e monitore o `demo:reset`.
-- Não habilite `DEMO_INSTANCE` na produção principal. A API ainda não tem um cliente Expo/React Native; os endereços base e o botão “Experimentar demo” serão implementados nessa etapa separada.
+- Não habilite `DEMO_INSTANCE` na produção principal.
+- `mobile/eas.json` define um build de teste interno (APK) e um build de produção (AAB). Antes de executar `npx eas-cli build`, associe o app a um projeto EAS e configure `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_API_URL_DEMO` e `EXPO_PUBLIC_WEB_URL` nos ambientes de build apropriados.
+- Builds de distribuição ainda dependem das URLs HTTPS reais, identificador Android definitivo, ícones finais e credenciais de assinatura. Nenhum pacote assinado foi produzido ou enviado à Play Store.

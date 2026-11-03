@@ -2,6 +2,16 @@
 
 Projeto: app de controle financeiro pessoal (portfólio). Laravel + React (Inertia, TypeScript), SQLite, Tailwind e shadcn/ui, toasts com Sonner. Textos da interface em português, código em inglês.
 
+## Atualização — cliente mobile
+
+- A API Sanctum e o isolamento da demonstração foram implementados e documentados; o aplicativo web continua autenticado por sessão/Fortify.
+- O cliente Expo/React Native em `mobile/` usa Expo Router e SecureStore. Inclui cadastro/login, recuperação via site, opção “Experimentar demo”, dashboard, lançamentos, categorias, metas, recorrências, exportação, logout e exclusão de conta.
+- A sessão armazena o token e a URL da instância correspondente. A demo fica em somente leitura no cliente e o backend também bloqueia suas mutações.
+- Verificações atuais do cliente: TypeScript, Expo lint, checagem de compatibilidade das dependências Expo, Expo Doctor e exportação do bundle Android passaram.
+- A suíte Laravel passou com 153 testes aprovados e 2 ignorados.
+- Ainda falta validar todos os fluxos em emulador/dispositivo e contra instâncias reais; configurar URLs HTTPS; finalizar identificador, ícones e assinatura; e publicar política de privacidade e exclusão de conta antes de teste na Play Store.
+- `npm audit` reporta avisos moderados de `glob`/`minimatch` na árvore do Expo/ESLint. O reparo forçado proposto pelo npm implicaria downgrade incompatível do Expo; nenhum downgrade foi aplicado.
+
 ## Concluído
 
 - Autenticação, categorias, lançamentos (CRUD com Policy e Form Requests), filtros por URL, dashboard com cards e gráficos, seeder de demonstração, README inicial.
@@ -25,11 +35,15 @@ Projeto: app de controle financeiro pessoal (portfólio). Laravel + React (Inert
 
 ## Em andamento
 
+- Validação manual do cliente Expo contra emulador/dispositivo e API; depende de endpoints configurados em `mobile/.env` e não substitui testes de um build assinado.
 - Revisão do app publicado: depende de uma URL de produção e deve ser feita depois do deploy.
 
 ## Próximos passos
 
-- Publicar a aplicação e então revisar segurança, acessibilidade e desempenho no ambiente real.
+- Validar os fluxos web e API no emulador ou dispositivo, incluindo sessão expirada, demo somente leitura, exportação e exclusão.
+- Definir o identificador Android final, ícones e URLs HTTPS da API principal, instância demo, site e política de privacidade.
+- Configurar EAS e credenciais de assinatura, gerar um build interno e então preparar o teste fechado da Play Store.
+- Publicar a aplicação e revisar segurança, acessibilidade e desempenho no ambiente real.
 - Capturar telas atualizadas das funcionalidades que ainda não aparecem nos GIFs.
 
 ## Regras de trabalho

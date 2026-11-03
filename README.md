@@ -106,4 +106,17 @@ O app ainda não possui uma URL pública de produção.
 
 ## API móvel
 
-O backend JSON autenticado por tokens Sanctum e seus endpoints estão descritos em [docs/MOBILE_API.md](docs/MOBILE_API.md). As telas e a configuração do cliente Expo/React Native ainda não foram iniciadas. Antes de um teste fechado na Play Store, publique a API em HTTPS, uma política de privacidade baseada nos dados reais do serviço e o fluxo público de exclusão de conta em `/account-deletion`.
+O backend JSON autenticado por tokens Sanctum e seus endpoints estão descritos em [docs/MOBILE_API.md](docs/MOBILE_API.md). O cliente Android está em `mobile/`, feito com Expo, React Native e TypeScript. Ele inclui autenticação, acesso à demo isolada, dashboard, lançamentos, categorias, metas, recorrências e opções de exportação, logout e exclusão de conta.
+
+Para executar em desenvolvimento:
+
+```powershell
+Copy-Item mobile/.env.example mobile/.env
+Set-Location mobile
+npm install
+npm run android
+```
+
+Edite `mobile/.env` com os endereços base das APIs, sem acrescentar `/api/v1`. O Android Emulator normalmente alcança o Laravel local em `http://10.0.2.2:8000`; em dispositivo físico, use o IP LAN do computador. Configure a URL demo somente quando houver uma instância demo separada. Builds de distribuição aceitam apenas HTTPS.
+
+Antes de um teste fechado na Play Store, ainda é necessário configurar e validar URLs reais de produção e demo, confirmar o identificador Android do aplicativo, preparar os ícones finais e credenciais de assinatura, e publicar em HTTPS uma política de privacidade e o fluxo público de exclusão de conta em `/account-deletion`. O aplicativo ainda não foi validado manualmente contra uma implantação real nem foi gerado como pacote assinado de distribuição.
