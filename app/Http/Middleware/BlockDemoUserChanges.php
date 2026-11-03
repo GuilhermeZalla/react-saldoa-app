@@ -16,7 +16,8 @@ class BlockDemoUserChanges
     public function handle(Request $request, Closure $next): Response
     {
         abort_if(
-            config('demo.enabled') && $request->user()?->email === config('demo.email'),
+            (config('demo.enabled') || config('demo.instance'))
+                && $request->user()?->email === config('demo.email'),
             403,
         );
 

@@ -28,6 +28,7 @@ test('demo login returns 404 when disabled', function () {
 
 test('demo login is unavailable in production even when enabled', function () {
     config()->set('demo.enabled', true);
+    config()->set('demo.instance', false);
     $this->app['env'] = 'production';
 
     User::factory()->create([
@@ -42,6 +43,24 @@ test('demo login is unavailable in production even when enabled', function () {
         ->assertNotFound();
 
     $this->assertGuest();
+});
+
+test('demo login is available in production on an explicitly isolated demo instance', function () {
+    config()->set('demo.enabled', true);
+    config()->set('demo.instance', true);
+    $this->app['env'] = 'production';
+
+    $demoUser = User::factory()->create([
+        'email' => config('demo.email'),
+    ]);
+    $csrfToken = 'isolated-demo-login-test-token';
+
+    $this->withSession(['_token' => $csrfToken])
+        ->withHeader('X-CSRF-TOKEN', $csrfToken)
+        ->post(route('demo.login'))
+        ->assertRedirect(route('dashboard'));
+
+    $this->assertAuthenticatedAs($demoUser);
 });
 
 test('authenticated user is redirected when trying demo login', function () {
@@ -81,6 +100,26 @@ test('demo login respects throttle', function () {
     // 6ª deve falhar por throttle
     $this->post(route('demo.login'))
         ->assertStatus(429);
+});
+
+test('demo instance accounts can read web pages but cannot mutate financial data', function () {
+    config()->set('demo.enabled', false);
+    config()->set('demo.instance', true);
+
+    $demoUser = User::factory()->create([
+        'email' => config('demo.email'),
+    ]);
+
+    $this->actingAs($demoUser)
+        ->get(route('categories.index'))
+        ->assertOk();
+
+    $this->post(route('categories.store'), [
+        'name' => 'Nova categoria',
+        'type' => 'expense',
+    ])->assertForbidden();
+
+    expect($demoUser->categories()->exists())->toBeFalse();
 });
 
 test('login page shows demo button when enabled', function () {

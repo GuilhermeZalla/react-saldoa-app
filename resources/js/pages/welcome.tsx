@@ -14,6 +14,7 @@ import { dashboard, login, register } from '@/routes';
 
 export default function Welcome() {
     const { auth } = usePage().props;
+    const canRegister = Boolean(usePage().props.canRegister);
 
     return (
         <>
@@ -58,18 +59,28 @@ export default function Welcome() {
                                     >
                                         <Link href={login()}>Entrar</Link>
                                     </Button>
-                                    <Button
-                                        size="sm"
-                                        asChild
-                                        className="duration-200"
-                                    >
-                                        <Link href={register()}>
-                                            Criar conta
-                                        </Link>
-                                    </Button>
+                                    {canRegister && (
+                                        <Button
+                                            size="sm"
+                                            asChild
+                                            className="duration-200"
+                                        >
+                                            <Link href={register()}>
+                                                Criar conta
+                                            </Link>
+                                        </Button>
+                                    )}
                                 </>
                             )}
                         </nav>
+                        <footer className="mx-auto w-full max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
+                            <Link
+                                href="/account-deletion"
+                                className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                            >
+                                Solicitar exclusão de conta
+                            </Link>
+                        </footer>
                     </div>
                 </header>
 
@@ -90,19 +101,21 @@ export default function Welcome() {
                             </div>
                             {!auth.user && (
                                 <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center">
-                                    <Button
-                                        size="lg"
-                                        asChild
-                                        className="h-12 px-6 text-base duration-200"
-                                    >
-                                        <Link href={register()}>
-                                            Criar conta
-                                            <ArrowRight
-                                                aria-hidden="true"
-                                                className="size-4"
-                                            />
-                                        </Link>
-                                    </Button>
+                                    {canRegister && (
+                                        <Button
+                                            size="lg"
+                                            asChild
+                                            className="h-12 px-6 text-base duration-200"
+                                        >
+                                            <Link href={register()}>
+                                                Criar conta
+                                                <ArrowRight
+                                                    aria-hidden="true"
+                                                    className="size-4"
+                                                />
+                                            </Link>
+                                        </Button>
+                                    )}
                                     <Button
                                         size="lg"
                                         variant="outline"

@@ -38,9 +38,21 @@ test('database seeder does not create the demo account in production', function 
     expect(User::query()->where('email', config('demo.email'))->exists())->toBeFalse();
 });
 
+test('database seeder creates demo data in production only on an isolated demo instance', function () {
+    config()->set('demo.instance', true);
+    $this->app['env'] = 'production';
+
+    app(DatabaseSeeder::class)->run();
+
+    expect(User::query()->where('email', config('demo.email'))->exists())->toBeTrue();
+});
+
 test('demo data seeder explicitly refuses to run in production', function () {
     $this->app['env'] = 'production';
 
     expect(fn () => app(DemoDataSeeder::class)->run())
-        ->toThrow(RuntimeException::class, 'Demo data cannot be seeded in production.');
+        ->toThrow(
+            RuntimeException::class,
+            'Demo data can only be seeded locally, in testing, or on an isolated instance with DEMO_INSTANCE=true.',
+        );
 });

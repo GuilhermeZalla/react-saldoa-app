@@ -15,8 +15,10 @@ class DemoDataSeeder extends Seeder
      */
     public function run(): void
     {
-        if (app()->environment('production')) {
-            throw new RuntimeException('Demo data cannot be seeded in production.');
+        if (app()->environment('production') && ! config('demo.instance')) {
+            throw new RuntimeException(
+                'Demo data can only be seeded locally, in testing, or on an isolated instance with DEMO_INSTANCE=true.',
+            );
         }
 
         $today = now();

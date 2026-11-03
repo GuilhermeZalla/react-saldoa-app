@@ -18,6 +18,8 @@ class ResetUserPassword implements ResetsUserPasswords
      */
     public function reset(User $user, array $input): void
     {
+        abort_if(config('demo.instance') && $user->email === config('demo.email'), 404);
+
         Validator::make($input, [
             'password' => $this->passwordRules(),
         ])->validate();
