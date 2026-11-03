@@ -10,7 +10,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $category_id
+ * @property string $description
+ * @property string $amount
+ * @property 'income'|'expense' $type
+ * @property 'daily'|'weekly'|'monthly'|'yearly' $frequency
+ * @property Carbon $start_date
+ * @property Carbon|null $end_date
+ * @property Carbon|null $next_occurrence_date
+ */
 #[Fillable(['category_id', 'description', 'amount', 'type', 'frequency', 'start_date', 'end_date', 'next_occurrence_date'])]
 class RecurringTransaction extends Model
 {

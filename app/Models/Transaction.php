@@ -8,7 +8,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $category_id
+ * @property string $description
+ * @property string $amount
+ * @property 'income'|'expense' $type
+ * @property Carbon $date
+ * @property Carbon|null $deleted_at
+ */
 #[Fillable(['category_id', 'recurring_transaction_id', 'description', 'amount', 'type', 'date'])]
 class Transaction extends Model
 {

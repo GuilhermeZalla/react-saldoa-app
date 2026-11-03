@@ -4,6 +4,7 @@ use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\User;
 use Database\Seeders\FinancialDataSeeder;
+use Illuminate\Support\Carbon;
 use Inertia\Testing\AssertableInertia as Assert;
 
 test('guests are redirected to the login page', function () {
@@ -116,8 +117,8 @@ test('dashboard totals use all time for the general balance and the selected mon
             ->where('summary.monthlyIncome', '1000.00')
             ->where('summary.monthlyExpense', '100.00')
             ->where('summary.monthlyBalance', '900.00')
-            ->where('monthlyTrend.5.income', 1000)
-            ->where('monthlyTrend.5.expense', 100)
+            ->where('monthlyTrend.5.income', '1000.00')
+            ->where('monthlyTrend.5.expense', '100.00')
             ->where('hasTransactionsInMonth', true)
             ->where('hasTransactionsInChartRange', true)
             ->has('recentTransactions', 4)
@@ -165,7 +166,8 @@ test('dashboard groups the selected months expenses by category', function () {
             ->where('expensesByCategory.0.name', 'Moradia')
             ->where('expensesByCategory.0.total', '800.00')
             ->where('expensesByCategory.1.name', 'Alimentação')
-            ->where('expensesByCategory.1.total', '60.50'));
+            ->where('expensesByCategory.1.total', '60.50')
+            ->where('expensesByCategory.1.value', '60.50'));
 });
 
 test('dashboard returns the six monthly totals ending with the selected month', function () {
@@ -202,26 +204,33 @@ test('dashboard returns the six monthly totals ending with the selected month', 
         ->assertInertia(fn (Assert $page) => $page
             ->has('monthlyTrend', 6)
             ->where('monthlyTrend.0.month', '2024-12')
-            ->where('monthlyTrend.0.expense', 10)
+            ->where('monthlyTrend.0.expense', '10.00')
             ->where('monthlyTrend.5.month', '2025-05')
-            ->where('monthlyTrend.5.expense', 50));
+            ->where('monthlyTrend.5.expense', '50.00'));
 });
 
 test('dashboard shows demo data when browsing a seeded previous month', function () {
-    $this->seed(FinancialDataSeeder::class);
-    $user = User::query()->where('email', 'test@example.com')->firstOrFail();
-    $previousMonth = now()->subMonth()->format('Y-m');
+    $previousTestNow = Carbon::getTestNow();
+    Carbon::setTestNow('2026-11-15 12:00:00');
 
-    expect($user->email_verified_at)->not->toBeNull();
+    try {
+        $this->seed(FinancialDataSeeder::class);
+        $user = User::query()->where('email', 'test@example.com')->firstOrFail();
+        $previousMonth = now()->subMonth()->format('Y-m');
 
-    $this->actingAs($user)
-        ->get(route('dashboard', ['month' => $previousMonth]))
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('summary.monthlyIncome', '4500.00')
-            ->where('summary.monthlyExpense', '320.50')
-            ->where('hasTransactionsInMonth', true)
-            ->where('hasTransactionsInChartRange', true));
+        expect($user->email_verified_at)->not->toBeNull();
+
+        $this->actingAs($user)
+            ->get(route('dashboard', ['month' => $previousMonth]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('summary.monthlyIncome', '4500.00')
+                ->where('summary.monthlyExpense', '320.50')
+                ->where('hasTransactionsInMonth', true)
+                ->where('hasTransactionsInChartRange', true));
+    } finally {
+        Carbon::setTestNow($previousTestNow);
+    }
 });
 
 test('dashboard calculates favorable percentage changes from aggregate monthly totals', function () {
@@ -479,13 +488,13 @@ test('dashboard aggregates exclude soft-deleted transactions from every widget',
             ->where('expensesByCategory.0.total', '25.00')
             ->has('monthlyTrend', 6)
             ->where('monthlyTrend.0.month', '2025-01')
-            ->where('monthlyTrend.0.income', 10)
+            ->where('monthlyTrend.0.income', '10.00')
             ->where('monthlyTrend.1.month', '2025-02')
-            ->where('monthlyTrend.1.income', 0)
-            ->where('monthlyTrend.4.income', 50)
-            ->where('monthlyTrend.4.expense', 20)
-            ->where('monthlyTrend.5.income', 100)
-            ->where('monthlyTrend.5.expense', 25)
+            ->where('monthlyTrend.1.income', '0.00')
+            ->where('monthlyTrend.4.income', '50.00')
+            ->where('monthlyTrend.4.expense', '20.00')
+            ->where('monthlyTrend.5.income', '100.00')
+            ->where('monthlyTrend.5.expense', '25.00')
             ->has('recentTransactions', 5)
             ->where('recentTransactions.0.description', 'June expense')
             ->where('recentTransactions.1.description', 'June income')

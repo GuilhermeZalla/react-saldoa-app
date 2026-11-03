@@ -27,15 +27,15 @@ export type DashboardMonthNavigation = {
 export type DashboardExpenseCategory = {
     id: number;
     name: string;
-    value: number;
+    value: string;
     total: string;
 };
 
 export type DashboardMonthlyTotal = {
     month: string;
     label: string;
-    income: number;
-    expense: number;
+    income: string;
+    expense: string;
 };
 
 export type DashboardRecentTransaction = {

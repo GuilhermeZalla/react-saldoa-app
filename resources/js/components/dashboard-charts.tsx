@@ -54,6 +54,15 @@ export function DashboardCharts({
     monthlyTrend,
     hasTransactionsInChartRange,
 }: DashboardChartsProps) {
+    const expensesChartData = expensesByCategory.map((category) => ({
+        ...category,
+        value: Number(category.value),
+    }));
+    const monthlyTrendChartData = monthlyTrend.map((month) => ({
+        ...month,
+        income: Number(month.income),
+        expense: Number(month.expense),
+    }));
     const transactionListUrl = (categoryId: number) =>
         TransactionController.index({
             query: {
@@ -79,7 +88,7 @@ export function DashboardCharts({
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie
-                                            data={expensesByCategory}
+                                            data={expensesChartData}
                                             dataKey="value"
                                             nameKey="name"
                                             innerRadius="56%"
@@ -225,7 +234,7 @@ export function DashboardCharts({
                             <div className="h-72 min-w-0">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart
-                                        data={monthlyTrend}
+                                        data={monthlyTrendChartData}
                                         margin={{
                                             top: 8,
                                             right: 4,

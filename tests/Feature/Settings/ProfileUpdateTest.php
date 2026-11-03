@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\Budget;
+use App\Models\Category;
+use App\Models\RecurringTransaction;
+use App\Models\Transaction;
 use App\Models\User;
 
 test('profile page is displayed', function () {
@@ -81,6 +85,18 @@ test('email verification status is unchanged when the email address is unchanged
 
 test('user can delete their account', function () {
     $user = User::factory()->create();
+    $category = Category::factory()->for($user)->create(['type' => 'expense']);
+    $activeTransaction = Transaction::factory()->for($user)->for($category)->create([
+        'type' => 'expense',
+    ]);
+    $deletedTransaction = Transaction::factory()->for($user)->for($category)->create([
+        'type' => 'expense',
+    ]);
+    $deletedTransaction->delete();
+    $recurringTransaction = RecurringTransaction::factory()->for($user)->for($category)->create([
+        'type' => 'expense',
+    ]);
+    $budget = Budget::factory()->for($user)->for($category)->create();
 
     $response = $this
         ->actingAs($user)
@@ -93,7 +109,12 @@ test('user can delete their account', function () {
         ->assertRedirect(route('home'));
 
     $this->assertGuest();
-    expect($user->fresh())->toBeNull();
+    expect($user->fresh())->toBeNull()
+        ->and(Transaction::withTrashed()->find($activeTransaction->id))->toBeNull()
+        ->and(Transaction::withTrashed()->find($deletedTransaction->id))->toBeNull()
+        ->and(RecurringTransaction::query()->find($recurringTransaction->id))->toBeNull()
+        ->and(Budget::query()->find($budget->id))->toBeNull()
+        ->and(Category::query()->find($category->id))->toBeNull();
 });
 
 test('demo user cannot delete their account', function () {

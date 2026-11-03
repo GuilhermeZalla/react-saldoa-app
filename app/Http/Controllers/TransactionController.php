@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\ExportTransactionsCsv;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
 use App\Models\Category;
 use App\Models\Transaction;
-use Illuminate\Database\Eloquent\Builder;
+use App\Queries\TransactionQuery;
+use App\Support\DecimalAmount;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,6 +21,11 @@ class TransactionController extends Controller
 {
     use AuthorizesRequests;
 
+    public function __construct(
+        private TransactionQuery $transactionQuery,
+        private ExportTransactionsCsv $exportTransactionsCsv,
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
@@ -26,10 +33,10 @@ class TransactionController extends Controller
     {
         $this->authorize('viewAny', Transaction::class);
 
-        $filters = $this->filtersFor($request);
+        $filters = $this->transactionQuery->filtersFor($request, $request->user());
         $monthStart = Carbon::parse($filters['month'].'-01')->startOfMonth();
 
-        $query = $this->filteredTransactions($request, $filters);
+        $query = $this->transactionQuery->filteredTransactions($request->user(), $filters);
 
         $totals = (clone $query)->selectRaw(
             'COALESCE(SUM(CASE WHEN type = ? THEN amount ELSE 0 END), 0) AS income_total, '
@@ -68,9 +75,9 @@ class TransactionController extends Controller
                 'default' => now()->format('Y-m'),
             ],
             'summary' => [
-                'income' => $this->decimalAmount($totals->income_total),
-                'expense' => $this->decimalAmount($totals->expense_total),
-                'balance' => $this->decimalAmount($totals->balance_total),
+                'income' => DecimalAmount::format($totals->income_total),
+                'expense' => DecimalAmount::format($totals->expense_total),
+                'balance' => DecimalAmount::format($totals->balance_total),
             ],
         ]);
     }
@@ -82,38 +89,13 @@ class TransactionController extends Controller
     {
         $this->authorize('viewAny', Transaction::class);
 
-        $filters = $this->filtersFor($request);
-        $transactions = $this->filteredTransactions($request, $filters)
+        $filters = $this->transactionQuery->filtersFor($request, $request->user());
+        $transactions = $this->transactionQuery->filteredTransactions($request->user(), $filters)
             ->with('category:id,name')
             ->orderBy('date')
             ->orderBy('id');
 
-        return response()->streamDownload(function () use ($transactions): void {
-            $output = fopen('php://output', 'w');
-
-            if ($output === false) {
-                return;
-            }
-
-            fwrite($output, "\xEF\xBB\xBF");
-            fputcsv($output, ['Data', 'Tipo', 'Categoria', 'Descrição', 'Valor'], ';', '"', '', "\r\n");
-
-            $transactions->chunk(500, function ($transactionChunk) use ($output): void {
-                foreach ($transactionChunk as $transaction) {
-                    fputcsv($output, [
-                        $transaction->date->format('d/m/Y'),
-                        $transaction->type === 'income' ? 'Receita' : 'Despesa',
-                        $this->safeCsvValue($transaction->category->name),
-                        $this->safeCsvValue($transaction->description),
-                        str_replace('.', ',', (string) $transaction->amount),
-                    ], ';', '"', '', "\r\n");
-                }
-            });
-
-            fclose($output);
-        }, 'lancamentos-'.$filters['month'].'.csv', [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-        ]);
+        return $this->exportTransactionsCsv->execute($transactions, 'lancamentos-'.$filters['month'].'.csv');
     }
 
     /**
@@ -160,7 +142,7 @@ class TransactionController extends Controller
                 'date' => $transaction->date->format('Y-m-d'),
             ],
             'categories' => $this->categoryOptions($request),
-            'filters' => $this->filtersFor($request),
+            'filters' => $this->transactionQuery->filtersFor($request, $request->user()),
         ]);
     }
 
@@ -176,7 +158,7 @@ class TransactionController extends Controller
             'message' => 'Lançamento atualizado com sucesso.',
         ]);
 
-        return to_route('transactions.index', $this->filtersFor($request));
+        return to_route('transactions.index', $this->transactionQuery->filtersFor($request, $request->user()));
     }
 
     /**
@@ -196,13 +178,13 @@ class TransactionController extends Controller
                 'label' => 'Desfazer',
                 'url' => route('transactions.restore', [
                     'transaction' => $transaction->id,
-                    ...$this->filtersFor($request),
+                    ...$this->transactionQuery->filtersFor($request, $request->user()),
                 ]),
                 'method' => 'post',
             ],
         ]);
 
-        return to_route('transactions.index', $this->filtersFor($request));
+        return to_route('transactions.index', $this->transactionQuery->filtersFor($request, $request->user()));
     }
 
     /**
@@ -219,7 +201,7 @@ class TransactionController extends Controller
                 'duration' => 3000,
             ]);
 
-            return to_route('transactions.index', $this->filtersFor($request));
+            return to_route('transactions.index', $this->transactionQuery->filtersFor($request, $request->user()));
         }
 
         $transaction->restore();
@@ -230,7 +212,7 @@ class TransactionController extends Controller
             'duration' => 3000,
         ]);
 
-        return to_route('transactions.index', $this->filtersFor($request));
+        return to_route('transactions.index', $this->transactionQuery->filtersFor($request, $request->user()));
     }
 
     /**
@@ -249,93 +231,5 @@ class TransactionController extends Controller
                 'type' => $category->type,
             ])
             ->all();
-    }
-
-    /**
-     * Normalize filters from the current URL and restrict category IDs to the user.
-     *
-     * @return array{month: string, type: string, category_id: string, search: string}
-     */
-    private function filtersFor(Request $request): array
-    {
-        $month = $request->query('month');
-
-        if (! is_string($month)
-            || preg_match('/^(?!0000)\d{4}-(0[1-9]|1[0-2])$/D', $month) !== 1) {
-            $month = now()->format('Y-m');
-        }
-
-        $type = $request->query('type', 'all');
-
-        if (! is_string($type) || ! in_array($type, ['all', 'income', 'expense'], true)) {
-            $type = 'all';
-        }
-
-        $categoryId = 'all';
-        $requestedCategoryId = $request->query('category_id');
-
-        if (is_string($requestedCategoryId)) {
-            $validatedCategoryId = filter_var($requestedCategoryId, FILTER_VALIDATE_INT);
-
-            if ($validatedCategoryId !== false
-                && $validatedCategoryId > 0
-                && $request->user()->categories()->whereKey($validatedCategoryId)->exists()) {
-                $categoryId = (string) $validatedCategoryId;
-            }
-        }
-
-        $search = $request->query('search', '');
-        $search = is_string($search) ? mb_substr(trim($search), 0, 255) : '';
-
-        return [
-            'month' => $month,
-            'type' => $type,
-            'category_id' => $categoryId,
-            'search' => $search,
-        ];
-    }
-
-    /**
-     * Build the user's transaction query using the normalized list filters.
-     *
-     * @param  array{month: string, type: string, category_id: string, search: string}  $filters
-     * @return Builder<Transaction>
-     */
-    private function filteredTransactions(Request $request, array $filters): Builder
-    {
-        $monthStart = Carbon::parse($filters['month'].'-01')->startOfMonth();
-        $monthEnd = $monthStart->copy()->endOfMonth();
-
-        $query = $request->user()->transactions()->getQuery()
-            ->whereBetween('date', [
-                $monthStart->toDateString(),
-                $monthEnd->toDateString(),
-            ]);
-
-        if ($filters['type'] !== 'all') {
-            $query->where('type', $filters['type']);
-        }
-
-        if ($filters['category_id'] !== 'all') {
-            $query->where('category_id', $filters['category_id']);
-        }
-
-        if ($filters['search'] !== '') {
-            $query->where('description', 'like', '%'.$filters['search'].'%');
-        }
-
-        return $query;
-    }
-
-    private function safeCsvValue(string $value): string
-    {
-        return preg_match('/^[\x00-\x20]*[=+\-@]/u', $value) === 1
-            ? "'".$value
-            : $value;
-    }
-
-    private function decimalAmount(mixed $amount): string
-    {
-        return number_format((float) $amount, 2, '.', '');
     }
 }

@@ -76,6 +76,9 @@
             "@types:check",
             "@php artisan test"
         ],
+        "test:mysql": [
+            "@php vendor/bin/pest --configuration=phpunit.mysql.xml"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\DeleteCategory;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -98,19 +98,11 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category): RedirectResponse
+    public function destroy(Category $category, DeleteCategory $deleteCategory): RedirectResponse
     {
         $this->authorize('delete', $category);
 
-        $deleted = DB::transaction(function () use ($category): bool {
-            if ($category->transactions()->exists() || $category->recurringTransactions()->exists()) {
-                return false;
-            }
-
-            $category->transactions()->onlyTrashed()->forceDelete();
-
-            return (bool) $category->delete();
-        });
+        $deleted = $deleteCategory->execute($category);
 
         if (! $deleted) {
             Inertia::flash('toast', [
