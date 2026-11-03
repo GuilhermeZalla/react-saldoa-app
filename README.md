@@ -49,7 +49,9 @@ composer run dev
 
 Abra [http://localhost:8000](http://localhost:8000). Em ambiente local, o seeder cria dados de exemplo, incluindo a conta `demo@exemplo.com` (senha `demo1234`). O botão de acesso em um clique depende de `DEMO_LOGIN_ENABLED=true` no `.env`.
 
-**A conta e a senha de demonstração são apenas para desenvolvimento local/portfólio e jamais devem existir em produção.** O `DatabaseSeeder` não cria essa conta em produção, e o login de demonstração é recusado nesse ambiente. Antes de publicar um ambiente que já tenha recebido os dados demo, execute `php artisan demo:purge --force` e confirme que a conta não existe mais.
+**A conta e a senha conhecidas de demonstração nunca podem existir na instância principal de produção.** Para disponibilizar uma demonstração pública, use uma implantação e banco de dados isolados, habilite `DEMO_INSTANCE=true` somente nela e configure `DEMO_LOGIN_ENABLED=true`. O seeder e o login demo permanecem bloqueados em produção quando `DEMO_INSTANCE=false`. Não compartilhe banco, domínio administrativo, credenciais nem backups entre as instâncias.
+
+Na instância demo, as rotas web e API de escrita recusam alterações feitas pela conta demo. O comando `php artisan demo:reset --force` remove os dados da conta demo e a cria novamente; ele é agendado diariamente nessa instância. Antes de publicar a instância principal de produção, execute `php artisan demo:purge --force` e confirme que a conta não existe.
 
 ## Rodar as verificações
 
@@ -101,3 +103,7 @@ Os testes de comportamento ficam em `tests/Feature/`; factories e seeders ajudam
 ## Deploy
 
 O app ainda não possui uma URL pública de produção.
+
+## API móvel
+
+O backend JSON autenticado por tokens Sanctum e seus endpoints estão descritos em [docs/MOBILE_API.md](docs/MOBILE_API.md). As telas e a configuração do cliente Expo/React Native ainda não foram iniciadas. Antes de um teste fechado na Play Store, publique a API em HTTPS, uma política de privacidade baseada nos dados reais do serviço e o fluxo público de exclusão de conta em `/account-deletion`.
