@@ -61,7 +61,12 @@ export type Dashboard = {
         monthlyBalance: string;
     };
     expensesByCategory: { id: number; name: string; total: string }[];
-    monthlyTrend: { month: string; label: string; income: string; expense: string }[];
+    monthlyTrend: {
+        month: string;
+        label: string;
+        income: string;
+        expense: string;
+    }[];
     recentTransactions: {
         id: number;
         description: string;
@@ -71,7 +76,11 @@ export type Dashboard = {
         formattedDate: string;
         category: string;
     }[];
-    budgetAlerts: { category_name: string; percentage: number; status: string }[];
+    budgetAlerts: {
+        category_name: string;
+        percentage: number;
+        status: string;
+    }[];
     hasTransactionsInMonth: boolean;
     hasTransactionsInChartRange: boolean;
     hasBudgets: boolean;

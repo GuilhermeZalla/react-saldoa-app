@@ -6,7 +6,9 @@ const currencyFormatter = new Intl.NumberFormat('pt-BR', {
 export function formatCurrency(amount: string | number): string {
     const numericAmount = typeof amount === 'number' ? amount : Number(amount);
 
-    return currencyFormatter.format(Number.isFinite(numericAmount) ? numericAmount : 0);
+    return currencyFormatter.format(
+        Number.isFinite(numericAmount) ? numericAmount : 0,
+    );
 }
 
 export function formatDate(date: string): string {
@@ -17,6 +19,38 @@ export function formatDate(date: string): string {
     }
 
     return new Intl.DateTimeFormat('pt-BR').format(parsedDate);
+}
+
+export function formatDateForInput(date: string): string {
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(date);
+
+    return match ? `${match[3]}/${match[2]}/${match[1]}` : date;
+}
+
+export function dateForApi(value: string): string | null {
+    const normalizedValue = value.trim();
+    const brazilianDate = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(normalizedValue);
+    const isoDate = /^(\d{4})-(\d{2})-(\d{2})$/.exec(normalizedValue);
+    const year = Number(brazilianDate?.[3] ?? isoDate?.[1]);
+    const month = Number(brazilianDate?.[2] ?? isoDate?.[2]);
+    const day = Number(brazilianDate?.[1] ?? isoDate?.[3]);
+
+    if (!brazilianDate && !isoDate) {
+        return null;
+    }
+
+    const parsedDate = new Date(0);
+    parsedDate.setUTCFullYear(year, month - 1, day);
+
+    if (
+        parsedDate.getUTCFullYear() !== year ||
+        parsedDate.getUTCMonth() !== month - 1 ||
+        parsedDate.getUTCDate() !== day
+    ) {
+        return null;
+    }
+
+    return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
 export function currentMonth(): string {

@@ -1,39 +1,40 @@
 {
-  "expo": {
-    "name": "Saldoa",
-    "slug": "saldoa",
-    "scheme": "saldoa",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "package": "com.saldoa.app",
-      "adaptiveIcon": {
-        "backgroundColor": "#4F46E5",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-secure-store",
-        {
-          "configureAndroidBackup": true
+    "expo": {
+        "name": "Saldoa",
+        "slug": "saldoa",
+        "scheme": "saldoa",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "icon": "./assets/icon.png",
+        "userInterfaceStyle": "light",
+        "ios": {
+            "supportsTablet": true
+        },
+        "android": {
+            "package": "com.saldoa.app",
+            "adaptiveIcon": {
+                "backgroundColor": "#4F46E5",
+                "foregroundImage": "./assets/android-icon-foreground.png",
+                "backgroundImage": "./assets/android-icon-background.png",
+                "monochromeImage": "./assets/android-icon-monochrome.png"
+            },
+            "predictiveBackGestureEnabled": false
+        },
+        "web": {
+            "favicon": "./assets/favicon.png"
+        },
+        "plugins": [
+            "expo-router",
+            [
+                "expo-secure-store",
+                {
+                    "configureAndroidBackup": true
+                }
+            ],
+            "./plugins/with-local-api-cleartext"
+        ],
+        "experiments": {
+            "typedRoutes": true
         }
-      ]
-    ],
-    "experiments": {
-      "typedRoutes": true
     }
-  }
 }

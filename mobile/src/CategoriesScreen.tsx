@@ -149,7 +149,9 @@ export default function CategoriesScreen({ session }: Props) {
                     />
                     <ChoiceChips
                         selected={type}
-                        onSelect={(value) => setType(value as 'income' | 'expense')}
+                        onSelect={(value) =>
+                            setType(value as 'income' | 'expense')
+                        }
                         options={[
                             { value: 'expense', label: 'Despesa' },
                             { value: 'income', label: 'Receita' },
@@ -168,14 +170,18 @@ export default function CategoriesScreen({ session }: Props) {
             <Card>
                 <SectionTitle title="Suas categorias" />
                 {loading ? (
-                    <Text style={commonStyles.muted}>Carregando categorias…</Text>
+                    <Text style={commonStyles.muted}>
+                        Carregando categorias…
+                    </Text>
                 ) : categories.length ? (
                     categories.map((category) => (
                         <View key={category.id} style={styles.row}>
                             <View style={styles.categoryInfo}>
                                 <Text style={styles.name}>{category.name}</Text>
                                 <Text style={styles.meta}>
-                                    {category.type === 'income' ? 'Receita' : 'Despesa'}
+                                    {category.type === 'income'
+                                        ? 'Receita'
+                                        : 'Despesa'}
                                     {category.transactions_count === undefined
                                         ? ''
                                         : ` · ${category.transactions_count} lançamentos`}

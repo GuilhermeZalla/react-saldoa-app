@@ -96,7 +96,9 @@ export default function DashboardScreen({ session }: Props) {
         >
             <PageTitle
                 title={`Olá, ${session.user.name.split(' ')[0]}`}
-                subtitle={dashboard?.monthNavigation.label ?? 'Seu resumo financeiro'}
+                subtitle={
+                    dashboard?.monthNavigation.label ?? 'Seu resumo financeiro'
+                }
             />
 
             {session.isDemo ? (
@@ -127,7 +129,9 @@ export default function DashboardScreen({ session }: Props) {
                         ? '—'
                         : formatCurrency(summary.overallBalance)}
                 </Text>
-                <Text style={styles.balanceCaption}>Saldo de todos os períodos</Text>
+                <Text style={styles.balanceCaption}>
+                    Saldo de todos os períodos
+                </Text>
             </Card>
 
             <View style={styles.metricGrid}>
@@ -167,7 +171,10 @@ export default function DashboardScreen({ session }: Props) {
                 <SectionTitle title="Movimentações recentes" />
                 {dashboard?.recentTransactions.length ? (
                     dashboard.recentTransactions.map((transaction) => (
-                        <View key={transaction.id} style={styles.transactionRow}>
+                        <View
+                            key={transaction.id}
+                            style={styles.transactionRow}
+                        >
                             <View style={styles.transactionDescription}>
                                 <Text style={styles.rowTitle} numberOfLines={1}>
                                     {transaction.description}
@@ -201,9 +208,12 @@ export default function DashboardScreen({ session }: Props) {
                 <Card style={styles.warningCard}>
                     <SectionTitle title="Atenção às metas" />
                     {dashboard.budgetAlerts.map((alert) => (
-                        <Text key={alert.category_name} style={styles.warningText}>
-                            {alert.category_name}: {Math.round(alert.percentage)}%
-                            do limite mensal
+                        <Text
+                            key={alert.category_name}
+                            style={styles.warningText}
+                        >
+                            {alert.category_name}:{' '}
+                            {Math.round(alert.percentage)}% do limite mensal
                         </Text>
                     ))}
                 </Card>
@@ -250,7 +260,10 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '700',
     },
-    balanceCard: { backgroundColor: colors.primary, borderColor: colors.primary },
+    balanceCard: {
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
+    },
     metricLabel: { color: colors.muted, fontSize: 12, fontWeight: '600' },
     balance: { color: colors.surface, fontSize: 31, fontWeight: '800' },
     balanceCaption: { color: '#E1E3FF', fontSize: 12 },
@@ -275,7 +288,10 @@ const styles = StyleSheet.create({
     rowTitle: { color: colors.text, fontSize: 13, fontWeight: '600' },
     rowMeta: { color: colors.muted, fontSize: 11 },
     rowAmount: { color: colors.text, fontSize: 12, fontWeight: '700' },
-    warningCard: { backgroundColor: colors.warningSoft, borderColor: '#F3DFAF' },
+    warningCard: {
+        backgroundColor: colors.warningSoft,
+        borderColor: '#F3DFAF',
+    },
     warningText: { color: colors.warning, fontSize: 13 },
     error: { color: colors.expense, fontSize: 13, lineHeight: 19 },
 });

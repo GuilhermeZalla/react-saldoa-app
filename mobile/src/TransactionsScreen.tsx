@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-    Alert,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
-} from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ApiError, sessionRequest } from './api';
 import {
     ActionButton,
@@ -21,8 +15,10 @@ import {
     amountForApi,
     currentDate,
     currentMonth,
+    dateForApi,
     formatCurrency,
     formatDate,
+    formatDateForInput,
 } from './format';
 import { colors } from './theme';
 import type { Category, Session, Transaction } from './types';
@@ -71,7 +67,12 @@ export default function TransactionsScreen({ session }: Props) {
             setTransactions(data.transactions);
             setCategories(data.categories);
         } catch (error) {
-            setErrorMessage(messageForError(error, 'Não foi possível carregar os lançamentos.'));
+            setErrorMessage(
+                messageForError(
+                    error,
+                    'Não foi possível carregar os lançamentos.',
+                ),
+            );
         } finally {
             setLoading(false);
         }
@@ -153,6 +154,13 @@ export default function TransactionsScreen({ session }: Props) {
             return;
         }
 
+        const apiDate = dateForApi(date);
+
+        if (apiDate === null) {
+            setErrorMessage('Informe uma data válida no formato DD/MM/AAAA.');
+            return;
+        }
+
         setSaving(true);
         setErrorMessage('');
 
@@ -169,14 +177,16 @@ export default function TransactionsScreen({ session }: Props) {
                         amount: amountForApi(amount),
                         type,
                         category_id: categoryId,
-                        date,
+                        date: apiDate,
                     },
                 },
             );
             resetForm();
             await loadData();
         } catch (error) {
-            setErrorMessage(messageForError(error, 'Não foi possível salvar o lançamento.'));
+            setErrorMessage(
+                messageForError(error, 'Não foi possível salvar o lançamento.'),
+            );
         } finally {
             setSaving(false);
         }
@@ -204,7 +214,12 @@ export default function TransactionsScreen({ session }: Props) {
             });
             await loadData();
         } catch (error) {
-            setErrorMessage(messageForError(error, 'Não foi possível excluir o lançamento.'));
+            setErrorMessage(
+                messageForError(
+                    error,
+                    'Não foi possível excluir o lançamento.',
+                ),
+            );
         }
     }
 
@@ -224,7 +239,11 @@ export default function TransactionsScreen({ session }: Props) {
             {!session.isDemo ? (
                 <Card>
                     <SectionTitle
-                        title={editingId === null ? 'Novo lançamento' : 'Editar lançamento'}
+                        title={
+                            editingId === null
+                                ? 'Novo lançamento'
+                                : 'Editar lançamento'
+                        }
                     />
                     <TextField
                         label="Descrição"
@@ -268,22 +287,26 @@ export default function TransactionsScreen({ session }: Props) {
                         />
                     ) : (
                         <Text style={commonStyles.muted}>
-                            Crie uma categoria desse tipo antes de adicionar um lançamento.
+                            Crie uma categoria desse tipo antes de adicionar um
+                            lançamento.
                         </Text>
                     )}
                     <TextField
-                        label="Data (AAAA-MM-DD)"
-                        value={date}
+                        label="Data (DD/MM/AAAA)"
+                        value={formatDateForInput(date)}
                         onChangeText={setDate}
                         autoCapitalize="none"
-                        placeholder={currentDate()}
+                        maxLength={10}
+                        placeholder="DD/MM/AAAA"
                     />
                     <ActionButton
                         onPress={() => void saveTransaction()}
                         disabled={saving}
                         loading={saving}
                     >
-                        {editingId === null ? 'Adicionar lançamento' : 'Salvar alterações'}
+                        {editingId === null
+                            ? 'Adicionar lançamento'
+                            : 'Salvar alterações'}
                     </ActionButton>
                     {editingId !== null ? (
                         <ActionButton onPress={resetForm} variant="quiet">
@@ -296,7 +319,9 @@ export default function TransactionsScreen({ session }: Props) {
             <Card>
                 <SectionTitle title="Este mês" />
                 {loading ? (
-                    <Text style={commonStyles.muted}>Carregando lançamentos…</Text>
+                    <Text style={commonStyles.muted}>
+                        Carregando lançamentos…
+                    </Text>
                 ) : transactions.length ? (
                     transactions.map((transaction) => (
                         <View key={transaction.id} style={styles.transaction}>
@@ -306,11 +331,15 @@ export default function TransactionsScreen({ session }: Props) {
                                 onPress={() => startEditing(transaction)}
                                 style={styles.transactionMain}
                             >
-                                <Text style={styles.description} numberOfLines={1}>
+                                <Text
+                                    style={styles.description}
+                                    numberOfLines={1}
+                                >
                                     {transaction.description}
                                 </Text>
                                 <Text style={styles.meta}>
-                                    {transaction.category.name} · {formatDate(transaction.date)}
+                                    {transaction.category.name} ·{' '}
+                                    {formatDate(transaction.date)}
                                 </Text>
                                 <Text
                                     style={[

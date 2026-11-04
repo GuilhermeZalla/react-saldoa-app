@@ -99,7 +99,9 @@ export function ActionButton({
         >
             {loading ? (
                 <ActivityIndicator
-                    color={variant === 'primary' ? colors.surface : colors.primary}
+                    color={
+                        variant === 'primary' ? colors.surface : colors.primary
+                    }
                 />
             ) : (
                 <Text style={[styles.buttonText, textStyle]}>{children}</Text>
@@ -147,10 +149,7 @@ export function ChoiceChips({
                         accessibilityRole="button"
                         accessibilityState={{ selected: isSelected }}
                         onPress={() => onSelect(option.value)}
-                        style={[
-                            styles.chip,
-                            isSelected && styles.chipSelected,
-                        ]}
+                        style={[styles.chip, isSelected && styles.chipSelected]}
                     >
                         <Text
                             style={[
@@ -189,7 +188,11 @@ export const commonStyles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
-    separator: { backgroundColor: colors.border, height: 1, marginVertical: 12 },
+    separator: {
+        backgroundColor: colors.border,
+        height: 1,
+        marginVertical: 12,
+    },
 });
 
 const styles = StyleSheet.create({

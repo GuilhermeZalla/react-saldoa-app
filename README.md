@@ -1,126 +1,248 @@
 # Saldoa
 
+Projeto de estudo independente e portfólio para controle financeiro pessoal.
+
+Desenvolvido como uma aplicação web completa com **Laravel 13**, **React 19**, **Inertia.js 3** e **Tailwind CSS 4**, acompanhada por um cliente mobile complementar construído com **Expo (React Native)** e **TypeScript**.
+
+O Saldoa ajuda a acompanhar de perto o fluxo financeiro. O usuário registra receitas e despesas com categorias personalizadas, estipula metas mensais de gastos com indicadores visuais de progresso, agenda lançamentos recorrentes automáticos e visualiza a evolução do patrimônio por meio de gráficos e comparativos em um dashboard interativo. A aplicação conta com separação estrita por usuário, exportação de lançamentos em CSV com sanitização de fórmulas, suporte a exclusão lógica com ação de desfazer e ambiente de demonstração seguro com acesso em um clique.
+
+## Demonstrações
+
+Gravações reais da aplicação em execução no ambiente de desenvolvimento com dados de demonstração.
+
+### Visão geral e Landing Page
+
 ![Tela inicial do Saldoa](docs/images/home.gif)
 
-O Saldoa ajuda a acompanhar o dinheiro que entra e sai. Você registra receitas e despesas, organiza tudo por categoria, define limites mensais e vê um resumo das finanças no dashboard. É um projeto de portfólio feito com Laravel, React e Inertia.
+### Autenticação e Acesso à Demonstração
 
-## Features da aplicação
+![Login e cadastro](docs/images/auth.gif)
 
-- Criar uma conta e manter os dados separados por usuário.
-- Registrar receitas e despesas, filtrar os lançamentos e exportar os resultados para CSV.
-- Organizar lançamentos em categorias e definir metas mensais para categorias de despesa.
-- Agendar lançamentos recorrentes e acompanhar os resumos no dashboard.
-- Experimentar o app com a conta de demonstração, quando o login demo estiver habilitado.
+### Dashboard e Indicadores Financeiros
 
-## Tecnologias
+![Dashboard](docs/images/dashboard.gif)
 
-- PHP 8.4 e Laravel 13
-- React 19, Inertia.js 3 e TypeScript
-- Tailwind CSS 4 e componentes shadcn/ui
-- Recharts para os gráficos
-- Pest para os testes
-- SQLite por padrão no ambiente local; MySQL também pode ser configurado
+### Gestão de Lançamentos
 
-## Rodar na sua máquina
+![Lançamentos](docs/images/transactions.gif)
 
-Você precisa de PHP 8.4 com as extensões do Laravel, Composer, Node.js/npm e Git. Com SQLite, não é necessário instalar um servidor de banco de dados.
+### Categorias de Receitas e Despesas
 
-```bash
+![Categorias](docs/images/categories.gif)
+
+### Planejamento de Metas Mensais
+
+![Metas](docs/images/meta.gif)
+
+### Aplicativo Móvel (Expo)
+
+Prévia do cliente Expo no navegador, em uma janela de 390 × 844, com dados fictícios da instância local de demonstração.
+
+![Demonstração do aplicativo móvel Expo](docs/images/mobile-expo.gif)
+
+Capturas individuais: [Login](docs/screenshots/mobile-login-expo.png) · [Dashboard](docs/screenshots/mobile-dashboard-expo.png) · [Lançamentos](docs/screenshots/mobile-transactions-expo.png) · [Formulário de lançamento](docs/screenshots/mobile-transaction-form-expo.png) · [Categorias](docs/screenshots/mobile-categories-expo.png) · [Metas](docs/screenshots/mobile-budgets-expo.png) · [Recorrências](docs/screenshots/mobile-recurring-expo.png) · [Conta](docs/screenshots/mobile-account-expo.png).
+
+> A prévia web é voltada à revisão visual: como o SecureStore não está disponível no navegador, a sessão web fica apenas em memória e é perdida ao recarregar a página. Para testar no celular, use o Expo Go.
+
+## Screenshots
+
+Capturas reais da aplicação web em português (BRL), extraídas com dados de demonstração. Visualização desktop em proporção widescreen e celular em 390 × 844.
+
+| Tela                  | Desktop                                                  | Celular                                                 |
+| --------------------- | -------------------------------------------------------- | ------------------------------------------------------- |
+| Início (Landing Page) | [Ver captura](docs/screenshots/home-desktop.png)         | [Ver captura](docs/screenshots/home-mobile.png)         |
+| Login / Autenticação  | [Ver captura](docs/screenshots/login-desktop.png)        | [Ver captura](docs/screenshots/login-mobile.png)        |
+| Cadastro              | [Ver captura](docs/screenshots/register-desktop.png)     | —                                                       |
+| Dashboard Financeiro  | [Ver captura](docs/screenshots/dashboard-desktop.png)    | [Ver captura](docs/screenshots/dashboard-mobile.png)    |
+| Lançamentos           | [Ver captura](docs/screenshots/transactions-desktop.png) | [Ver captura](docs/screenshots/transactions-mobile.png) |
+| Categorias            | [Ver captura](docs/screenshots/categories-desktop.png)   | [Ver captura](docs/screenshots/categories-mobile.png)   |
+| Metas do Mês          | [Ver captura](docs/screenshots/budgets-desktop.png)      | [Ver captura](docs/screenshots/budgets-mobile.png)      |
+
+## Estrutura e stack
+
+- **Backend Web & API:** PHP 8.4, Laravel 13, Laravel Fortify (sessão web), Laravel Sanctum (tokens para API mobile) e Pest PHP.
+- **Frontend Web:** React 19, Inertia.js 3, TypeScript, Tailwind CSS 4, componentes shadcn/ui, Recharts e Sonner.
+- **Cliente Mobile:** React Native, Expo SDK 58, Expo Router, Expo SecureStore e TypeScript (localizado na pasta `mobile/`).
+- **Banco de dados:** SQLite por padrão no desenvolvimento local; suporte e migrations compatíveis com MySQL 8+.
+- **Documentação técnica:**
+    - `docs/MOBILE_API.md`: especificação dos contratos da API JSON e segurança mobile.
+    - `docs/STATUS.md`: acompanhamento do progresso e próximos passos.
+    - `docs/apresentacao-entrevista-saldoa.pdf`: guia estruturado em PDF para apresentação técnica em entrevistas.
+
+## Executar localmente
+
+### Requisitos
+
+- **PHP 8.4** com as extensões `pdo_sqlite`, `pdo_mysql`, `mbstring`, `intl`, `bcmath` e `curl`.
+- **Composer 2**
+- **Node.js 22+** e **npm**
+- **Git**
+- _(Opcional para mobile)_ Aplicativo **Expo Go** instalado em um smartphone Android ou iOS.
+
+### 1. Backend e Aplicação Web
+
+Clone o repositório e instale as dependências:
+
+```powershell
 git clone https://github.com/GuilhermeZalla/react-saldoa-app.git
 cd react-saldoa-app
 composer install
 npm install
 ```
 
-Copie `.env.example` para `.env` (no PowerShell, use `Copy-Item .env.example .env`), gere a chave e prepare o banco:
+Configure o ambiente e o banco de dados:
 
-```bash
+```powershell
+Copy-Item .env.example .env
 php artisan key:generate
 php artisan migrate --seed
 ```
 
-O arquivo de ambiente padrão usa SQLite. Caso o arquivo `database/database.sqlite` não exista, crie-o antes de migrar. Para usar MySQL, configure as variáveis `DB_*` no `.env`.
+O arquivo `.env.example` vem pré-configurado para SQLite local (`database/database.sqlite`). Caso queira utilizar MySQL, ajuste as variáveis `DB_CONNECTION`, `DB_HOST`, `DB_DATABASE`, `DB_USERNAME` e `DB_PASSWORD` no `.env`.
 
-Inicie a aplicação e o Vite:
+Inicie a aplicação e o servidor de assets:
 
-```bash
+```powershell
 composer run dev
 ```
 
-Abra [http://localhost:8000](http://localhost:8000). Em ambiente local, o seeder cria dados de exemplo, incluindo a conta `demo@exemplo.com` (senha `demo1234`). O botão de acesso em um clique depende de `DEMO_LOGIN_ENABLED=true` no `.env`.
+Abra `http://localhost:8000`. O seeder cadastra dados de exemplo e a conta demo: `demo@exemplo.com` (senha `demo1234`). O acesso rápido em um clique na tela inicial depende de `DEMO_LOGIN_ENABLED=true` no `.env`.
 
-**A conta e a senha conhecidas de demonstração nunca podem existir na instância principal de produção.** Para disponibilizar uma demonstração pública, use uma implantação e banco de dados isolados, habilite `DEMO_INSTANCE=true` somente nela e configure `DEMO_LOGIN_ENABLED=true`. O seeder e o login demo permanecem bloqueados em produção quando `DEMO_INSTANCE=false`. Não compartilhe banco, domínio administrativo, credenciais nem backups entre as instâncias.
+> [!WARNING]
+> **A conta e credenciais de demonstração nunca devem existir na base principal de produção.** Em implantações públicas, utilize uma instância de demonstração isolada com `DEMO_INSTANCE=true`. Na produção real, execute `php artisan demo:purge --force` para assegurar que a conta demo não exista.
 
-Na instância demo, as rotas web e API de escrita recusam alterações feitas pela conta demo. O comando `php artisan demo:reset --force` remove os dados da conta demo e a cria novamente; ele é agendado diariamente nessa instância. Antes de publicar a instância principal de produção, execute `php artisan demo:purge --force` e confirme que a conta não existe.
+### 2. Aplicativo Móvel (Expo Go)
 
-## Rodar as verificações
+O cliente móvel fica na pasta `mobile/` e consome a API JSON do Laravel autenticada via tokens Sanctum:
 
-```bash
+```powershell
+Copy-Item mobile/.env.example mobile/.env
+cd mobile
+npm install
+npm start -- --go --lan
+```
+
+Abra o aplicativo **Expo Go** no celular, garanta que o computador e o smartphone estejam na mesma rede Wi-Fi e escaneie o QR Code exibido no terminal.
+
+Para testar contra o backend local a partir de um aparelho físico:
+
+1. Altere `mobile/.env` preenchendo `EXPO_PUBLIC_API_URL=http://<SEU_IP_LAN>:8000` (sem barra no final nem `/api/v1`).
+2. No backend, inicie o Laravel com escuta em todas as interfaces: `php artisan serve --host=0.0.0.0 --port=8000`.
+
+Para abrir uma prévia visual no navegador, use `npm run web` dentro da pasta `mobile/`. Essa opção não substitui os testes no Expo Go.
+
+### 3. Gerar um APK local de teste
+
+Com Android Studio, Android SDK e Java instalados, é possível gerar o APK sem conta EAS ou enviar o código para um serviço de build remoto. Configure `EXPO_PUBLIC_API_URL` em `mobile/.env` com o endereço LAN do computador, conectado à mesma rede Wi‑Fi do celular, e inicie a API Laravel aceitando conexões na rede local:
+
+```powershell
+cd mobile
+npm run apk:local
+```
+
+Para servir a API Laravel em uma interface de rede, use a partir da raiz do projeto:
+
+```powershell
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+O build permite HTTP **somente para o endereço privado configurado em `EXPO_PUBLIC_API_URL`** e continua bloqueando HTTP para os demais domínios. O arquivo fica em `mobile/android/app/build/outputs/apk/release/app-release.apk`, inclui somente a arquitetura `arm64-v8a` e é assinado com a chave de depuração local: destina-se a testes na sua rede, não à Play Store. Sem URLs públicas, ele não funcionará fora dessa rede. Builds EAS ou AAB de produção exigem configuração de ambientes e assinatura próprios, além de uma API pública HTTPS.
+
+## Autenticação, isolamento e segurança
+
+- **Sessão Web vs. Tokens Móveis:** A aplicação web utiliza autenticação baseada em sessão com cookies HttpOnly gerenciados pelo Laravel Fortify e proteção contra CSRF. O cliente mobile utiliza autenticação desacoplada baseada em tokens pessoais via Laravel Sanctum (`Authorization: Bearer <token>`).
+- **Isolamento de Dados por Usuário:** 100% das listagens e consultas partem das relações do usuário autenticado (`$user->transactions()`, `$user->categories()`). Policies dedicadas garantem que nenhum usuário acesse ou modifique lançamentos, categorias ou metas de terceiros.
+- **Validação com Form Requests:** Todas as operações de criação e alteração passam por Form Requests que validam tipos, formato decimal de moeda, pertencimento da categoria ao usuário e regras de unicidade.
+- **Proteção contra Injeção de Fórmulas CSV:** A exportação de dados higieniza campos de texto que se iniciam com caracteres perigosos (`=`, `+`, `-`, `@`), evitando execução indevida de macros em planilhas eletrônicas.
+- **Ambiente de Demonstração Seguro:** Na instância de demonstração, o middleware `BlockDemoUserChanges` intercepta e rejeita requisições de escrita originadas pelo usuário demo. O comando `php artisan demo:reset --force` é executado diariamente via Scheduler para restaurar o estado limpo dos dados.
+
+## Regras de negócio
+
+- **Gestão de Lançamentos:** Suporta receitas e despesas vinculadas a categorias do mesmo tipo. Permite filtragem por mês, categoria, tipo e busca textual.
+- **Soft Delete e Desfazer:** Exclusões de lançamentos utilizam exclusão lógica (`softDeletes`). A interface web exibe um toast com contagem regressiva de 8 segundos permitindo desfazer a ação instantaneamente.
+- **Metas de Gastos (Budgets):** Permite fixar um limite mensal de despesa por categoria. O status é calculado dinamicamente em três faixas:
+    - **Ok (< 80%):** gasto sob controle.
+    - **Atenção (80% a 99%):** gasto próximo ao limite estipulado (destaque em âmbar).
+    - **Excedido (≥ 100%):** limite estourado (destaque em vermelho).
+- **Recorrências Automatizadas:** Lançamentos com periodicidade diária, semanal, mensal ou anual são avaliados pelo comando agendado `transactions:generate-recurring`, com bloqueio contra execução sobreposta e idempotência por data de vigência.
+- **Dashboard Financeiro:** Exibe saldo atual consolidado, receitas e despesas do mês corrente, indicador percentual de variação em relação ao mês anterior, gráfico em rosca clicável para filtro imediato e gráfico de linha com a evolução semestral.
+
+## API Móvel
+
+Os endpoints JSON utilizam o prefixo `/api/v1` e estão detalhados em [docs/MOBILE_API.md](docs/MOBILE_API.md):
+
+| Método           | Endpoint                              | Acesso         | Descrição                                                          |
+| ---------------- | ------------------------------------- | -------------- | ------------------------------------------------------------------ |
+| POST             | `/api/v1/auth/register`               | Público        | Cadastro de novo usuário e emissão de token.                       |
+| POST             | `/api/v1/auth/login`                  | Público        | Autenticação por e-mail e senha.                                   |
+| POST             | `/api/v1/auth/demo`                   | Público (Demo) | Emissão de token de leitura para a conta de demonstração.          |
+| GET              | `/api/v1/auth/me`                     | Token          | Dados do perfil do usuário autenticado.                            |
+| POST             | `/api/v1/auth/logout`                 | Token          | Revogação do token ativo.                                          |
+| GET              | `/api/v1/dashboard`                   | Token          | Métricas consolidadas, alertas e resumo do mês (`?month=AAAA-MM`). |
+| GET, POST        | `/api/v1/transactions`                | Token          | Listagem paginada e cadastro de lançamentos.                       |
+| GET, PUT, DELETE | `/api/v1/transactions/{id}`           | Token          | Detalhes, atualização e exclusão lógica de lançamento.             |
+| POST             | `/api/v1/transactions/{id}/restore`   | Token          | Restauração de lançamento excluído.                                |
+| GET              | `/api/v1/transactions/export`         | Token          | Exportação dos lançamentos filtrados em formato CSV.               |
+| GET, POST        | `/api/v1/categories`                  | Token          | Listagem e criação de categorias.                                  |
+| GET, PUT, DELETE | `/api/v1/categories/{id}`             | Token          | Consulta, edição e exclusão de categoria.                          |
+| GET, POST        | `/api/v1/budgets`                     | Token          | Listagem e estipulação de metas de gasto por categoria.            |
+| PUT, DELETE      | `/api/v1/budgets/{id}`                | Token          | Atualização de valor ou remoção de meta.                           |
+| GET, POST        | `/api/v1/recurring-transactions`      | Token          | Listagem e criação de regras de recorrência.                       |
+| PUT, DELETE      | `/api/v1/recurring-transactions/{id}` | Token          | Edição ou cancelamento de regra recorrente.                        |
+| GET              | `/api/v1/account/export`              | Token          | Exportação integral de dados do usuário (portabilidade).           |
+| DELETE           | `/api/v1/account`                     | Token          | Exclusão definitiva da conta mediante confirmação de senha.        |
+
+## Verificação e qualidade de código
+
+Execute a suíte completa de verificações para assegurar integridade:
+
+```powershell
+# Testes automatizados do backend (Pest PHP)
 php artisan test
+
+# Formatação e estilo PHP (Laravel Pint)
+vendor/bin/pint --test
+
+# Verificação de tipos, linter e formatação do frontend (Vite Plus + TypeScript)
 npm run check
 npm run types:check
 npm run build
 ```
 
-O workflow do GitHub Actions também executa o setup e as verificações em pushes para `main` e em pull requests.
-
-Para remover manualmente os dados de demonstração, execute `php artisan demo:purge`. O comando pede confirmação; `--force` dispensa a confirmação e é apropriado para um passo explícito do checklist de deploy.
-
-## Como o app é organizado
-
-As rotas ficam em `routes/` e encaminham as requisições para controllers em `app/Http/Controllers/`. As regras de entrada ficam em Form Requests e as permissões por usuário ficam em Policies. Models e migrations representam os dados no banco. Serviços reúnem cálculos usados por mais de uma tela.
-
-As páginas React ficam em `resources/js/pages/`, os componentes reutilizáveis em `resources/js/components/` e os tipos compartilhados em `resources/js/types/`. O Inertia conecta essas páginas às rotas Laravel, enviando os dados preparados no servidor. O Wayfinder gera funções TypeScript para chamar as rotas nomeadas.
-
-Os testes de comportamento ficam em `tests/Feature/`; factories e seeders ajudam a preparar os dados. O agendamento de recorrências é definido em `routes/console.php`: em produção, configure o cron do Laravel Scheduler para que as ocorrências sejam criadas no horário previsto.
-
-## Demonstração
-
-### Tela Inicial
-
-![Tela inicial do Saldoa](docs/images/home.gif)
-
-### Login e cadastro
-
-![Login e cadastro](docs/images/auth.gif)
-
-### Dashboard
-
-![Dashboard](docs/images/dashboard.gif)
-
-### Lançamentos
-
-![Lançamentos](docs/images/transactions.gif)
-
-## Categorias
-
-![Categorias](docs/images/categories.gif)
-
-## Meta
-
-![Meta](docs/images/meta.gif)
-
-## Deploy
-
-O app ainda não possui uma URL pública de produção.
-
-## API móvel
-
-O backend JSON autenticado por tokens Sanctum e seus endpoints estão descritos em [docs/MOBILE_API.md](docs/MOBILE_API.md). O cliente Android está em `mobile/`, feito com Expo, React Native e TypeScript. Ele inclui autenticação, acesso à demo isolada, dashboard, lançamentos, categorias, metas, recorrências e opções de exportação, logout e exclusão de conta.
-
-Para executar em desenvolvimento:
+Para o cliente móvel:
 
 ```powershell
-Copy-Item mobile/.env.example mobile/.env
-Set-Location mobile
-npm install
-npm start -- --go --lan
+cd mobile
+npx expo lint
+npx tsc --noEmit
+npx expo-doctor
 ```
 
-Instale o **Expo Go** no celular, conecte o celular e o computador à mesma rede Wi-Fi e leia o QR code mostrado pelo comando. Para testar com o backend local em um aparelho físico, edite `mobile/.env` e use o IP LAN do computador em `EXPO_PUBLIC_API_URL`, sem acrescentar `/api/v1`; inicie o Laravel com `php artisan serve --host=0.0.0.0` para permitir o acesso pela rede local. Configure `EXPO_PUBLIC_API_URL_DEMO` somente quando houver uma instância demo separada; se ficar vazia, o botão de demonstração fica desabilitado.
+## Decisões técnicas
 
-Esse modo serve para pré-visualizar e testar o app durante o desenvolvimento; não gera um APK nem substitui um build de distribuição. Para usar um emulador com `npm run android` ou fazer um build local, é necessário instalar JDK e Android Studio/SDK. Builds de distribuição aceitam apenas HTTPS.
+- **Inertia.js com React 19:** Permite criar uma Single-Page Application rica e reativa sem a complexidade de manter rotas, gerenciamento de tokens e validações duplicadas no cliente e no servidor. O roteamento e a autorização permanecem no Laravel.
+- **Sanctum Tokens no Mobile:** Diferente do navegador, aplicações móveis não gerenciam cookies de sessão de forma transparente e segura contra políticas cross-site. O uso de tokens Sanctum armazenados no SecureStore do dispositivo oferece segurança e facilidade de renovação.
+- **Serviço de Domínio Compartilhado:** O cálculo de progresso das metas e agrupamento de despesas foi centralizado em `BudgetSummaryService`, permitindo que os controllers web (Inertia) e os controllers de API (JSON) consumam exatamente a mesma lógica de negócio sem redundância.
+- **Precisão Financeira:** Valores monetários são manipulados no banco com tipo `decimal(12,2)` e expostos na API JSON como strings decimais formatadas (ex.: `"1234.56"`), impedindo erros de ponto flutuante típicos do tipo float em JavaScript.
+- **Pest PHP para Testes:** A suíte de testes de integração e feature valida os fluxos reais de ponta a ponta, simulando requisições HTTP, autenticação, autorização entre usuários diferentes e integridade dos cálculos.
 
-O cadastro e os principais fluxos da API local foram validados ponta a ponta. Ainda não foi gerado um APK; para um build local faltam JDK e Android SDK neste computador. O build em nuvem EAS também não foi iniciado.
+## Limites do projeto
 
-Antes de um teste fechado na Play Store, ainda é necessário configurar e validar URLs reais de produção e demo, confirmar o identificador Android do aplicativo, preparar os ícones finais e credenciais de assinatura, e publicar em HTTPS uma política de privacidade e o fluxo público de exclusão de conta em `/account-deletion`. O aplicativo ainda não foi validado manualmente contra uma implantação real nem foi gerado como pacote assinado de distribuição.
+- A aplicação ainda não possui implantação pública ativa com domínio e certificado HTTPS de produção.
+- O aplicativo móvel foi validado no modo desenvolvimento com Expo Go e exportado para Android. O APK local de teste pode ser gerado com `cd mobile; npm run apk:local`; ele inclui somente `arm64-v8a`, usa uma chave de depuração e o endereço HTTP privado da API, e não serve para a Play Store. Builds EAS/AAB de distribuição ainda dependem de configurar URLs públicas HTTPS, assinatura própria, identificador e ícones finais, política de privacidade e página pública de exclusão de conta.
+- A recuperação de senha utiliza o fluxo web com envio de e-mails em fila; para envio em produção é necessário configurar um serviço de transporte SMTP transacional.
+
+---
+
+## Uso de Inteligência Artificial
+
+Este projeto foi concebido, arquitetado e desenvolvido de forma independente pelo autor, que é o único responsável pela definição de todas as regras de negócio, modelagem de dados, arquitetura de software e implementação do código-fonte.
+
+Ferramentas modernas de Inteligência Artificial foram utilizadas pontualmente como instrumento de apoio e produtividade nas seguintes atividades complementares:
+
+- **Documentação:** auxílio na elaboração, organização estrutural e revisão gramatical da documentação técnica e deste README.
+- **Mockups:** apoio na concepção de protótipos rápidos e exploração de referências visuais de interface.
+- **Layout e interface:** sugestões de boas práticas de estilização, apoio na aplicação de classes utilitárias do Tailwind CSS e ajustes de responsividade.
+- **Testes automatizados:** apoio na formulação de cenários de borda e revisão de testes de integração com o Pest.
+
+A integridade do sistema, as decisões técnicas, a segurança das regras financeiras e a autoria integral das soluções adotadas permanecem sob responsabilidade do desenvolvedor.

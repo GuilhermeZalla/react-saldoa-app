@@ -47,7 +47,10 @@ export default function AuthScreen({ onAuthenticated }: Props) {
         try {
             await Linking.openURL(`${webUrl}/forgot-password`);
         } catch {
-            Alert.alert('Não foi possível abrir o site', 'Tente novamente mais tarde.');
+            Alert.alert(
+                'Não foi possível abrir o site',
+                'Tente novamente mais tarde.',
+            );
         }
     }
 
@@ -132,7 +135,9 @@ export default function AuthScreen({ onAuthenticated }: Props) {
                 <Card>
                     <View style={styles.heading}>
                         <Text style={styles.title}>
-                            {mode === 'login' ? 'Bem-vindo de volta' : 'Criar conta'}
+                            {mode === 'login'
+                                ? 'Bem-vindo de volta'
+                                : 'Criar conta'}
                         </Text>
                         <Text style={styles.subtitle}>
                             {mode === 'login'
@@ -166,7 +171,9 @@ export default function AuthScreen({ onAuthenticated }: Props) {
                         onChangeText={setPassword}
                         secureTextEntry
                         autoComplete={
-                            mode === 'login' ? 'current-password' : 'new-password'
+                            mode === 'login'
+                                ? 'current-password'
+                                : 'new-password'
                         }
                         placeholder="Sua senha"
                     />

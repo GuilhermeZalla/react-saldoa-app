@@ -1,10 +1,15 @@
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import type { Session } from './types';
 
 const SESSION_KEY = 'saldoa.mobile.session';
+let webSession: string | null = null;
 
 export async function readSession(): Promise<Session | null> {
-    const storedSession = await SecureStore.getItemAsync(SESSION_KEY);
+    const storedSession =
+        Platform.OS === 'web'
+            ? webSession
+            : await SecureStore.getItemAsync(SESSION_KEY);
 
     if (storedSession === null) {
         return null;
@@ -13,15 +18,35 @@ export async function readSession(): Promise<Session | null> {
     try {
         return JSON.parse(storedSession) as Session;
     } catch (error) {
-        await SecureStore.deleteItemAsync(SESSION_KEY);
-        throw new Error('Não foi possível ler a sessão salva.', { cause: error });
+        await deleteStoredSession();
+        throw new Error('Não foi possível ler a sessão salva.', {
+            cause: error,
+        });
     }
 }
 
 export async function saveSession(session: Session): Promise<void> {
-    await SecureStore.setItemAsync(SESSION_KEY, JSON.stringify(session));
+    const serializedSession = JSON.stringify(session);
+
+    if (Platform.OS === 'web') {
+        webSession = serializedSession;
+
+        return;
+    }
+
+    await SecureStore.setItemAsync(SESSION_KEY, serializedSession);
 }
 
 export async function clearSession(): Promise<void> {
+    await deleteStoredSession();
+}
+
+async function deleteStoredSession(): Promise<void> {
+    if (Platform.OS === 'web') {
+        webSession = null;
+
+        return;
+    }
+
     await SecureStore.deleteItemAsync(SESSION_KEY);
 }

@@ -261,18 +261,23 @@ export default function RecurringScreen({ session }: Props) {
             <Card>
                 <SectionTitle title="Regras cadastradas" />
                 {loading ? (
-                    <Text style={commonStyles.muted}>Carregando recorrências…</Text>
+                    <Text style={commonStyles.muted}>
+                        Carregando recorrências…
+                    </Text>
                 ) : items.length ? (
                     items.map((item) => (
                         <View key={item.id} style={styles.row}>
                             <View style={styles.itemInfo}>
-                                <Text style={styles.name}>{item.description}</Text>
+                                <Text style={styles.name}>
+                                    {item.description}
+                                </Text>
                                 <Text style={styles.meta}>
                                     {item.category.name} ·{' '}
                                     {frequencyLabel(item.frequency)}
                                 </Text>
                                 <Text style={styles.meta}>
-                                    Próxima: {item.next_occurrence_date
+                                    Próxima:{' '}
+                                    {item.next_occurrence_date
                                         ? formatDate(item.next_occurrence_date)
                                         : 'não agendada'}
                                 </Text>
@@ -311,7 +316,9 @@ export default function RecurringScreen({ session }: Props) {
 }
 
 function frequencyLabel(frequency: Frequency): string {
-    return frequencies.find((item) => item.value === frequency)?.label ?? frequency;
+    return (
+        frequencies.find((item) => item.value === frequency)?.label ?? frequency
+    );
 }
 
 function errorMessageFor(error: unknown): string {

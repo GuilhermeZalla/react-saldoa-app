@@ -38,7 +38,9 @@ export default function BudgetsScreen({ session }: Props) {
             categories.filter(
                 (category) =>
                     category.type === 'expense' &&
-                    !budgets.some((budget) => budget.category_id === category.id),
+                    !budgets.some(
+                        (budget) => budget.category_id === category.id,
+                    ),
             ),
         [budgets, categories],
     );
@@ -77,7 +79,8 @@ export default function BudgetsScreen({ session }: Props) {
 
         async function loadInitialBudgets(): Promise<void> {
             try {
-                const { budgetResponse, categoryResponse } = await fetchBudgets();
+                const { budgetResponse, categoryResponse } =
+                    await fetchBudgets();
 
                 if (isCurrent) {
                     setBudgets(budgetResponse.data);
@@ -120,7 +123,9 @@ export default function BudgetsScreen({ session }: Props) {
 
     async function saveBudget(): Promise<void> {
         if (!amount.trim() || (editingId === null && categoryId === null)) {
-            setErrorMessage('Informe o valor da meta e selecione uma categoria.');
+            setErrorMessage(
+                'Informe o valor da meta e selecione uma categoria.',
+            );
             return;
         }
 
@@ -189,7 +194,8 @@ export default function BudgetsScreen({ session }: Props) {
                 </Text>
             ) : null}
 
-            {!session.isDemo && (editingId !== null || availableCategories.length > 0) ? (
+            {!session.isDemo &&
+            (editingId !== null || availableCategories.length > 0) ? (
                 <Card>
                     <SectionTitle
                         title={editingId === null ? 'Nova meta' : 'Editar meta'}
@@ -199,11 +205,15 @@ export default function BudgetsScreen({ session }: Props) {
                             <Text style={styles.fieldLabel}>Categoria</Text>
                             <ChoiceChips
                                 selected={categoryId?.toString() ?? ''}
-                                onSelect={(value) => setCategoryId(Number(value))}
-                                options={availableCategories.map((category) => ({
-                                    value: category.id.toString(),
-                                    label: category.name,
-                                }))}
+                                onSelect={(value) =>
+                                    setCategoryId(Number(value))
+                                }
+                                options={availableCategories.map(
+                                    (category) => ({
+                                        value: category.id.toString(),
+                                        label: category.name,
+                                    }),
+                                )}
                             />
                         </>
                     ) : null}
@@ -277,14 +287,18 @@ function BudgetRow({
             <View style={styles.budgetHeading}>
                 <Text style={styles.categoryName}>{budget.category_name}</Text>
                 <Text style={styles.budgetAmount}>
-                    {formatCurrency(budget.spent)} / {formatCurrency(budget.amount)}
+                    {formatCurrency(budget.spent)} /{' '}
+                    {formatCurrency(budget.amount)}
                 </Text>
             </View>
             <View style={styles.progressTrack}>
                 <View
                     style={[
                         styles.progressFill,
-                        { backgroundColor: statusColor, width: `${percentage}%` },
+                        {
+                            backgroundColor: statusColor,
+                            width: `${percentage}%`,
+                        },
                     ]}
                 />
             </View>
@@ -297,7 +311,11 @@ function BudgetRow({
                         <ActionButton onPress={onEdit} variant="quiet" compact>
                             Editar
                         </ActionButton>
-                        <ActionButton onPress={onDelete} variant="quiet" compact>
+                        <ActionButton
+                            onPress={onDelete}
+                            variant="quiet"
+                            compact
+                        >
                             Excluir
                         </ActionButton>
                     </View>

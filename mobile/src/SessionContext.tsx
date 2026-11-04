@@ -120,7 +120,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
     const accountDeleted = useCallback(async () => {
         await clearSession();
         setSession(null);
-        Alert.alert('Conta excluída', 'Sua conta e seus dados foram removidos.');
+        Alert.alert(
+            'Conta excluída',
+            'Sua conta e seus dados foram removidos.',
+        );
     }, []);
 
     return (

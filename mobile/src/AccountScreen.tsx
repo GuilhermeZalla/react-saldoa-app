@@ -1,11 +1,5 @@
 import { useState } from 'react';
-import {
-    Alert,
-    Share,
-    StyleSheet,
-    Text,
-    View,
-} from 'react-native';
+import { Alert, Share, StyleSheet, Text, View } from 'react-native';
 import { ApiError, apiTextRequest, sessionRequest } from './api';
 import { ActionButton, Card, Page, PageTitle, TextField } from './components';
 import { colors } from './theme';
@@ -94,7 +88,10 @@ export default function AccountScreen({
 
     return (
         <Page>
-            <PageTitle title="Conta" subtitle="Perfil e segurança da sua sessão." />
+            <PageTitle
+                title="Conta"
+                subtitle="Perfil e segurança da sua sessão."
+            />
 
             {session.isDemo ? (
                 <View style={styles.demoBanner}>
@@ -123,11 +120,15 @@ export default function AccountScreen({
                 <Card>
                     <Text style={styles.sectionTitle}>Seus dados</Text>
                     <Text style={styles.description}>
-                        Compartilhe um arquivo JSON com seu perfil e dados financeiros.
+                        Compartilhe um arquivo JSON com seu perfil e dados
+                        financeiros.
                     </Text>
                     <ActionButton
                         onPress={() =>
-                            void shareExport('/account/export', 'Exportação Saldoa')
+                            void shareExport(
+                                '/account/export',
+                                'Exportação Saldoa',
+                            )
                         }
                         variant="secondary"
                         disabled={busy}
@@ -193,7 +194,8 @@ export default function AccountScreen({
                     <Text style={styles.dangerTitle}>Excluir conta</Text>
                     <Text style={styles.description}>
                         A exclusão remove permanentemente sua conta e os dados
-                        associados. Também é possível solicitar pelo site, sem o app.
+                        associados. Também é possível solicitar pelo site, sem o
+                        app.
                     </Text>
                     <TextField
                         label="Confirme sua senha"
