@@ -6,10 +6,12 @@ Projeto: app de controle financeiro pessoal (portfólio). Laravel + React (Inert
 
 - O usuário confirmou que o APK funciona; a falha de login ocorreu porque o celular estava na rede errada. Não foi necessária uma alteração no app para corrigir esse problema.
 - O APK local continua usando uma URL HTTP de rede privada e serve apenas para testes. Para funcionar fora da rede doméstica, o próximo marco é publicar o Laravel em HTTPS e gerar outro build com a URL pública.
-- A configuração versionada usa SQLite local e drivers `database` para sessão, cache e fila. Para um ambiente durável, provisionar um banco gerenciado (MySQL é suportado pelo projeto) e configurar os drivers compatíveis com os serviços escolhidos.
+- A configuração local usa SQLite e drivers `database` para sessão, cache e fila. Na VM Oracle, a configuração separada de produção usa MySQL 8.4 em volume persistente; proteção contra perda da VM depende de backup externo e restauração testada.
 - O envio de e-mail está configurado para `log`; a solicitação pública de exclusão já existe, mas a confirmação por e-mail depende de um provedor real configurado e testado.
 - O projeto contém um endpoint `/up`, Scheduler para lançamentos recorrentes e limpeza de solicitações expiradas, e documentação das proteções necessárias para a instância demo. Não habilitar a demo na produção principal.
-- Laravel Cloud é a opção inicial sugerida pelas regras do projeto. A implantação ainda depende de vincular um repositório Git e configurar conta, região, ambiente, banco, segredos e domínio. Não há URL de produção configurada neste repositório.
+- Após comparar custos, o usuário escolheu Oracle Always Free e aceitou administrar a VM. Ainda não criou conta nem domínio. Arquivos de produção foram preparados em `docker-compose.production.yml` e `docker/`, com instruções em `docs/ORACLE_DEPLOY.md`. Conta/VM/DNS/SMTP, deploy real, HTTPS público e cópia externa/restauração de backups continuam pendentes; nenhum recurso Oracle foi criado.
+
+- Verificação local da preparação Oracle: Compose, configuração Caddy e sintaxe Bash passaram; imagens PHP/Vite/Caddy compilaram em Linux AMD64. Cinco serviços foram iniciados num projeto descartável: `/up`, login web e exclusão pública responderam 200, API sem token e login inválido responderam 401, e `/.env` respondeu 404. Requisitos PHP de produção passaram. O script de backup foi executado e seu SQL restaurado em um segundo banco descartável (15 tabelas); containers/volumes de teste removidos. ARM64 na Oracle, HTTPS público, e-mail real e backup externo ainda não foram validados.
 
 ## Redesign mobile — 04/11/2026
 
