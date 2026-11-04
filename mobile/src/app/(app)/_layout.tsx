@@ -6,17 +6,25 @@ import {
     View,
     type ColorValue,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSession } from '../../SessionContext';
-import { colors } from '../../theme';
+import { usePreferences } from '../../PreferencesContext';
+import { AppIcon, type IconName } from '../../icons';
 
 export default function MainTabsLayout() {
     const { session, loading } = useSession();
+    const { colors, t } = usePreferences();
+    const insets = useSafeAreaInsets();
 
     if (loading) {
         return (
-            <View style={styles.loading}>
+            <View
+                style={[styles.loading, { backgroundColor: colors.background }]}
+            >
                 <ActivityIndicator color={colors.primary} />
-                <Text style={styles.loadingText}>Carregando Saldoa…</Text>
+                <Text style={[styles.loadingText, { color: colors.muted }]}>
+                    {t('Carregando Saldoa…')}
+                </Text>
             </View>
         );
     }
@@ -32,64 +40,103 @@ export default function MainTabsLayout() {
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.muted,
                 tabBarLabelStyle: styles.tabLabel,
-                tabBarStyle: styles.tabBar,
+                tabBarStyle: [
+                    styles.tabBar,
+                    {
+                        backgroundColor: colors.surface,
+                        borderTopColor: colors.border,
+                        height: 68 + insets.bottom,
+                        paddingBottom: Math.max(8, insets.bottom),
+                    },
+                ],
+                tabBarHideOnKeyboard: true,
             }}
         >
             <Tabs.Screen
                 name="dashboard"
                 options={{
-                    title: 'Início',
-                    tabBarIcon: ({ color, size }) => (
-                        <TabIcon symbol="⌂" color={color} size={size} />
+                    title: t('Início'),
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <TabIcon
+                            focused={focused}
+                            name="home"
+                            color={color}
+                            size={size}
+                        />
                     ),
                 }}
             />
             <Tabs.Screen
                 name="transactions"
                 options={{
-                    title: 'Lançamentos',
-                    tabBarLabel: 'Lanç.',
-                    tabBarAccessibilityLabel: 'Lançamentos',
-                    tabBarIcon: ({ color, size }) => (
-                        <TabIcon symbol="↕" color={color} size={size} />
+                    title: t('Lançamentos'),
+                    tabBarLabel: t('Lanç.'),
+                    tabBarAccessibilityLabel: t('Lançamentos'),
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <TabIcon
+                            focused={focused}
+                            name="transactions"
+                            color={color}
+                            size={size}
+                        />
                     ),
                 }}
             />
             <Tabs.Screen
                 name="categories"
                 options={{
-                    title: 'Categorias',
-                    tabBarIcon: ({ color, size }) => (
-                        <TabIcon symbol="▦" color={color} size={size} />
+                    title: t('Categorias'),
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <TabIcon
+                            focused={focused}
+                            name="categories"
+                            color={color}
+                            size={size}
+                        />
                     ),
                 }}
             />
             <Tabs.Screen
                 name="budgets"
                 options={{
-                    title: 'Metas',
-                    tabBarIcon: ({ color, size }) => (
-                        <TabIcon symbol="◎" color={color} size={size} />
+                    title: t('Metas'),
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <TabIcon
+                            focused={focused}
+                            name="target"
+                            color={color}
+                            size={size}
+                        />
                     ),
                 }}
             />
             <Tabs.Screen
                 name="recurring"
                 options={{
-                    title: 'Recorrências',
-                    tabBarLabel: 'Recorr.',
-                    tabBarAccessibilityLabel: 'Recorrências',
-                    tabBarIcon: ({ color, size }) => (
-                        <TabIcon symbol="↻" color={color} size={size} />
+                    title: t('Recorrências'),
+                    tabBarLabel: t('Recorr.'),
+                    tabBarAccessibilityLabel: t('Recorrências'),
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <TabIcon
+                            focused={focused}
+                            name="repeat"
+                            color={color}
+                            size={size}
+                        />
                     ),
                 }}
             />
             <Tabs.Screen
                 name="account"
                 options={{
-                    title: 'Conta',
-                    tabBarIcon: ({ color, size }) => (
-                        <TabIcon symbol="●" color={color} size={size} />
+                    title: t('Conta'),
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <TabIcon
+                            focused={focused}
+                            name="user"
+                            color={color}
+                            size={size}
+                        />
                     ),
                 }}
             />
@@ -100,35 +147,54 @@ export default function MainTabsLayout() {
 const styles = StyleSheet.create({
     loading: {
         alignItems: 'center',
-        backgroundColor: colors.background,
         flex: 1,
         gap: 12,
         justifyContent: 'center',
     },
-    loadingText: { color: colors.muted, fontSize: 13 },
+    loadingText: { fontFamily: 'DMSans', fontSize: 13 },
     tabBar: {
-        backgroundColor: colors.surface,
-        borderTopColor: colors.border,
         elevation: 0,
-        height: 58,
-        paddingBottom: 4,
-        paddingTop: 4,
+        paddingTop: 8,
     },
-    tabLabel: { fontSize: 10, fontWeight: '600', lineHeight: 12 },
+    tabIcon: {
+        width: 44,
+        height: 34,
+        borderRadius: 13,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    tabLabel: {
+        fontFamily: 'DMSans',
+        fontSize: 10,
+        fontWeight: '600',
+        lineHeight: 14,
+    },
 });
 
 function TabIcon({
-    symbol,
+    name,
     color,
     size,
+    focused,
 }: {
-    symbol: string;
+    name: IconName;
     color: ColorValue;
     size: number;
+    focused: boolean;
 }) {
+    const { colors } = usePreferences();
     return (
-        <Text style={{ color, fontSize: size, lineHeight: size + 1 }}>
-            {symbol}
-        </Text>
+        <View
+            style={[
+                styles.tabIcon,
+                {
+                    backgroundColor: focused
+                        ? colors.primarySoft
+                        : 'transparent',
+                },
+            ]}
+        >
+            <AppIcon name={name} color={color} size={Math.max(26, size)} />
+        </View>
     );
 }

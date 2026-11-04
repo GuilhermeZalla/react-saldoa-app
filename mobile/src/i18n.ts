@@ -1,0 +1,274 @@
+export type Locale = 'pt-BR' | 'en';
+let currentLocale: Locale = 'pt-BR';
+
+export const english: Record<string, string> = {
+    'Abrir preferências': 'Open preferences',
+    'Fechar preferências': 'Close preferences',
+    'Experimentar sem criar conta': 'Try without an account',
+    'A recuperação de senha está indisponível no momento.':
+        'Password recovery is currently unavailable.',
+    'A demonstração está indisponível no momento.':
+        'The demo is currently unavailable.',
+    'O serviço está indisponível no momento. Tente novamente mais tarde.':
+        'The service is currently unavailable. Please try again later.',
+    'Abrir minha conta': 'Open my account',
+    'Carregando resumo…': 'Loading overview…',
+    'Ver todas': 'View all',
+    'Do seu jeito': 'Make it yours',
+    'Idioma e aparência': 'Language and appearance',
+    'Seu perfil e suas finanças em JSON.': 'Your profile and finances in JSON.',
+    'Seus lançamentos em uma planilha.': 'Your transactions in a spreadsheet.',
+    'Sessão válida até': 'Session valid until',
+    'Gerenciar a exclusão permanente dos seus dados.':
+        'Manage the permanent deletion of your data.',
+    'de {amount} no mês': 'of {amount} this month',
+    'Acima do limite': 'Over budget',
+    Disponível: 'Available',
+    'Informe sua senha para confirmar a exclusão.':
+        'Enter your password to confirm deletion.',
+    'Excluir sua conta?': 'Delete your account?',
+    'Essa ação é permanente. Seu perfil, lançamentos, categorias, metas e recorrências serão removidos.':
+        'This action is permanent. Your profile, transactions, categories, budgets and recurring rules will be removed.',
+    Cancelar: 'Cancel',
+    'Excluir permanentemente': 'Delete permanently',
+    Conta: 'Account',
+    'Perfil e segurança da sua sessão.': 'Your profile and session security.',
+    'Conta de demonstração em instância isolada':
+        'Demo account on an isolated instance',
+    'Token válido até': 'Token valid until',
+    'Ambiente:': 'Environment:',
+    Demonstração: 'Demo',
+    Produção: 'Production',
+    'Seus dados': 'Your data',
+    'Compartilhe um arquivo JSON com seu perfil e dados financeiros.':
+        'Share a JSON export of your profile and financial data.',
+    'Exportação Saldoa': 'Saldoa export',
+    'Exportar todos os dados': 'Export all data',
+    'Lançamentos Saldoa': 'Saldoa transactions',
+    'Exportar CSV do mês': 'Export monthly CSV',
+    Segurança: 'Security',
+    'Encerrar todas as sessões?': 'End all sessions?',
+    'Todos os dispositivos serão desconectados.':
+        'All devices will be signed out.',
+    'Encerrar sessões': 'End sessions',
+    'Encerrar sessões em outros dispositivos': 'Sign out on other devices',
+    'Sair desta conta': 'Sign out',
+    'Excluir conta': 'Delete account',
+    'A exclusão remove permanentemente sua conta e os dados associados. Também é possível solicitar pelo site, sem o app.':
+        'Deletion permanently removes your account and associated data. You can also request it on the website without the app.',
+    'Confirme sua senha': 'Confirm your password',
+    'Senha atual': 'Current password',
+    'Excluir minha conta': 'Delete my account',
+    'Não foi possível concluir a solicitação.':
+        'Could not complete the request.',
+    'Configure EXPO_PUBLIC_WEB_URL para abrir a recuperação de senha.':
+        'Set EXPO_PUBLIC_WEB_URL to open password recovery.',
+    'Não foi possível abrir o site': 'Could not open the website',
+    'Tente novamente mais tarde.': 'Please try again later.',
+    'Configure EXPO_PUBLIC_API_URL_DEMO para conectar à demonstração.':
+        'Set EXPO_PUBLIC_API_URL_DEMO to connect to the demo.',
+    'Configure EXPO_PUBLIC_API_URL para conectar à API.':
+        'Set EXPO_PUBLIC_API_URL to connect to the API.',
+    'Ocorreu um erro ao entrar. Tente novamente.':
+        'Could not sign in. Please try again.',
+    'Suas finanças, com mais clareza.': 'A clearer view of your finances.',
+    'Bem-vindo de volta': 'Welcome back',
+    'Criar conta': 'Create account',
+    'Entre para acompanhar seu dinheiro.':
+        'Sign in to keep track of your money.',
+    'Organize suas finanças em um só lugar.':
+        'Organize your finances in one place.',
+    Nome: 'Name',
+    'Seu nome': 'Your name',
+    'E-mail': 'Email',
+    Senha: 'Password',
+    'Sua senha': 'Your password',
+    'Confirmar senha': 'Confirm password',
+    'Repita sua senha': 'Repeat your password',
+    Entrar: 'Sign in',
+    'Criar minha conta': 'Create my account',
+    'Ainda não tenho uma conta': 'Create an account',
+    'Já tenho uma conta': 'I already have an account',
+    'Conheça o Saldoa': 'Meet Saldoa',
+    'Explore uma demonstração isolada com dados de exemplo. Ela usa uma API diferente da produção.':
+        'Explore an isolated demo with sample data. It uses a separate API from production.',
+    'Experimentar demo': 'Try demo',
+    'Instância de demonstração configurada': 'Demo instance configured',
+    'Configure EXPO_PUBLIC_API_URL_DEMO para ativar':
+        'Set EXPO_PUBLIC_API_URL_DEMO to enable',
+    'Esqueci minha senha': 'Forgot password',
+    'Configure EXPO_PUBLIC_API_URL para desenvolvimento':
+        'Set EXPO_PUBLIC_API_URL for development',
+    'Informe o valor da meta e selecione uma categoria.':
+        'Enter a budget amount and select a category.',
+    'Excluir meta?': 'Delete budget?',
+    Excluir: 'Delete',
+    Metas: 'Budgets',
+    'Acompanhe seus limites de gastos do mês.':
+        'Keep track of your monthly spending limits.',
+    'Nova meta': 'New budget',
+    'Editar meta': 'Edit budget',
+    Categoria: 'Category',
+    Categorias: 'Categories',
+    'Limite mensal': 'Monthly limit',
+    'Salvar meta': 'Save budget',
+    'Cancelar edição': 'Cancel editing',
+    'Metas deste mês': 'This month’s budgets',
+    'Carregando metas…': 'Loading budgets…',
+    'Nenhuma meta cadastrada para este mês.': 'No budgets for this month.',
+    '% utilizado': '% used',
+    Editar: 'Edit',
+    'Informe o nome da categoria.': 'Enter a category name.',
+    'Excluir categoria?': 'Delete category?',
+    'A categoria está em uso. Primeiro remova ou mova os lançamentos e recorrências associados.':
+        'This category is in use. First remove or move its transactions and recurring rules.',
+    'Organize receitas e despesas por tipo.':
+        'Organize income and expenses by type.',
+    'Nova categoria': 'New category',
+    'Ex.: Moradia': 'E.g. Housing',
+    Despesa: 'Expense',
+    Receita: 'Income',
+    'Adicionar categoria': 'Add category',
+    'Suas categorias': 'Your categories',
+    'Carregando categorias…': 'Loading categories…',
+    'Nenhuma categoria cadastrada.': 'No categories yet.',
+    'Não é possível excluir uma categoria que ainda possui lançamentos ou recorrências.':
+        'A category with transactions or recurring rules cannot be deleted.',
+    'Não foi possível carregar o resumo.': 'Could not load the summary.',
+    'Seu resumo financeiro': 'Your financial summary',
+    'Modo demonstração · somente leitura': 'Demo mode · read only',
+    'Tentar novamente': 'Try again',
+    'Saldo total': 'Total balance',
+    'Saldo de todos os períodos': 'Balance across all periods',
+    'Receitas no mês': 'Monthly income',
+    'Despesas no mês': 'Monthly expenses',
+    'Despesas por categoria': 'Expenses by category',
+    'Ainda não há despesas neste mês.': 'No expenses this month yet.',
+    'Movimentações recentes': 'Recent transactions',
+    'Seus lançamentos aparecerão aqui.': 'Your transactions will appear here.',
+    'Atenção às metas': 'Budget alerts',
+    '% do limite mensal': '% of the monthly limit',
+    Diária: 'Daily',
+    Semanal: 'Weekly',
+    Mensal: 'Monthly',
+    Anual: 'Yearly',
+    'Preencha a descrição, o valor e a categoria.':
+        'Enter a description, amount and category.',
+    'Excluir recorrência?': 'Delete recurring rule?',
+    Recorrências: 'Recurring',
+    'Acompanhe lançamentos que se repetem.':
+        'Keep track of repeating transactions.',
+    'Nova recorrência': 'New recurring rule',
+    'Ex.: Mensalidade': 'E.g. Subscription',
+    Descrição: 'Description',
+    Valor: 'Amount',
+    'Crie uma categoria desse tipo antes de continuar.':
+        'Create a category of this type before continuing.',
+    Frequência: 'Frequency',
+    'Data de início (AAAA-MM-DD)': 'Start date (YYYY-MM-DD)',
+    'Criar recorrência': 'Create recurring rule',
+    'Regras cadastradas': 'Recurring rules',
+    'Carregando recorrências…': 'Loading recurring rules…',
+    'Próxima:': 'Next:',
+    'não agendada': 'not scheduled',
+    'Nenhuma recorrência cadastrada.': 'No recurring rules yet.',
+    'Não foi possível carregar os lançamentos.': 'Could not load transactions.',
+    'Informe uma data válida no formato DD/MM/AAAA.':
+        'Enter a valid date in DD/MM/YYYY format.',
+    'Não foi possível salvar o lançamento.': 'Could not save the transaction.',
+    'Excluir lançamento?': 'Delete transaction?',
+    'Não foi possível excluir o lançamento.':
+        'Could not delete the transaction.',
+    Lançamentos: 'Transactions',
+    'Receitas e despesas do mês atual.':
+        'Income and expenses for the current month.',
+    'Novo lançamento': 'New transaction',
+    'Editar lançamento': 'Edit transaction',
+    'Ex.: Conta de luz': 'E.g. Electricity bill',
+    'Crie uma categoria desse tipo antes de adicionar um lançamento.':
+        'Create a category of this type before adding a transaction.',
+    'Data (DD/MM/AAAA)': 'Date (DD/MM/YYYY)',
+    'DD/MM/AAAA': 'DD/MM/YYYY',
+    'Adicionar lançamento': 'Add transaction',
+    'Salvar alterações': 'Save changes',
+    'Este mês': 'This month',
+    'Carregando lançamentos…': 'Loading transactions…',
+    'Não há lançamentos neste período.': 'No transactions in this period.',
+    'Não foi possível restaurar a sessão': 'Could not restore your session',
+    'Tente entrar novamente.': 'Please sign in again.',
+    'Sessão encerrada neste dispositivo': 'Signed out on this device',
+    'A API não confirmou a revogação. A sessão salva localmente foi removida.':
+        'The API did not confirm revocation. The local session was removed.',
+    'Conta excluída': 'Account deleted',
+    'Sua conta e seus dados foram removidos.':
+        'Your account and data have been removed.',
+    'A API não respondeu em 15 segundos. Verifique se o servidor está ativo e acessível pelo celular.':
+        'The API did not respond within 15 seconds. Check that the server is running and reachable from your phone.',
+    'Não foi possível conectar à API. Verifique a URL e sua conexão.':
+        'Could not connect to the API. Check the URL and your connection.',
+    'Sua sessão expirou. Entre novamente.':
+        'Your session has expired. Please sign in again.',
+    'Não foi possível conectar à API. Verifique sua conexão.':
+        'Could not connect to the API. Check your connection.',
+    'Não foi possível exportar os dados.': 'Could not export the data.',
+    'Não foi possível ler a sessão salva.': 'Could not read the saved session.',
+    Início: 'Home',
+    'Lanç.': 'Trans.',
+    'Recorr.': 'Repeat',
+    'Carregando Saldoa…': 'Loading Saldoa…',
+    Preferências: 'Preferences',
+    Idioma: 'Language',
+    Aparência: 'Appearance',
+    Claro: 'Light',
+    Escuro: 'Dark',
+    Sistema: 'System',
+    'As preferências são salvas neste aparelho.':
+        'Preferences are saved on this device.',
+    'Não foi possível salvar as preferências. Elas serão mantidas apenas nesta sessão.':
+        'Could not save preferences. They will only apply to this session.',
+    'Olá, {name}': 'Hello, {name}',
+    '“{description}” será movido para a lixeira.':
+        '“{description}” will be moved to the trash.',
+    'A regra “{description}” será removida. Os lançamentos já criados permanecem.':
+        'The rule “{description}” will be removed. Existing transactions will remain.',
+    'A meta de “{name}” será removida.':
+        'The budget for “{name}” will be removed.',
+    'A categoria “{name}” será removida.':
+        'The category “{name}” will be removed.',
+    'API principal: {host}': 'Main API: {host}',
+    'Data de início (DD/MM/AAAA)': 'Start date (DD/MM/YYYY)',
+    'E-mail ou senha incorretos.': 'Incorrect email or password.',
+    'Você não tem permissão para esta ação.':
+        'You do not have permission to perform this action.',
+    'O recurso solicitado não está disponível.':
+        'The requested resource is unavailable.',
+    'Muitas tentativas. Aguarde um momento e tente novamente.':
+        'Too many attempts. Wait a moment and try again.',
+    'O servidor encontrou um problema. Tente novamente mais tarde.':
+        'The server encountered a problem. Please try again later.',
+    'Verifique os dados informados em: {fields}.':
+        'Check the information entered for: {fields}.',
+    'Verifique os dados informados.': 'Check the information you entered.',
+    Data: 'Date',
+    'Data de início': 'Start date',
+    '{count} lançamentos': '{count} transactions',
+};
+
+export function setLocale(locale: Locale): void {
+    currentLocale = locale;
+}
+
+export function getLocale(): Locale {
+    return currentLocale;
+}
+
+export function t(
+    message: string,
+    values: Record<string, string | number> = {},
+): string {
+    const translated =
+        currentLocale === 'en' ? (english[message] ?? message) : message;
+    return translated.replace(/\{(\w+)\}/g, (match, key: string) =>
+        String(values[key] ?? match),
+    );
+}

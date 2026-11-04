@@ -1,12 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import {
-    mkdir,
-    readFile,
-    rm,
-    unlink,
-    writeFile,
-} from 'node:fs/promises';
+import { mkdir, readFile, rm, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -16,7 +10,12 @@ const mobileDirectory = path.resolve(
     '..',
 );
 const repositoryDirectory = path.dirname(mobileDirectory);
-const environment = { ...process.env, SALDOA_LOCAL_APK: 'true' };
+const environment = {
+    ...process.env,
+    EXPO_PUBLIC_LOCAL_APK: 'true',
+    SALDOA_LOCAL_APK: 'true',
+    CMAKE_BUILD_PARALLEL_LEVEL: '2',
+};
 
 function configureAndroidEnvironment() {
     if (process.platform !== 'win32') {
@@ -61,12 +60,14 @@ function configureAndroidEnvironment() {
 }
 
 function createShortWindowsPath(targetDirectory) {
-    const driveLetter = 'ZYXWVUTSRQPONMLKJIHGFED'.split('').find(
-        (letter) => !existsSync(`${letter}:\\`),
-    );
+    const driveLetter = 'ZYXWVUTSRQPONMLKJIHGFED'
+        .split('')
+        .find((letter) => !existsSync(`${letter}:\\`));
 
     if (!driveLetter) {
-        throw new Error('No unused drive letter is available for the local APK build.');
+        throw new Error(
+            'No unused drive letter is available for the local APK build.',
+        );
     }
 
     const drive = `${driveLetter}:`;
@@ -200,9 +201,18 @@ def configureShortCmake = { project ->
     def android = project.extensions.findByName("android")
     def cmake = android?.externalNativeBuild?.cmake
     if (cmake != null) {
-        cmake.buildStagingDirectory = shortCmakeStagingDirectory
+        cmake.buildStagingDirectory = new File(
+            shortCmakeStagingDirectory,
+            Integer.toHexString(project.path.hashCode())
+        )
         android.defaultConfig.externalNativeBuild.cmake.arguments.add(
             "-DCMAKE_OBJECT_PATH_MAX=240"
+        )
+        android.defaultConfig.externalNativeBuild.cmake.arguments.add(
+            "-DCMAKE_JOB_POOLS=saldoa_compile=2"
+        )
+        android.defaultConfig.externalNativeBuild.cmake.arguments.add(
+            "-DCMAKE_JOB_POOL_COMPILE=saldoa_compile"
         )
     }
 }
@@ -239,7 +249,9 @@ allprojects {
                 workingMobileDirectory,
             );
         } finally {
-            const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf8'));
+            const packageJson = JSON.parse(
+                await readFile(packageJsonPath, 'utf8'),
+            );
             packageJson.scripts.android = 'expo start --android';
             packageJson.scripts.ios = 'expo start --ios';
             await writeFile(
@@ -249,15 +261,28 @@ allprojects {
             );
         }
 
-        const gradleWrapper =
-            process.platform === 'win32' ? 'gradlew.bat' : './gradlew';
         const gradleWorkingDirectory = path.join(
             workingMobileDirectory,
             'android',
         );
+        const gradleWrapper =
+            process.platform === 'win32'
+                ? path.join(gradleWorkingDirectory, 'gradlew.bat')
+                : './gradlew';
+        const gradleOptions = [
+            '--no-daemon',
+            '--no-parallel',
+            '--max-workers=1',
+            '-Pkotlin.compiler.execution.strategy=in-process',
+            ...(isWindows ? ['-Pkotlin.incremental=false'] : []),
+        ];
 
         if (isWindows) {
-            run(gradleWrapper, ['help'], gradleWorkingDirectory);
+            run(
+                gradleWrapper,
+                [...gradleOptions, 'help'],
+                gradleWorkingDirectory,
+            );
 
             originalAutolinkingConfig = await readFile(
                 autolinkingConfigPath,
@@ -289,6 +314,7 @@ allprojects {
         run(
             gradleWrapper,
             [
+                ...gradleOptions,
                 ...(isWindows ? ['-I', gradleInitScript] : []),
                 '-PreactNativeArchitectures=arm64-v8a',
                 'assembleRelease',

@@ -1,3 +1,5 @@
+import { useThemeStyles } from './PreferencesContext';
+import { t } from './i18n';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ApiError, sessionRequest } from './api';
@@ -9,7 +11,7 @@ import {
     PageTitle,
     SectionTitle,
     TextField,
-    commonStyles,
+    useCommonStyles,
 } from './components';
 import {
     amountForApi,
@@ -20,13 +22,15 @@ import {
     formatDate,
     formatDateForInput,
 } from './format';
-import { colors } from './theme';
+import type { ThemeColors } from './theme';
 import type { Category, Session, Transaction } from './types';
 
 type Props = { session: Session };
 type Collection<T> = { data: T[] };
 
 export default function TransactionsScreen({ session }: Props) {
+    const { styles } = useThemeStyles(createStyles);
+    const commonStyles = useCommonStyles();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [description, setDescription] = useState('');
@@ -70,7 +74,7 @@ export default function TransactionsScreen({ session }: Props) {
             setErrorMessage(
                 messageForError(
                     error,
-                    'Não foi possível carregar os lançamentos.',
+                    t('Não foi possível carregar os lançamentos.'),
                 ),
             );
         } finally {
@@ -112,7 +116,7 @@ export default function TransactionsScreen({ session }: Props) {
                     setErrorMessage(
                         messageForError(
                             error,
-                            'Não foi possível carregar os lançamentos.',
+                            t('Não foi possível carregar os lançamentos.'),
                         ),
                     );
                 }
@@ -150,14 +154,16 @@ export default function TransactionsScreen({ session }: Props) {
 
     async function saveTransaction(): Promise<void> {
         if (!description.trim() || !amount.trim() || categoryId === null) {
-            setErrorMessage('Preencha a descrição, o valor e a categoria.');
+            setErrorMessage(t('Preencha a descrição, o valor e a categoria.'));
             return;
         }
 
         const apiDate = dateForApi(date);
 
         if (apiDate === null) {
-            setErrorMessage('Informe uma data válida no formato DD/MM/AAAA.');
+            setErrorMessage(
+                t('Informe uma data válida no formato DD/MM/AAAA.'),
+            );
             return;
         }
 
@@ -185,7 +191,10 @@ export default function TransactionsScreen({ session }: Props) {
             await loadData();
         } catch (error) {
             setErrorMessage(
-                messageForError(error, 'Não foi possível salvar o lançamento.'),
+                messageForError(
+                    error,
+                    t('Não foi possível salvar o lançamento.'),
+                ),
             );
         } finally {
             setSaving(false);
@@ -194,12 +203,14 @@ export default function TransactionsScreen({ session }: Props) {
 
     function confirmDelete(transaction: Transaction): void {
         Alert.alert(
-            'Excluir lançamento?',
-            `“${transaction.description}” será movido para a lixeira.`,
+            t('Excluir lançamento?'),
+            t('“{description}” será movido para a lixeira.', {
+                description: transaction.description,
+            }),
             [
-                { text: 'Cancelar', style: 'cancel' },
+                { text: t('Cancelar'), style: 'cancel' },
                 {
-                    text: 'Excluir',
+                    text: t('Excluir'),
                     style: 'destructive',
                     onPress: () => void deleteTransaction(transaction.id),
                 },
@@ -217,7 +228,7 @@ export default function TransactionsScreen({ session }: Props) {
             setErrorMessage(
                 messageForError(
                     error,
-                    'Não foi possível excluir o lançamento.',
+                    t('Não foi possível excluir o lançamento.'),
                 ),
             );
         }
@@ -226,8 +237,8 @@ export default function TransactionsScreen({ session }: Props) {
     return (
         <Page>
             <PageTitle
-                title="Lançamentos"
-                subtitle="Receitas e despesas do mês atual."
+                title={t('Lançamentos')}
+                subtitle={t('Receitas e despesas do mês atual.')}
             />
 
             {errorMessage ? (
@@ -241,19 +252,19 @@ export default function TransactionsScreen({ session }: Props) {
                     <SectionTitle
                         title={
                             editingId === null
-                                ? 'Novo lançamento'
-                                : 'Editar lançamento'
+                                ? t('Novo lançamento')
+                                : t('Editar lançamento')
                         }
                     />
                     <TextField
-                        label="Descrição"
+                        label={t('Descrição')}
                         value={description}
                         onChangeText={setDescription}
                         maxLength={255}
-                        placeholder="Ex.: Conta de luz"
+                        placeholder={t('Ex.: Conta de luz')}
                     />
                     <TextField
-                        label="Valor"
+                        label={t('Valor')}
                         value={amount}
                         onChangeText={setAmount}
                         keyboardType="decimal-pad"
@@ -271,11 +282,11 @@ export default function TransactionsScreen({ session }: Props) {
                             );
                         }}
                         options={[
-                            { value: 'expense', label: 'Despesa' },
-                            { value: 'income', label: 'Receita' },
+                            { value: 'expense', label: t('Despesa') },
+                            { value: 'income', label: t('Receita') },
                         ]}
                     />
-                    <Text style={styles.fieldLabel}>Categoria</Text>
+                    <Text style={styles.fieldLabel}>{t('Categoria')}</Text>
                     {availableCategories.length ? (
                         <ChoiceChips
                             selected={categoryId?.toString() ?? ''}
@@ -287,17 +298,18 @@ export default function TransactionsScreen({ session }: Props) {
                         />
                     ) : (
                         <Text style={commonStyles.muted}>
-                            Crie uma categoria desse tipo antes de adicionar um
-                            lançamento.
+                            {t(
+                                'Crie uma categoria desse tipo antes de adicionar um lançamento.',
+                            )}
                         </Text>
                     )}
                     <TextField
-                        label="Data (DD/MM/AAAA)"
+                        label={t('Data (DD/MM/AAAA)')}
                         value={formatDateForInput(date)}
                         onChangeText={setDate}
                         autoCapitalize="none"
                         maxLength={10}
-                        placeholder="DD/MM/AAAA"
+                        placeholder={t('DD/MM/AAAA')}
                     />
                     <ActionButton
                         onPress={() => void saveTransaction()}
@@ -305,22 +317,22 @@ export default function TransactionsScreen({ session }: Props) {
                         loading={saving}
                     >
                         {editingId === null
-                            ? 'Adicionar lançamento'
-                            : 'Salvar alterações'}
+                            ? t('Adicionar lançamento')
+                            : t('Salvar alterações')}
                     </ActionButton>
                     {editingId !== null ? (
                         <ActionButton onPress={resetForm} variant="quiet">
-                            Cancelar edição
+                            {t('Cancelar edição')}
                         </ActionButton>
                     ) : null}
                 </Card>
             ) : null}
 
             <Card>
-                <SectionTitle title="Este mês" />
+                <SectionTitle title={t('Este mês')} />
                 {loading ? (
                     <Text style={commonStyles.muted}>
-                        Carregando lançamentos…
+                        {t('Carregando lançamentos…')}
                     </Text>
                 ) : transactions.length ? (
                     transactions.map((transaction) => (
@@ -359,14 +371,14 @@ export default function TransactionsScreen({ session }: Props) {
                                     variant="quiet"
                                     compact
                                 >
-                                    Excluir
+                                    {t('Excluir')}
                                 </ActionButton>
                             ) : null}
                         </View>
                     ))
                 ) : (
                     <Text style={commonStyles.muted}>
-                        Não há lançamentos neste período.
+                        {t('Não há lançamentos neste período.')}
                     </Text>
                 )}
             </Card>
@@ -378,27 +390,40 @@ function messageForError(error: unknown, fallback: string): string {
     return error instanceof ApiError ? error.message : fallback;
 }
 
-const styles = StyleSheet.create({
-    error: {
-        backgroundColor: colors.expenseSoft,
-        borderRadius: 10,
-        color: colors.expense,
-        fontSize: 13,
-        padding: 12,
-    },
-    fieldLabel: { color: colors.text, fontSize: 13, fontWeight: '600' },
-    transaction: {
-        alignItems: 'center',
-        borderTopColor: colors.border,
-        borderTopWidth: 1,
-        flexDirection: 'row',
-        gap: 5,
-        paddingTop: 12,
-    },
-    transactionMain: { flex: 1, gap: 4, paddingVertical: 2 },
-    description: { color: colors.text, fontSize: 14, fontWeight: '600' },
-    meta: { color: colors.muted, fontSize: 11 },
-    amount: { fontSize: 13, fontWeight: '700' },
-    income: { color: colors.income },
-    expense: { color: colors.expense },
-});
+const createStyles = (colors: ThemeColors) =>
+    StyleSheet.create({
+        error: {
+            fontFamily: 'DMSans',
+            backgroundColor: colors.expenseSoft,
+            borderRadius: 10,
+            color: colors.expense,
+            fontSize: 13,
+            padding: 12,
+        },
+        fieldLabel: {
+            fontFamily: 'DMSans',
+            color: colors.text,
+            fontSize: 15,
+            fontWeight: '600',
+        },
+        transaction: {
+            alignItems: 'center',
+            borderTopColor: colors.border,
+            borderTopWidth: 1,
+            flexDirection: 'row',
+            gap: 5,
+            paddingTop: 16,
+            paddingBottom: 4,
+        },
+        transactionMain: { flex: 1, gap: 4, paddingVertical: 2 },
+        description: {
+            fontFamily: 'DMSans',
+            color: colors.text,
+            fontSize: 16,
+            fontWeight: '600',
+        },
+        meta: { fontFamily: 'DMSans', color: colors.muted, fontSize: 11 },
+        amount: { fontFamily: 'DMSans', fontSize: 13, fontWeight: '700' },
+        income: { color: colors.income },
+        expense: { color: colors.expense },
+    });

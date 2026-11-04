@@ -1,16 +1,54 @@
 # Estado do projeto
 
-Projeto: app de controle financeiro pessoal (portfólio). Laravel + React (Inertia, TypeScript), SQLite, Tailwind e shadcn/ui, toasts com Sonner. Textos da interface em português, código em inglês.
+Projeto: app de controle financeiro pessoal (portfólio). Laravel + React (Inertia, TypeScript), SQLite, Tailwind e shadcn/ui, toasts com Sonner. Interface web em português e mobile em português/inglês; código em inglês.
+
+## Preparação para implantação pública — 04/11/2026
+
+- O usuário confirmou que o APK funciona; a falha de login ocorreu porque o celular estava na rede errada. Não foi necessária uma alteração no app para corrigir esse problema.
+- O APK local continua usando uma URL HTTP de rede privada e serve apenas para testes. Para funcionar fora da rede doméstica, o próximo marco é publicar o Laravel em HTTPS e gerar outro build com a URL pública.
+- A configuração versionada usa SQLite local e drivers `database` para sessão, cache e fila. Para um ambiente durável, provisionar um banco gerenciado (MySQL é suportado pelo projeto) e configurar os drivers compatíveis com os serviços escolhidos.
+- O envio de e-mail está configurado para `log`; a solicitação pública de exclusão já existe, mas a confirmação por e-mail depende de um provedor real configurado e testado.
+- O projeto contém um endpoint `/up`, Scheduler para lançamentos recorrentes e limpeza de solicitações expiradas, e documentação das proteções necessárias para a instância demo. Não habilitar a demo na produção principal.
+- Laravel Cloud é a opção inicial sugerida pelas regras do projeto. A implantação ainda depende de vincular um repositório Git e configurar conta, região, ambiente, banco, segredos e domínio. Não há URL de produção configurada neste repositório.
+
+## Redesign mobile — 04/11/2026
+
+- O usuário confirmou que o APK anterior funcionou no celular. A direção visual seguinte foi aprovada: autenticação mais leve, controles de tema/idioma discretos e telas internas com hierarquia mais clara, mantendo laranja, cinzas, DM Sans, Space Grotesk e a carteira Saldoa.
+- Login/cadastro receberam ilustração vetorial própria, formulário com maior espaçamento e botão de preferências no topo. A ilustração é reduzida no cadastro, em telas baixas e quando o teclado nativo aparece. O painel permite mudar idioma/tema e fechar pelo botão, fundo ou ação de voltar; a persistência existente foi preservada.
+- O card de demo foi substituído por **Experimentar sem criar conta**, visível apenas quando uma URL demo válida está configurada. A regra vale em qualquer build; não identifica um APK de teste nem comprova disponibilidade do servidor. Hosts e instruções de configuração não aparecem na tela de acesso.
+- Dashboard: saudação com avatar de iniciais, saldo destacado, receitas/despesas compactas, atalhos para as telas existentes, barras de distribuição por categoria e movimentações com indicadores de entrada/saída. Todos os valores vêm da API existente.
+- Metas: gasto e limite mais legíveis, progresso, disponível ou excesso; formulário aberto ao criar/editar. Conta: perfil e opções agrupadas em linhas, preferências no mesmo painel e exclusão recolhida, mantendo senha e confirmação permanente.
+- Componentes compartilhados, demais listas e aba ativa foram ajustados ao mesmo estilo. Não houve alteração de backend, endpoints, banco, dependências ou regras financeiras.
+- README, documentação da API e instruções mobile atualizados; capturas do navegador usam dados fictícios, sem alterar contas reais.
+- Verificações do redesign: 5 testes mobile aprovados, TypeScript e Expo lint sem erros; `npm run check` passou com 125 arquivos formatados e 110 arquivos sem avisos/erros de lint. A suíte Laravel passou com 153 testes, 2 ignorados e 1 aviso, sem alterar código PHP.
+- Playwright com API simulada validou login/cadastro, seis abas, português/inglês, temas, fechamento do painel, ausência de configuração técnica no login, demo oculta sem URL e demo somente leitura quando configurada. Também conferiu criação/edição de metas com os mesmos payloads da API, cancelamento da exclusão e ausência de overflow horizontal em 320/360/390/768 px. Sem erros JavaScript.
+- Novo APK gerado por `npm run apk:local` com build completo em 19 min 2 s: `mobile/android/app/build/outputs/apk/release/app-release.apk`, 29,15 MiB, `com.saldoa.app`, apenas `arm64-v8a`. Assinatura v2 verificada e certificado igual ao APK anterior. O bundle contém os novos textos, o host local correto e não contém o endereço fictício usado na revisão da demo.
+- API local confirmada com HTTP 200 em `http://192.168.68.50:8000/up` após a compilação. Essa verificação se refere à rede utilizada no momento do build. Este APK usa a configuração local, sem URL demo; por isso o link de demonstração fica oculto. O usuário confirmou que o app funciona no celular; o erro de conexão relatado depois ocorreu enquanto o aparelho estava na rede incorreta.
 
 ## Atualização — cliente mobile
 
+### 04/11/2026 — identidade, áreas seguras e preferências
+
+- Mobile alinhado à identidade desktop: carteira Saldoa nos ícones de instalação/adaptativo/monocromático/abertura e no login; DM Sans e Space Grotesk empacotadas com suas licenças; paletas claro/escuro em laranja e cinza.
+- Telas usam áreas seguras; barra de abas considera o espaço inferior do aparelho e se oculta com o teclado. Ícones vetoriais maiores substituem caracteres de texto e Conta usa um usuário. As barras do Android ficam ocultas e podem ser reveladas temporariamente por gesto.
+- Português e inglês e temas claro/escuro/sistema disponíveis no login e em Conta. Preferências persistem no aparelho via SecureStore e na prévia web via localStorage; token web permanece somente em memória. Valores continuam em BRL. As datas editáveis de lançamentos e recorrências usam dia/mês/ano com normalização ISO para a API.
+- Traduções incluem navegação, formulários, confirmações e mensagens locais. O backend não traduz as validações por `Accept-Language`; em inglês o cliente informa os campos inválidos, preservando detalhes do backend em português quando esse é o idioma selecionado.
+- Preservadas as correções anteriores do script de APK local e de `api.ts`, incluindo caminhos curtos no Windows, `arm64-v8a`, HTTP privado de teste e timeout de 15 segundos.
+- Script de APK ajustado para resolver o Gradle Wrapper por caminho absoluto e limitar memória/paralelismo da compilação: Gradle sem daemon persistente, um trabalho por vez, Kotlin no mesmo processo e pool CMake de dois compiladores. Isso reduz o consumo de memória; a recompilação completa passou após o ajuste.
+- Verificações concluídas: 5 testes mobile de tradução/formatação/erros, checagem de tipos, Expo lint e exportação web. Playwright validou login com API simulada, as seis abas, troca/restauração de idioma e tema, acompanhamento do tema do sistema e larguras de 320/360/390/768 px, sem erros JavaScript. Capturas atualizadas no README usam dados fictícios e não comprovam conectividade da API real.
+- A suíte Laravel passou com 153 testes e 2 ignorados via `php artisan test --compact` no PHP 8.4.27. A execução dentro do sandbox selecionava outro PHP sem OpenSSL; a suíte também passou ao habilitar a extensão apenas naquele processo. Nenhuma configuração global de PHP foi alterada.
+- O endereço privado antigo da API (`192.168.68.52`) não correspondia mais ao IP Wi-Fi do computador. `mobile/.env` foi atualizado para `192.168.68.50`; a API local respondeu 200 em `/up`, 401 JSON em `/api/v1/auth/me` sem token e 401 no login com credenciais fictícias inválidas. Não foram criadas contas nem alterados dados financeiros. O teste do APK anterior foi confirmado pelo usuário antes do redesign seguinte.
+- `npm run check` completo passou (124 arquivos formatados, 109 arquivos sem avisos/erros de lint); o script de build recebeu nova checagem escopada após o ajuste de memória. Build web, sintaxe do script e `git diff --check` também passaram.
+- Novo APK gerado com sucesso pelo comando normal `npm run apk:local` (build completo em 20 minutos). Arquivo: `mobile/android/app/build/outputs/apk/release/app-release.apk`, 29,14 MiB, identificador `com.saldoa.app`, somente `arm64-v8a`, assinatura de depuração verificada pelo `apksigner`. Também foram verificados no pacote o novo host `192.168.68.50`, a ausência do host antigo no bundle e a permissão HTTP restrita ao novo endereço. A API local ficou em execução para teste no mesmo Wi-Fi.
+- O usuário confirmou o funcionamento deste APK no celular antes do redesign seguinte; a prévia web não valida esses comportamentos nativos e não há emulador Android instalado neste ambiente.
+
 - A API Sanctum e o isolamento da demonstração foram implementados e documentados; o aplicativo web continua autenticado por sessão/Fortify.
-- O cliente Expo/React Native em `mobile/` usa Expo Router e SecureStore. Inclui cadastro/login, recuperação via site, opção “Experimentar demo”, dashboard, lançamentos, categorias, metas, recorrências, exportação, logout e exclusão de conta.
+- O cliente Expo/React Native em `mobile/` usa Expo Router e SecureStore. Inclui cadastro/login, recuperação via site, opção “Experimentar sem criar conta” quando configurada, dashboard, lançamentos, categorias, metas, recorrências, exportação, logout e exclusão de conta.
 - A sessão armazena o token e a URL da instância correspondente. A demo fica em somente leitura no cliente e o backend também bloqueia suas mutações.
 - Verificações atuais do cliente: TypeScript, Expo lint, checagem de compatibilidade das dependências Expo, Expo Doctor e exportação do bundle Android passaram.
 - A prévia Expo Web foi habilitada com `react-native-web` e revisada em 390 × 844. TypeScript, lint e exportação web passaram; a sessão no navegador fica apenas em memória porque o SecureStore não é suportado na web. As datas dos lançamentos são exibidas em `dd/mm/aaaa` e normalizadas para ISO antes do envio à API.
 - A suíte Laravel passou com 153 testes aprovados e 2 ignorados.
-- A primeira validação funcional em aparelho físico com Expo Go foi concluída. Também foi executado um smoke test ponta a ponta da API local (cadastro, categoria, lançamento, meta, recorrência, dashboard, listagem, exportações e exclusão; registros temporários removidos). A máquina tem Android Studio com JDK 25, plataformas Android 36/37 e Build Tools 36/37; o Gradle Wrapper 9.4.1 inicia corretamente. Ainda não foi gerado um APK: o cliente está configurado para uma API HTTP em endereço privado, não há URL de demonstração, e `mobile/app.json` ainda não está associado a um projeto EAS. O perfil `preview` está preparado para APK, mas um build de teste distribuível depende de configurar EAS e endpoints HTTPS públicos. Para a Play Store também faltam confirmar o identificador e os ícones definitivos, configurar a assinatura de produção, publicar a política de privacidade e disponibilizar o fluxo público de exclusão de conta.
+- A primeira validação funcional em aparelho físico com Expo Go e um smoke test da API local foram concluídos anteriormente. Também foi gerado um APK local sem EAS para teste na rede doméstica, com assinatura de depuração e arquitetura `arm64-v8a`. O cliente usa uma API HTTP privada; o build local não exige endpoints públicos, mas depende da API ativa e acessível pela mesma rede Wi-Fi. O projeto ainda não está associado ao EAS. A distribuição pública exige HTTPS e assinatura próprios; a Play Store ainda depende de confirmar o identificador final, publicar política de privacidade e validar o fluxo público de exclusão de conta.
 - `npm audit` reporta avisos moderados de `glob`/`minimatch` na árvore do Expo/ESLint. O reparo forçado proposto pelo npm implicaria downgrade incompatível do Expo; nenhum downgrade foi aplicado.
 
 ## Concluído
@@ -61,7 +99,7 @@ Projeto: app de controle financeiro pessoal (portfólio). Laravel + React (Inert
 ## Regras de trabalho
 
 - Passos pequenos; explicar em linguagem simples (estou aprendendo).
-- Mostrar o plano e esperar meu OK antes de codar.
+- Após a aprovação do plano, continuar a execução sem novas confirmações de rotina; interromper apenas diante de ações extremamente críticas que possam quebrar o sistema (orientação de 04/11/2026).
 - Sem bibliotecas novas sem perguntar.
 - Sem cores fixas: usar os tokens do tema.
 - Rodar os comandos de verificação do AGENTS.md (testes, lint, tipos) ao final.

@@ -1,14 +1,12 @@
-const currencyFormatter = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-});
+import { getLocale } from './i18n';
 
 export function formatCurrency(amount: string | number): string {
     const numericAmount = typeof amount === 'number' ? amount : Number(amount);
 
-    return currencyFormatter.format(
-        Number.isFinite(numericAmount) ? numericAmount : 0,
-    );
+    return new Intl.NumberFormat(getLocale(), {
+        style: 'currency',
+        currency: 'BRL',
+    }).format(Number.isFinite(numericAmount) ? numericAmount : 0);
 }
 
 export function formatDate(date: string): string {
@@ -18,7 +16,11 @@ export function formatDate(date: string): string {
         return date;
     }
 
-    return new Intl.DateTimeFormat('pt-BR').format(parsedDate);
+    return new Intl.DateTimeFormat(getLocale(), {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    }).format(parsedDate);
 }
 
 export function formatDateForInput(date: string): string {

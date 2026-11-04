@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import type { Session } from './types';
@@ -19,7 +20,7 @@ export async function readSession(): Promise<Session | null> {
         return JSON.parse(storedSession) as Session;
     } catch (error) {
         await deleteStoredSession();
-        throw new Error('Não foi possível ler a sessão salva.', {
+        throw new Error(t('Não foi possível ler a sessão salva.'), {
             cause: error,
         });
     }

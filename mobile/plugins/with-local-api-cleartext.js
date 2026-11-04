@@ -1,4 +1,7 @@
-const { withAndroidManifest, withDangerousMod } = require('expo/config-plugins');
+const {
+    withAndroidManifest,
+    withDangerousMod,
+} = require('expo/config-plugins');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { isIPv4 } = require('node:net');
@@ -52,7 +55,9 @@ function withLocalApiCleartext(config) {
         const application = modConfig.modResults.manifest.application?.[0];
 
         if (!application) {
-            throw new Error('The Android manifest does not declare an application.');
+            throw new Error(
+                'The Android manifest does not declare an application.',
+            );
         }
 
         if (isLocalBuild) {

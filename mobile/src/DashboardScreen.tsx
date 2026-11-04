@@ -1,21 +1,34 @@
+import { useThemeStyles } from './PreferencesContext';
+import { getLocale, t } from './i18n';
 import { useCallback, useEffect, useState } from 'react';
-import { RefreshControl, StyleSheet, Text, View } from 'react-native';
+import {
+    Pressable,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    View,
+} from 'react-native';
+import { router } from 'expo-router';
+import { AppIcon, type IconName } from './icons';
 import { ApiError, sessionRequest } from './api';
 import {
     ActionButton,
     Card,
     Page,
-    PageTitle,
+    UserAvatar,
+    ProgressBar,
     SectionTitle,
-    commonStyles,
+    useCommonStyles,
 } from './components';
 import { currentMonth, formatCurrency, formatDate } from './format';
-import { colors } from './theme';
+import type { ThemeColors } from './theme';
 import type { Dashboard, Session } from './types';
 
 type Props = { session: Session };
 
 export default function DashboardScreen({ session }: Props) {
+    const { colors, styles } = useThemeStyles(createStyles);
+    const commonStyles = useCommonStyles();
     const [dashboard, setDashboard] = useState<Dashboard | null>(null);
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
@@ -39,7 +52,7 @@ export default function DashboardScreen({ session }: Props) {
             setErrorMessage(
                 error instanceof ApiError
                     ? error.message
-                    : 'Não foi possível carregar o resumo.',
+                    : t('Não foi possível carregar o resumo.'),
             );
         } finally {
             setLoading(false);
@@ -63,7 +76,7 @@ export default function DashboardScreen({ session }: Props) {
                     setErrorMessage(
                         error instanceof ApiError
                             ? error.message
-                            : 'Não foi possível carregar o resumo.',
+                            : t('Não foi possível carregar o resumo.'),
                     );
                 }
             } finally {
@@ -94,17 +107,29 @@ export default function DashboardScreen({ session }: Props) {
                 />
             }
         >
-            <PageTitle
-                title={`Olá, ${session.user.name.split(' ')[0]}`}
-                subtitle={
-                    dashboard?.monthNavigation.label ?? 'Seu resumo financeiro'
-                }
-            />
-
+            <View style={styles.header}>
+                <View style={styles.headerCopy}>
+                    <Text style={styles.eyebrow}>
+                        {t('Seu resumo financeiro')}
+                    </Text>
+                    <Text accessibilityRole="header" style={styles.greeting}>
+                        {t('Olá, {name}', {
+                            name: session.user.name.split(' ')[0],
+                        })}
+                    </Text>
+                </View>
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('Abrir minha conta')}
+                    onPress={() => router.navigate('/account')}
+                >
+                    <UserAvatar name={session.user.name} small />
+                </Pressable>
+            </View>
             {session.isDemo ? (
                 <View style={styles.demoBanner}>
                     <Text style={styles.demoBannerText}>
-                        Modo demonstração · somente leitura
+                        {t('Modo demonstração · somente leitura')}
                     </Text>
                 </View>
             ) : null}
@@ -117,69 +142,156 @@ export default function DashboardScreen({ session }: Props) {
                         variant="secondary"
                         compact
                     >
-                        Tentar novamente
+                        {t('Tentar novamente')}
                     </ActionButton>
                 </Card>
             ) : null}
 
             <Card style={styles.balanceCard}>
-                <Text style={styles.metricLabel}>Saldo total</Text>
-                <Text style={styles.balance}>
+                <View style={styles.balanceHeading}>
+                    <Text style={styles.metricLabel}>{t('Saldo total')}</Text>
+                    <AppIcon name="wallet" color={colors.primary} size={25} />
+                </View>
+                <Text
+                    style={styles.balance}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.6}
+                    numberOfLines={1}
+                >
                     {loading || !summary
                         ? '—'
                         : formatCurrency(summary.overallBalance)}
                 </Text>
-                <Text style={styles.balanceCaption}>
-                    Saldo de todos os períodos
-                </Text>
+                <View style={styles.balanceFooter}>
+                    <Text style={styles.balanceCaption}>
+                        {t('Saldo de todos os períodos')}
+                    </Text>
+                    <Text style={styles.month}>
+                        {new Intl.DateTimeFormat(getLocale(), {
+                            month: 'short',
+                            year: 'numeric',
+                        }).format(new Date())}
+                    </Text>
+                </View>
             </Card>
-
             <View style={styles.metricGrid}>
                 <MetricCard
-                    label="Receitas no mês"
+                    label={t('Receitas no mês')}
                     value={summary?.monthlyIncome}
                     kind="income"
                     loading={loading}
                 />
                 <MetricCard
-                    label="Despesas no mês"
+                    label={t('Despesas no mês')}
                     value={summary?.monthlyExpense}
                     kind="expense"
                     loading={loading}
                 />
             </View>
 
+            <View style={styles.quickActions}>
+                <QuickAction
+                    icon="plus"
+                    label={t('Lançamentos')}
+                    onPress={() => router.navigate('/transactions')}
+                />
+                <QuickAction
+                    icon="target"
+                    label={t('Metas')}
+                    onPress={() => router.navigate('/budgets')}
+                />
+                <QuickAction
+                    icon="repeat"
+                    label={t('Recorrências')}
+                    onPress={() => router.navigate('/recurring')}
+                />
+            </View>
             <Card>
-                <SectionTitle title="Despesas por categoria" />
+                <SectionTitle title={t('Despesas por categoria')} />
                 {dashboard?.expensesByCategory.length ? (
-                    dashboard.expensesByCategory.slice(0, 5).map((category) => (
-                        <View key={category.id} style={styles.listRow}>
-                            <Text style={styles.rowTitle}>{category.name}</Text>
-                            <Text style={styles.rowAmount}>
-                                {formatCurrency(category.total)}
-                            </Text>
-                        </View>
-                    ))
+                    dashboard.expensesByCategory.slice(0, 5).map((category) => {
+                        const total = dashboard.expensesByCategory.reduce(
+                            (sum, item) => sum + Number(item.total),
+                            0,
+                        );
+                        const percentage =
+                            total > 0
+                                ? (Number(category.total) / total) * 100
+                                : 0;
+                        return (
+                            <View key={category.id} style={styles.categoryItem}>
+                                <View style={styles.listRow}>
+                                    <Text style={styles.rowTitle}>
+                                        {category.name}
+                                    </Text>
+                                    <Text style={styles.rowAmount}>
+                                        {formatCurrency(category.total)}
+                                    </Text>
+                                </View>
+                                <ProgressBar
+                                    value={percentage}
+                                    label={category.name}
+                                />
+                            </View>
+                        );
+                    })
                 ) : (
                     <Text style={commonStyles.muted}>
-                        Ainda não há despesas neste mês.
+                        {loading
+                            ? t('Carregando resumo…')
+                            : t('Ainda não há despesas neste mês.')}
                     </Text>
                 )}
             </Card>
-
             <Card>
-                <SectionTitle title="Movimentações recentes" />
+                <SectionTitle
+                    title={t('Movimentações recentes')}
+                    action={
+                        <ActionButton
+                            compact
+                            variant="quiet"
+                            onPress={() => router.navigate('/transactions')}
+                        >
+                            {t('Ver todas')}
+                        </ActionButton>
+                    }
+                />
                 {dashboard?.recentTransactions.length ? (
                     dashboard.recentTransactions.map((transaction) => (
                         <View
                             key={transaction.id}
                             style={styles.transactionRow}
                         >
+                            <View
+                                style={[
+                                    styles.transactionIcon,
+                                    {
+                                        backgroundColor:
+                                            transaction.type === 'income'
+                                                ? colors.incomeSoft
+                                                : colors.expenseSoft,
+                                    },
+                                ]}
+                            >
+                                <AppIcon
+                                    name={
+                                        transaction.type === 'income'
+                                            ? 'arrow-down'
+                                            : 'arrow-up'
+                                    }
+                                    color={
+                                        transaction.type === 'income'
+                                            ? colors.income
+                                            : colors.expense
+                                    }
+                                    size={20}
+                                />
+                            </View>
                             <View style={styles.transactionDescription}>
                                 <Text style={styles.rowTitle} numberOfLines={1}>
                                     {transaction.description}
                                 </Text>
-                                <Text style={styles.rowMeta}>
+                                <Text style={styles.rowMeta} numberOfLines={2}>
                                     {transaction.category} ·{' '}
                                     {formatDate(transaction.date)}
                                 </Text>
@@ -199,21 +311,24 @@ export default function DashboardScreen({ session }: Props) {
                     ))
                 ) : (
                     <Text style={commonStyles.muted}>
-                        Seus lançamentos aparecerão aqui.
+                        {loading
+                            ? t('Carregando resumo…')
+                            : t('Seus lançamentos aparecerão aqui.')}
                     </Text>
                 )}
             </Card>
 
             {dashboard?.budgetAlerts.length ? (
                 <Card style={styles.warningCard}>
-                    <SectionTitle title="Atenção às metas" />
+                    <SectionTitle title={t('Atenção às metas')} />
                     {dashboard.budgetAlerts.map((alert) => (
                         <Text
                             key={alert.category_name}
                             style={styles.warningText}
                         >
                             {alert.category_name}:{' '}
-                            {Math.round(alert.percentage)}% do limite mensal
+                            {Math.round(alert.percentage)}
+                            {t('% do limite mensal')}
                         </Text>
                     ))}
                 </Card>
@@ -233,8 +348,14 @@ function MetricCard({
     kind: 'income' | 'expense';
     loading: boolean;
 }) {
+    const { colors, styles } = useThemeStyles(createStyles);
     return (
         <Card style={styles.metricCard}>
+            <AppIcon
+                name={kind === 'income' ? 'arrow-down' : 'arrow-up'}
+                color={kind === 'income' ? colors.income : colors.expense}
+                size={21}
+            />
             <Text style={styles.metricLabel}>{label}</Text>
             <Text
                 style={[
@@ -248,50 +369,195 @@ function MetricCard({
     );
 }
 
-const styles = StyleSheet.create({
-    demoBanner: {
-        alignItems: 'center',
-        backgroundColor: colors.primarySoft,
-        borderRadius: 11,
-        padding: 11,
-    },
-    demoBannerText: {
-        color: colors.primary,
-        fontSize: 12,
-        fontWeight: '700',
-    },
-    balanceCard: {
-        backgroundColor: colors.primary,
-        borderColor: colors.primary,
-    },
-    metricLabel: { color: colors.muted, fontSize: 12, fontWeight: '600' },
-    balance: { color: colors.surface, fontSize: 31, fontWeight: '800' },
-    balanceCaption: { color: '#E1E3FF', fontSize: 12 },
-    metricGrid: { flexDirection: 'row', gap: 12 },
-    metricCard: { flex: 1, minWidth: 0 },
-    metricValue: { fontSize: 17, fontWeight: '700' },
-    income: { color: colors.income },
-    expense: { color: colors.expense },
-    listRow: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: 3,
-    },
-    transactionRow: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        gap: 10,
-        justifyContent: 'space-between',
-    },
-    transactionDescription: { flex: 1, gap: 2 },
-    rowTitle: { color: colors.text, fontSize: 13, fontWeight: '600' },
-    rowMeta: { color: colors.muted, fontSize: 11 },
-    rowAmount: { color: colors.text, fontSize: 12, fontWeight: '700' },
-    warningCard: {
-        backgroundColor: colors.warningSoft,
-        borderColor: '#F3DFAF',
-    },
-    warningText: { color: colors.warning, fontSize: 13 },
-    error: { color: colors.expense, fontSize: 13, lineHeight: 19 },
-});
+function QuickAction({
+    icon,
+    label,
+    onPress,
+}: {
+    icon: IconName;
+    label: string;
+    onPress: () => void;
+}) {
+    const { colors, styles } = useThemeStyles(createStyles);
+    return (
+        <Pressable
+            accessibilityRole="button"
+            onPress={onPress}
+            style={({ pressed }) => [
+                styles.quickAction,
+                pressed && { opacity: 0.7 },
+            ]}
+        >
+            <View style={styles.quickIcon}>
+                <AppIcon name={icon} color={colors.primary} size={23} />
+            </View>
+            <Text style={styles.quickLabel}>{label}</Text>
+        </Pressable>
+    );
+}
+
+const createStyles = (colors: ThemeColors) =>
+    StyleSheet.create({
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            paddingVertical: 6,
+        },
+        headerCopy: { flex: 1, gap: 5 },
+        eyebrow: { fontFamily: 'DMSans', color: colors.muted, fontSize: 13 },
+        greeting: {
+            fontFamily: 'SpaceGrotesk',
+            color: colors.text,
+            fontSize: 27,
+            fontWeight: '700',
+            letterSpacing: -0.7,
+        },
+        demoBanner: {
+            alignItems: 'center',
+            backgroundColor: colors.primarySoft,
+            borderRadius: 12,
+            padding: 11,
+        },
+        demoBannerText: {
+            fontFamily: 'DMSans',
+            color: colors.primary,
+            fontSize: 12,
+            fontWeight: '700',
+        },
+        balanceCard: {
+            backgroundColor: colors.primarySoft,
+            borderColor: colors.primarySoft,
+            gap: 18,
+            padding: 24,
+        },
+        balanceHeading: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+        },
+        balanceFooter: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 10,
+            justifyContent: 'space-between',
+        },
+        metricLabel: {
+            fontFamily: 'DMSans',
+            color: colors.muted,
+            fontSize: 12,
+            fontWeight: '600',
+        },
+        balance: {
+            fontFamily: 'SpaceGrotesk',
+            color: colors.text,
+            fontSize: 40,
+            fontWeight: '700',
+            letterSpacing: -1.5,
+        },
+        balanceCaption: {
+            fontFamily: 'DMSans',
+            color: colors.muted,
+            fontSize: 11,
+        },
+        month: {
+            fontFamily: 'DMSans',
+            color: colors.primary,
+            fontSize: 11,
+            fontWeight: '700',
+            textTransform: 'capitalize',
+        },
+        metricGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+        metricCard: { flex: 1, minWidth: 120, padding: 16, gap: 10 },
+        metricValue: {
+            fontFamily: 'SpaceGrotesk',
+            fontSize: 18,
+            fontWeight: '700',
+        },
+        income: { color: colors.income },
+        expense: { color: colors.expense },
+        quickActions: { flexDirection: 'row', gap: 10 },
+        quickAction: {
+            flex: 1,
+            alignItems: 'center',
+            gap: 9,
+            paddingVertical: 6,
+            minHeight: 82,
+        },
+        quickIcon: {
+            width: 50,
+            height: 50,
+            borderRadius: 18,
+            backgroundColor: colors.surface,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1,
+            borderColor: colors.border,
+        },
+        quickLabel: {
+            fontFamily: 'DMSans',
+            color: colors.text,
+            fontSize: 12,
+            textAlign: 'center',
+        },
+        categoryItem: { gap: 10, paddingVertical: 4 },
+        listRow: {
+            alignItems: 'center',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            gap: 12,
+        },
+        transactionRow: {
+            alignItems: 'center',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 12,
+            paddingVertical: 10,
+            borderTopWidth: 1,
+            borderTopColor: colors.border,
+        },
+        transactionIcon: {
+            width: 36,
+            height: 36,
+            borderRadius: 13,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        transactionDescription: { flex: 1, minWidth: 90, gap: 4 },
+        rowTitle: {
+            fontFamily: 'DMSans',
+            color: colors.text,
+            fontSize: 14,
+            fontWeight: '600',
+            flexShrink: 1,
+        },
+        rowMeta: {
+            fontFamily: 'DMSans',
+            color: colors.muted,
+            fontSize: 11,
+            lineHeight: 17,
+        },
+        rowAmount: {
+            fontFamily: 'DMSans',
+            color: colors.text,
+            fontSize: 13,
+            fontWeight: '700',
+            flexShrink: 1,
+        },
+        warningCard: {
+            backgroundColor: colors.warningSoft,
+            borderColor: colors.border,
+        },
+        warningText: {
+            fontFamily: 'DMSans',
+            color: colors.warning,
+            fontSize: 13,
+        },
+        error: {
+            fontFamily: 'DMSans',
+            color: colors.text,
+            fontSize: 13,
+            lineHeight: 19,
+        },
+    });

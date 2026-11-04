@@ -1,3 +1,5 @@
+import { useThemeStyles } from './PreferencesContext';
+import { t } from './i18n';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { ApiError, sessionRequest } from './api';
@@ -9,15 +11,17 @@ import {
     PageTitle,
     SectionTitle,
     TextField,
-    commonStyles,
+    useCommonStyles,
 } from './components';
-import { colors } from './theme';
+import type { ThemeColors } from './theme';
 import type { Category, Session } from './types';
 
 type Props = { session: Session };
 type Collection<T> = { data: T[] };
 
 export default function CategoriesScreen({ session }: Props) {
+    const { styles } = useThemeStyles(createStyles);
+    const commonStyles = useCommonStyles();
     const [categories, setCategories] = useState<Category[]>([]);
     const [name, setName] = useState('');
     const [type, setType] = useState<'income' | 'expense'>('expense');
@@ -76,7 +80,7 @@ export default function CategoriesScreen({ session }: Props) {
 
     async function createCategory(): Promise<void> {
         if (!name.trim()) {
-            setErrorMessage('Informe o nome da categoria.');
+            setErrorMessage(t('Informe o nome da categoria.'));
             return;
         }
 
@@ -99,14 +103,18 @@ export default function CategoriesScreen({ session }: Props) {
 
     function askToDelete(category: Category): void {
         Alert.alert(
-            'Excluir categoria?',
+            t('Excluir categoria?'),
             category.transactions_count
-                ? 'A categoria está em uso. Primeiro remova ou mova os lançamentos e recorrências associados.'
-                : `A categoria “${category.name}” será excluída.`,
+                ? t(
+                      'A categoria está em uso. Primeiro remova ou mova os lançamentos e recorrências associados.',
+                  )
+                : t('A categoria “{name}” será removida.', {
+                      name: category.name,
+                  }),
             [
-                { text: 'Cancelar', style: 'cancel' },
+                { text: t('Cancelar'), style: 'cancel' },
                 {
-                    text: 'Excluir',
+                    text: t('Excluir'),
                     style: 'destructive',
                     onPress: () => void deleteCategory(category.id),
                 },
@@ -128,8 +136,8 @@ export default function CategoriesScreen({ session }: Props) {
     return (
         <Page>
             <PageTitle
-                title="Categorias"
-                subtitle="Organize receitas e despesas por tipo."
+                title={t('Categorias')}
+                subtitle={t('Organize receitas e despesas por tipo.')}
             />
             {errorMessage ? (
                 <Text accessibilityRole="alert" style={styles.error}>
@@ -139,13 +147,13 @@ export default function CategoriesScreen({ session }: Props) {
 
             {!session.isDemo ? (
                 <Card>
-                    <SectionTitle title="Nova categoria" />
+                    <SectionTitle title={t('Nova categoria')} />
                     <TextField
-                        label="Nome"
+                        label={t('Nome')}
                         value={name}
                         onChangeText={setName}
                         maxLength={255}
-                        placeholder="Ex.: Moradia"
+                        placeholder={t('Ex.: Moradia')}
                     />
                     <ChoiceChips
                         selected={type}
@@ -153,8 +161,8 @@ export default function CategoriesScreen({ session }: Props) {
                             setType(value as 'income' | 'expense')
                         }
                         options={[
-                            { value: 'expense', label: 'Despesa' },
-                            { value: 'income', label: 'Receita' },
+                            { value: 'expense', label: t('Despesa') },
+                            { value: 'income', label: t('Receita') },
                         ]}
                     />
                     <ActionButton
@@ -162,16 +170,16 @@ export default function CategoriesScreen({ session }: Props) {
                         loading={saving}
                         disabled={saving}
                     >
-                        Adicionar categoria
+                        {t('Adicionar categoria')}
                     </ActionButton>
                 </Card>
             ) : null}
 
             <Card>
-                <SectionTitle title="Suas categorias" />
+                <SectionTitle title={t('Suas categorias')} />
                 {loading ? (
                     <Text style={commonStyles.muted}>
-                        Carregando categorias…
+                        {t('Carregando categorias…')}
                     </Text>
                 ) : categories.length ? (
                     categories.map((category) => (
@@ -180,11 +188,11 @@ export default function CategoriesScreen({ session }: Props) {
                                 <Text style={styles.name}>{category.name}</Text>
                                 <Text style={styles.meta}>
                                     {category.type === 'income'
-                                        ? 'Receita'
-                                        : 'Despesa'}
+                                        ? t('Receita')
+                                        : t('Despesa')}
                                     {category.transactions_count === undefined
                                         ? ''
-                                        : ` · ${category.transactions_count} lançamentos`}
+                                        : ` · ${t('{count} lançamentos', { count: category.transactions_count ?? 0 })}`}
                                 </Text>
                             </View>
                             {!session.isDemo ? (
@@ -193,14 +201,14 @@ export default function CategoriesScreen({ session }: Props) {
                                     variant="quiet"
                                     compact
                                 >
-                                    Excluir
+                                    {t('Excluir')}
                                 </ActionButton>
                             ) : null}
                         </View>
                     ))
                 ) : (
                     <Text style={commonStyles.muted}>
-                        Nenhuma categoria cadastrada.
+                        {t('Nenhuma categoria cadastrada.')}
                     </Text>
                 )}
             </Card>
@@ -210,31 +218,41 @@ export default function CategoriesScreen({ session }: Props) {
 
 function errorMessageFor(error: unknown): string {
     if (error instanceof ApiError && error.status === 409) {
-        return 'Não é possível excluir uma categoria que ainda possui lançamentos ou recorrências.';
+        return t(
+            'Não é possível excluir uma categoria que ainda possui lançamentos ou recorrências.',
+        );
     }
 
     return error instanceof ApiError
         ? error.message
-        : 'Não foi possível concluir a solicitação.';
+        : t('Não foi possível concluir a solicitação.');
 }
 
-const styles = StyleSheet.create({
-    error: {
-        backgroundColor: colors.expenseSoft,
-        borderRadius: 10,
-        color: colors.expense,
-        fontSize: 13,
-        padding: 12,
-    },
-    row: {
-        alignItems: 'center',
-        borderTopColor: colors.border,
-        borderTopWidth: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingTop: 10,
-    },
-    categoryInfo: { flex: 1, gap: 3 },
-    name: { color: colors.text, fontSize: 14, fontWeight: '600' },
-    meta: { color: colors.muted, fontSize: 11 },
-});
+const createStyles = (colors: ThemeColors) =>
+    StyleSheet.create({
+        error: {
+            fontFamily: 'DMSans',
+            backgroundColor: colors.expenseSoft,
+            borderRadius: 10,
+            color: colors.expense,
+            fontSize: 13,
+            padding: 12,
+        },
+        row: {
+            alignItems: 'center',
+            borderTopColor: colors.border,
+            borderTopWidth: 1,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingTop: 16,
+            gap: 12,
+        },
+        categoryInfo: { flex: 1, gap: 3 },
+        name: {
+            fontFamily: 'SpaceGrotesk',
+            color: colors.text,
+            fontSize: 16,
+            fontWeight: '600',
+        },
+        meta: { fontFamily: 'DMSans', color: colors.muted, fontSize: 11 },
+    });

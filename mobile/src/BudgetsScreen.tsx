@@ -1,3 +1,5 @@
+import { useThemeStyles } from './PreferencesContext';
+import { t } from './i18n';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { ApiError, sessionRequest } from './api';
@@ -7,12 +9,13 @@ import {
     ChoiceChips,
     Page,
     PageTitle,
+    ProgressBar,
     SectionTitle,
     TextField,
-    commonStyles,
+    useCommonStyles,
 } from './components';
 import { amountForApi, formatCurrency } from './format';
-import { colors } from './theme';
+import type { ThemeColors } from './theme';
 import type { Budget, Category, Session } from './types';
 
 type Props = { session: Session };
@@ -24,11 +27,14 @@ type BudgetIndex = {
 type Collection<T> = { data: T[] };
 
 export default function BudgetsScreen({ session }: Props) {
+    const { styles } = useThemeStyles(createStyles);
+    const commonStyles = useCommonStyles();
     const [budgets, setBudgets] = useState<Budget[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [categoryId, setCategoryId] = useState<number | null>(null);
     const [amount, setAmount] = useState('');
     const [editingId, setEditingId] = useState<number | null>(null);
+    const [formOpen, setFormOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -112,11 +118,13 @@ export default function BudgetsScreen({ session }: Props) {
     }, [fetchBudgets]);
 
     function editBudget(budget: Budget): void {
+        setFormOpen(true);
         setEditingId(budget.id);
         setAmount(budget.amount);
     }
 
     function cancelEdit(): void {
+        setFormOpen(false);
         setEditingId(null);
         setAmount('');
     }
@@ -124,7 +132,7 @@ export default function BudgetsScreen({ session }: Props) {
     async function saveBudget(): Promise<void> {
         if (!amount.trim() || (editingId === null && categoryId === null)) {
             setErrorMessage(
-                'Informe o valor da meta e selecione uma categoria.',
+                t('Informe o valor da meta e selecione uma categoria.'),
             );
             return;
         }
@@ -158,12 +166,14 @@ export default function BudgetsScreen({ session }: Props) {
 
     function askToDelete(budget: Budget): void {
         Alert.alert(
-            'Excluir meta?',
-            `A meta de ${budget.category_name} será removida.`,
+            t('Excluir meta?'),
+            t('A meta de “{name}” será removida.', {
+                name: budget.category_name,
+            }),
             [
-                { text: 'Cancelar', style: 'cancel' },
+                { text: t('Cancelar'), style: 'cancel' },
                 {
-                    text: 'Excluir',
+                    text: t('Excluir'),
                     style: 'destructive',
                     onPress: () => void deleteBudget(budget.id),
                 },
@@ -185,8 +195,8 @@ export default function BudgetsScreen({ session }: Props) {
     return (
         <Page>
             <PageTitle
-                title="Metas"
-                subtitle="Acompanhe seus limites de gastos do mês."
+                title={t('Metas')}
+                subtitle={t('Acompanhe seus limites de gastos do mês.')}
             />
             {errorMessage ? (
                 <Text accessibilityRole="alert" style={styles.error}>
@@ -194,15 +204,33 @@ export default function BudgetsScreen({ session }: Props) {
                 </Text>
             ) : null}
 
+            {!session.isDemo && availableCategories.length > 0 && !formOpen ? (
+                <ActionButton
+                    onPress={() => {
+                        setFormOpen(true);
+                        setErrorMessage('');
+                    }}
+                    variant="secondary"
+                >
+                    {t('Nova meta')}
+                </ActionButton>
+            ) : null}
             {!session.isDemo &&
+            formOpen &&
             (editingId !== null || availableCategories.length > 0) ? (
                 <Card>
                     <SectionTitle
-                        title={editingId === null ? 'Nova meta' : 'Editar meta'}
+                        title={
+                            editingId === null
+                                ? t('Nova meta')
+                                : t('Editar meta')
+                        }
                     />
                     {editingId === null ? (
                         <>
-                            <Text style={styles.fieldLabel}>Categoria</Text>
+                            <Text style={styles.fieldLabel}>
+                                {t('Categoria')}
+                            </Text>
                             <ChoiceChips
                                 selected={categoryId?.toString() ?? ''}
                                 onSelect={(value) =>
@@ -218,7 +246,7 @@ export default function BudgetsScreen({ session }: Props) {
                         </>
                     ) : null}
                     <TextField
-                        label="Limite mensal"
+                        label={t('Limite mensal')}
                         value={amount}
                         onChangeText={setAmount}
                         keyboardType="decimal-pad"
@@ -229,20 +257,20 @@ export default function BudgetsScreen({ session }: Props) {
                         disabled={saving}
                         loading={saving}
                     >
-                        Salvar meta
+                        {t('Salvar meta')}
                     </ActionButton>
-                    {editingId !== null ? (
-                        <ActionButton onPress={cancelEdit} variant="quiet">
-                            Cancelar edição
-                        </ActionButton>
-                    ) : null}
+                    <ActionButton onPress={cancelEdit} variant="quiet">
+                        {t('Cancelar')}
+                    </ActionButton>
                 </Card>
             ) : null}
 
             <Card>
-                <SectionTitle title="Metas deste mês" />
+                <SectionTitle title={t('Metas deste mês')} />
                 {loading ? (
-                    <Text style={commonStyles.muted}>Carregando metas…</Text>
+                    <Text style={commonStyles.muted}>
+                        {t('Carregando metas…')}
+                    </Text>
                 ) : budgets.length ? (
                     budgets.map((budget) => (
                         <BudgetRow
@@ -255,7 +283,7 @@ export default function BudgetsScreen({ session }: Props) {
                     ))
                 ) : (
                     <Text style={commonStyles.muted}>
-                        Nenhuma meta cadastrada para este mês.
+                        {t('Nenhuma meta cadastrada para este mês.')}
                     </Text>
                 )}
             </Card>
@@ -274,49 +302,60 @@ function BudgetRow({
     onEdit: () => void;
     onDelete: () => void;
 }) {
+    const { colors, styles } = useThemeStyles(createStyles);
     const statusColor =
         budget.status === 'exceeded'
             ? colors.expense
             : budget.status === 'warning'
               ? colors.warning
               : colors.primary;
-    const percentage = Math.min(100, Math.max(0, budget.percentage));
+    const remaining = Number(budget.amount) - Number(budget.spent);
 
     return (
         <View style={styles.budgetRow}>
             <View style={styles.budgetHeading}>
                 <Text style={styles.categoryName}>{budget.category_name}</Text>
-                <Text style={styles.budgetAmount}>
-                    {formatCurrency(budget.spent)} /{' '}
-                    {formatCurrency(budget.amount)}
-                </Text>
-            </View>
-            <View style={styles.progressTrack}>
-                <View
-                    style={[
-                        styles.progressFill,
-                        {
-                            backgroundColor: statusColor,
-                            width: `${percentage}%`,
-                        },
-                    ]}
-                />
-            </View>
-            <View style={styles.budgetHeading}>
                 <Text style={[styles.status, { color: statusColor }]}>
-                    {Math.round(budget.percentage)}% utilizado
+                    {Math.round(budget.percentage)}
+                    {t('% utilizado')}
                 </Text>
+            </View>
+            <Text style={styles.spent}>{formatCurrency(budget.spent)}</Text>
+            <Text style={styles.budgetAmount}>
+                {t('de {amount} no mês', {
+                    amount: formatCurrency(budget.amount),
+                })}
+            </Text>
+            <ProgressBar
+                value={budget.percentage}
+                label={budget.category_name}
+                color={statusColor}
+            />
+            <View style={styles.budgetHeading}>
+                <View style={styles.remainingCopy}>
+                    <Text style={styles.remainingLabel}>
+                        {remaining < 0 ? t('Acima do limite') : t('Disponível')}
+                    </Text>
+                    <Text
+                        style={[
+                            styles.remainingValue,
+                            remaining < 0 && { color: statusColor },
+                        ]}
+                    >
+                        {formatCurrency(Math.abs(remaining))}
+                    </Text>
+                </View>
                 {!readOnly ? (
                     <View style={styles.actions}>
                         <ActionButton onPress={onEdit} variant="quiet" compact>
-                            Editar
+                            {t('Editar')}
                         </ActionButton>
                         <ActionButton
                             onPress={onDelete}
                             variant="quiet"
                             compact
                         >
-                            Excluir
+                            {t('Excluir')}
                         </ActionButton>
                     </View>
                 ) : null}
@@ -328,38 +367,68 @@ function BudgetRow({
 function errorMessageFor(error: unknown): string {
     return error instanceof ApiError
         ? error.message
-        : 'Não foi possível concluir a solicitação.';
+        : t('Não foi possível concluir a solicitação.');
 }
 
-const styles = StyleSheet.create({
-    error: {
-        backgroundColor: colors.expenseSoft,
-        borderRadius: 10,
-        color: colors.expense,
-        fontSize: 13,
-        padding: 12,
-    },
-    fieldLabel: { color: colors.text, fontSize: 13, fontWeight: '600' },
-    budgetRow: {
-        borderTopColor: colors.border,
-        borderTopWidth: 1,
-        gap: 8,
-        paddingTop: 12,
-    },
-    budgetHeading: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    categoryName: { color: colors.text, fontSize: 14, fontWeight: '600' },
-    budgetAmount: { color: colors.muted, fontSize: 11 },
-    progressTrack: {
-        backgroundColor: colors.surfaceMuted,
-        borderRadius: 999,
-        height: 7,
-        overflow: 'hidden',
-    },
-    progressFill: { borderRadius: 999, height: 7 },
-    status: { fontSize: 11, fontWeight: '600' },
-    actions: { flexDirection: 'row' },
-});
+const createStyles = (colors: ThemeColors) =>
+    StyleSheet.create({
+        error: {
+            fontFamily: 'DMSans',
+            backgroundColor: colors.expenseSoft,
+            borderRadius: 10,
+            color: colors.expense,
+            fontSize: 13,
+            padding: 12,
+        },
+        fieldLabel: {
+            fontFamily: 'DMSans',
+            color: colors.text,
+            fontSize: 13,
+            fontWeight: '600',
+        },
+        budgetRow: {
+            backgroundColor: colors.background,
+            borderRadius: 20,
+            gap: 12,
+            padding: 16,
+        },
+        budgetHeading: {
+            alignItems: 'center',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 10,
+        },
+        categoryName: {
+            fontFamily: 'SpaceGrotesk',
+            color: colors.text,
+            fontSize: 17,
+            fontWeight: '600',
+            flexShrink: 1,
+        },
+        budgetAmount: {
+            fontFamily: 'DMSans',
+            color: colors.muted,
+            fontSize: 11,
+        },
+        spent: {
+            fontFamily: 'SpaceGrotesk',
+            color: colors.text,
+            fontSize: 28,
+            fontWeight: '700',
+        },
+        remainingCopy: { gap: 4 },
+        remainingLabel: {
+            fontFamily: 'DMSans',
+            color: colors.muted,
+            fontSize: 11,
+        },
+        remainingValue: {
+            fontFamily: 'DMSans',
+            color: colors.text,
+            fontSize: 14,
+            fontWeight: '600',
+        },
+        status: { fontFamily: 'DMSans', fontSize: 11, fontWeight: '600' },
+        actions: { flexDirection: 'row' },
+    });

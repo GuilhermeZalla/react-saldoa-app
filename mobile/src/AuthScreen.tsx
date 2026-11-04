@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useThemeStyles } from './PreferencesContext';
+import { t } from './i18n';
+import { useEffect, useState } from 'react';
 import {
     KeyboardAvoidingView,
+    Keyboard,
+    useWindowDimensions,
     Linking,
     Platform,
     StyleSheet,
@@ -9,8 +13,17 @@ import {
     Alert,
 } from 'react-native';
 import { ApiError, apiRequest, configuredApiUrl } from './api';
-import { ActionButton, Card, Page, TextField } from './components';
-import { colors } from './theme';
+import {
+    ActionButton,
+    Card,
+    Page,
+    PreferencesSheet,
+    IconButton,
+    TextField,
+} from './components';
+import { AppIcon } from './icons';
+import { FinanceIllustration } from './FinanceIllustration';
+import type { ThemeColors } from './theme';
 import type { Session, User } from './types';
 
 type Props = {
@@ -24,6 +37,7 @@ type AuthResponse = {
 };
 
 export default function AuthScreen({ onAuthenticated }: Props) {
+    const { colors, styles } = useThemeStyles(createStyles);
     const [mode, setMode] = useState<'login' | 'register'>('login');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -31,6 +45,21 @@ export default function AuthScreen({ onAuthenticated }: Props) {
     const [passwordConfirmation, setPasswordConfirmation] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [busy, setBusy] = useState(false);
+    const [preferencesOpen, setPreferencesOpen] = useState(false);
+    const [keyboardVisible, setKeyboardVisible] = useState(false);
+    const { height } = useWindowDimensions();
+    useEffect(() => {
+        const show = Keyboard.addListener('keyboardDidShow', () =>
+            setKeyboardVisible(true),
+        );
+        const hide = Keyboard.addListener('keyboardDidHide', () =>
+            setKeyboardVisible(false),
+        );
+        return () => {
+            show.remove();
+            hide.remove();
+        };
+    }, []);
     const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.trim().replace(/\/+$/, '');
 
     const apiUrl = configuredApiUrl(false);
@@ -39,7 +68,7 @@ export default function AuthScreen({ onAuthenticated }: Props) {
     async function openPasswordRecovery(): Promise<void> {
         if (!webUrl) {
             setErrorMessage(
-                'Configure EXPO_PUBLIC_WEB_URL para abrir a recuperação de senha.',
+                t('A recuperação de senha está indisponível no momento.'),
             );
             return;
         }
@@ -48,8 +77,8 @@ export default function AuthScreen({ onAuthenticated }: Props) {
             await Linking.openURL(`${webUrl}/forgot-password`);
         } catch {
             Alert.alert(
-                'Não foi possível abrir o site',
-                'Tente novamente mais tarde.',
+                t('Não foi possível abrir o site'),
+                t('Tente novamente mais tarde.'),
             );
         }
     }
@@ -60,8 +89,10 @@ export default function AuthScreen({ onAuthenticated }: Props) {
         if (targetApiUrl === null) {
             setErrorMessage(
                 isDemo
-                    ? 'Configure EXPO_PUBLIC_API_URL_DEMO para conectar à demonstração.'
-                    : 'Configure EXPO_PUBLIC_API_URL para conectar à API.',
+                    ? t('A demonstração está indisponível no momento.')
+                    : t(
+                          'O serviço está indisponível no momento. Tente novamente mais tarde.',
+                      ),
             );
 
             return;
@@ -109,7 +140,7 @@ export default function AuthScreen({ onAuthenticated }: Props) {
             setErrorMessage(
                 error instanceof ApiError
                     ? error.message
-                    : 'Ocorreu um erro ao entrar. Tente novamente.',
+                    : t('Ocorreu um erro ao entrar. Tente novamente.'),
             );
         } finally {
             setBusy(false);
@@ -121,43 +152,57 @@ export default function AuthScreen({ onAuthenticated }: Props) {
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             style={styles.keyboard}
         >
-            <Page>
-                <View style={styles.brand}>
-                    <View style={styles.logoMark}>
-                        <Text style={styles.logoText}>S</Text>
+            <Page contentStyle={styles.authContent}>
+                <View style={styles.toolbar}>
+                    <View style={styles.brand}>
+                        <View style={styles.logoMark}>
+                            <AppIcon
+                                name="wallet"
+                                color={colors.primaryForeground}
+                                size={24}
+                            />
+                        </View>
+                        <Text style={styles.brandName}>Saldoa</Text>
                     </View>
-                    <Text style={styles.brandName}>Saldoa</Text>
-                    <Text style={styles.brandTagline}>
-                        Suas finanças, com mais clareza.
+                    <IconButton
+                        icon="settings"
+                        label={t('Abrir preferências')}
+                        onPress={() => {
+                            Keyboard.dismiss();
+                            setPreferencesOpen(true);
+                        }}
+                    />
+                </View>
+                <FinanceIllustration
+                    compact={
+                        keyboardVisible || mode === 'register' || height < 700
+                    }
+                />
+                <View style={styles.heading}>
+                    <Text accessibilityRole="header" style={styles.title}>
+                        {mode === 'login'
+                            ? t('Bem-vindo de volta')
+                            : t('Criar conta')}
+                    </Text>
+                    <Text style={styles.subtitle}>
+                        {mode === 'login'
+                            ? t('Suas finanças, com mais clareza.')
+                            : t('Organize suas finanças em um só lugar.')}
                     </Text>
                 </View>
-
-                <Card>
-                    <View style={styles.heading}>
-                        <Text style={styles.title}>
-                            {mode === 'login'
-                                ? 'Bem-vindo de volta'
-                                : 'Criar conta'}
-                        </Text>
-                        <Text style={styles.subtitle}>
-                            {mode === 'login'
-                                ? 'Entre para acompanhar seu dinheiro.'
-                                : 'Organize suas finanças em um só lugar.'}
-                        </Text>
-                    </View>
-
+                <Card style={styles.form}>
                     {mode === 'register' && (
                         <TextField
-                            label="Nome"
+                            label={t('Nome')}
                             value={name}
                             onChangeText={setName}
                             autoCapitalize="words"
                             autoComplete="name"
-                            placeholder="Seu nome"
+                            placeholder={t('Seu nome')}
                         />
                     )}
                     <TextField
-                        label="E-mail"
+                        label={t('E-mail')}
                         value={email}
                         onChangeText={setEmail}
                         autoCapitalize="none"
@@ -166,7 +211,7 @@ export default function AuthScreen({ onAuthenticated }: Props) {
                         placeholder="voce@exemplo.com"
                     />
                     <TextField
-                        label="Senha"
+                        label={t('Senha')}
                         value={password}
                         onChangeText={setPassword}
                         secureTextEntry
@@ -175,16 +220,16 @@ export default function AuthScreen({ onAuthenticated }: Props) {
                                 ? 'current-password'
                                 : 'new-password'
                         }
-                        placeholder="Sua senha"
+                        placeholder={t('Sua senha')}
                     />
                     {mode === 'register' && (
                         <TextField
-                            label="Confirmar senha"
+                            label={t('Confirmar senha')}
                             value={passwordConfirmation}
                             onChangeText={setPasswordConfirmation}
                             secureTextEntry
                             autoComplete="new-password"
-                            placeholder="Repita sua senha"
+                            placeholder={t('Repita sua senha')}
                         />
                     )}
 
@@ -205,106 +250,105 @@ export default function AuthScreen({ onAuthenticated }: Props) {
                         }
                         loading={busy}
                     >
-                        {mode === 'login' ? 'Entrar' : 'Criar minha conta'}
+                        {mode === 'login'
+                            ? t('Entrar')
+                            : t('Criar minha conta')}
                     </ActionButton>
 
                     <ActionButton
-                        onPress={() =>
+                        onPress={() => {
                             setMode((currentMode) =>
                                 currentMode === 'login' ? 'register' : 'login',
-                            )
-                        }
+                            );
+                            setErrorMessage('');
+                        }}
+                        disabled={busy}
                         variant="quiet"
                     >
                         {mode === 'login'
-                            ? 'Ainda não tenho uma conta'
-                            : 'Já tenho uma conta'}
+                            ? t('Ainda não tenho uma conta')
+                            : t('Já tenho uma conta')}
                     </ActionButton>
-                </Card>
-
-                <Card style={styles.demoCard}>
-                    <View style={styles.demoHeading}>
-                        <View style={styles.demoDot} />
-                        <Text style={styles.demoTitle}>Conheça o Saldoa</Text>
-                    </View>
-                    <Text style={styles.demoDescription}>
-                        Explore uma demonstração isolada com dados de exemplo.
-                        Ela usa uma API diferente da produção.
-                    </Text>
-                    <ActionButton
-                        onPress={() => void authenticate(true)}
-                        variant="secondary"
-                        disabled={busy || demoApiUrl === null}
-                        loading={busy}
-                    >
-                        Experimentar demo
-                    </ActionButton>
-                    <Text style={styles.environment}>
-                        {demoApiUrl
-                            ? 'Instância de demonstração configurada'
-                            : 'Configure EXPO_PUBLIC_API_URL_DEMO para ativar'}
-                    </Text>
                 </Card>
 
                 {mode === 'login' ? (
                     <ActionButton
                         onPress={() => void openPasswordRecovery()}
                         variant="quiet"
+                        compact
                     >
-                        Esqueci minha senha
+                        {t('Esqueci minha senha')}
                     </ActionButton>
                 ) : null}
-
-                <Text style={styles.apiEnvironment}>
-                    {apiUrl
-                        ? `API principal: ${new URL(apiUrl).host}`
-                        : 'Configure EXPO_PUBLIC_API_URL para desenvolvimento'}
-                </Text>
+                {demoApiUrl !== null ? (
+                    <ActionButton
+                        onPress={() => void authenticate(true)}
+                        variant="quiet"
+                        disabled={busy}
+                        loading={busy}
+                        compact
+                    >
+                        {t('Experimentar sem criar conta')}
+                    </ActionButton>
+                ) : null}
             </Page>
+            <PreferencesSheet
+                visible={preferencesOpen}
+                onClose={() => setPreferencesOpen(false)}
+            />
         </KeyboardAvoidingView>
     );
 }
 
-const styles = StyleSheet.create({
-    keyboard: { flex: 1 },
-    brand: { alignItems: 'center', gap: 8, paddingVertical: 22 },
-    logoMark: {
-        alignItems: 'center',
-        backgroundColor: colors.primary,
-        borderRadius: 17,
-        height: 54,
-        justifyContent: 'center',
-        width: 54,
-    },
-    logoText: { color: colors.surface, fontSize: 28, fontWeight: '800' },
-    brandName: { color: colors.text, fontSize: 26, fontWeight: '800' },
-    brandTagline: { color: colors.muted, fontSize: 14 },
-    heading: { gap: 5, marginBottom: 4 },
-    title: { color: colors.text, fontSize: 20, fontWeight: '700' },
-    subtitle: { color: colors.muted, fontSize: 13, lineHeight: 19 },
-    error: {
-        backgroundColor: colors.expenseSoft,
-        borderRadius: 10,
-        color: colors.expense,
-        fontSize: 13,
-        lineHeight: 18,
-        padding: 11,
-    },
-    demoCard: { backgroundColor: colors.primarySoft, borderColor: '#DDE2FF' },
-    demoHeading: { alignItems: 'center', flexDirection: 'row', gap: 8 },
-    demoDot: {
-        backgroundColor: colors.primary,
-        borderRadius: 10,
-        height: 8,
-        width: 8,
-    },
-    demoTitle: { color: colors.text, fontSize: 15, fontWeight: '700' },
-    demoDescription: { color: colors.muted, fontSize: 13, lineHeight: 19 },
-    environment: { color: colors.muted, fontSize: 11, textAlign: 'center' },
-    apiEnvironment: {
-        color: colors.muted,
-        fontSize: 11,
-        marginTop: 1,
-        textAlign: 'center',
-    },
-});
+const createStyles = (colors: ThemeColors) =>
+    StyleSheet.create({
+        keyboard: { flex: 1 },
+        authContent: { maxWidth: 480, gap: 14, paddingBottom: 24 },
+        toolbar: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 4,
+        },
+        brand: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+        logoMark: {
+            backgroundColor: colors.primary,
+            borderRadius: 13,
+            width: 40,
+            height: 40,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        brandName: {
+            fontFamily: 'SpaceGrotesk',
+            color: colors.text,
+            fontSize: 23,
+            fontWeight: '700',
+        },
+        heading: { gap: 8, alignItems: 'center', marginBottom: 8 },
+        title: {
+            fontFamily: 'SpaceGrotesk',
+            color: colors.text,
+            fontSize: 28,
+            fontWeight: '700',
+            letterSpacing: -0.8,
+            textAlign: 'center',
+        },
+        subtitle: {
+            fontFamily: 'DMSans',
+            color: colors.muted,
+            fontSize: 14,
+            lineHeight: 21,
+            textAlign: 'center',
+        },
+        form: { padding: 22, gap: 18 },
+        error: {
+            fontFamily: 'DMSans',
+            backgroundColor: colors.surfaceMuted,
+            borderRadius: 12,
+            color: colors.text,
+            fontSize: 13,
+            lineHeight: 19,
+            padding: 12,
+        },
+    });

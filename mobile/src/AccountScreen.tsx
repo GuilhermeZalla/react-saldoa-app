@@ -1,8 +1,20 @@
+import { usePreferences, useThemeStyles } from './PreferencesContext';
+import { getLocale, t } from './i18n';
 import { useState } from 'react';
 import { Alert, Share, StyleSheet, Text, View } from 'react-native';
 import { ApiError, apiTextRequest, sessionRequest } from './api';
-import { ActionButton, Card, Page, PageTitle, TextField } from './components';
-import { colors } from './theme';
+import {
+    ActionButton,
+    Card,
+    Page,
+    PageTitle,
+    PreferencesSheet,
+    SettingsRow,
+    SectionTitle,
+    UserAvatar,
+    TextField,
+} from './components';
+import type { ThemeColors } from './theme';
 import type { Session } from './types';
 
 type Props = {
@@ -16,6 +28,10 @@ export default function AccountScreen({
     onLogout,
     onAccountDeleted,
 }: Props) {
+    const { styles } = useThemeStyles(createStyles);
+    const { language, theme } = usePreferences();
+    const [preferencesOpen, setPreferencesOpen] = useState(false);
+    const [deletionOpen, setDeletionOpen] = useState(false);
     const [password, setPassword] = useState('');
     const [busy, setBusy] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -53,17 +69,19 @@ export default function AccountScreen({
 
     function confirmAccountDeletion(): void {
         if (!password) {
-            setErrorMessage('Informe sua senha para confirmar a exclusão.');
+            setErrorMessage(t('Informe sua senha para confirmar a exclusão.'));
             return;
         }
 
         Alert.alert(
-            'Excluir sua conta?',
-            'Essa ação é permanente. Seu perfil, lançamentos, categorias, metas e recorrências serão removidos.',
+            t('Excluir sua conta?'),
+            t(
+                'Essa ação é permanente. Seu perfil, lançamentos, categorias, metas e recorrências serão removidos.',
+            ),
             [
-                { text: 'Cancelar', style: 'cancel' },
+                { text: t('Cancelar'), style: 'cancel' },
                 {
-                    text: 'Excluir permanentemente',
+                    text: t('Excluir permanentemente'),
                     style: 'destructive',
                     onPress: () => void deleteAccount(),
                 },
@@ -89,68 +107,64 @@ export default function AccountScreen({
     return (
         <Page>
             <PageTitle
-                title="Conta"
-                subtitle="Perfil e segurança da sua sessão."
+                title={t('Conta')}
+                subtitle={t('Perfil e segurança da sua sessão.')}
             />
 
             {session.isDemo ? (
                 <View style={styles.demoBanner}>
                     <Text style={styles.demoBannerText}>
-                        Conta de demonstração em instância isolada
+                        {t('Conta de demonstração em instância isolada')}
                     </Text>
                 </View>
             ) : null}
 
-            <Card>
-                <Text style={styles.name}>{session.user.name}</Text>
-                <Text style={styles.email}>{session.user.email}</Text>
-                <Text style={styles.sessionInfo}>
-                    Token válido até{' '}
-                    {new Intl.DateTimeFormat('pt-BR', {
-                        dateStyle: 'medium',
-                        timeStyle: 'short',
-                    }).format(new Date(session.expiresAt))}
-                </Text>
-                <Text style={styles.sessionInfo}>
-                    Ambiente: {session.isDemo ? 'Demonstração' : 'Produção'}
-                </Text>
+            <Card style={styles.profileCard}>
+                <UserAvatar name={session.user.name} />
+                <View style={styles.profileCopy}>
+                    <Text style={styles.name}>{session.user.name}</Text>
+                    <Text style={styles.email}>{session.user.email}</Text>
+                </View>
             </Card>
-
+            <Card>
+                <SectionTitle title={t('Do seu jeito')} />
+                <SettingsRow
+                    icon="settings"
+                    title={t('Idioma e aparência')}
+                    subtitle={`${language === 'en' ? 'English' : 'Português'} · ${t(theme === 'light' ? 'Claro' : theme === 'dark' ? 'Escuro' : 'Sistema')}`}
+                    onPress={() => setPreferencesOpen(true)}
+                />
+            </Card>
             {!session.isDemo ? (
                 <Card>
-                    <Text style={styles.sectionTitle}>Seus dados</Text>
-                    <Text style={styles.description}>
-                        Compartilhe um arquivo JSON com seu perfil e dados
-                        financeiros.
-                    </Text>
-                    <ActionButton
+                    <SectionTitle title={t('Seus dados')} />
+                    <SettingsRow
+                        icon="download"
+                        title={t('Exportar todos os dados')}
+                        subtitle={t('Seu perfil e suas finanças em JSON.')}
                         onPress={() =>
                             void shareExport(
                                 '/account/export',
-                                'Exportação Saldoa',
+                                t('Exportação Saldoa'),
                             )
                         }
-                        variant="secondary"
                         disabled={busy}
                         loading={busy}
-                    >
-                        Exportar todos os dados
-                    </ActionButton>
-                    <ActionButton
+                    />
+                    <SettingsRow
+                        icon="transactions"
+                        title={t('Exportar CSV do mês')}
+                        subtitle={t('Seus lançamentos em uma planilha.')}
                         onPress={() =>
                             void shareExport(
                                 `/transactions/export?month=${new Date().toISOString().slice(0, 7)}`,
-                                'Lançamentos Saldoa',
+                                t('Lançamentos Saldoa'),
                             )
                         }
-                        variant="secondary"
                         disabled={busy}
-                    >
-                        Exportar CSV do mês
-                    </ActionButton>
+                    />
                 </Card>
             ) : null}
-
             {errorMessage ? (
                 <Text accessibilityRole="alert" style={styles.error}>
                     {errorMessage}
@@ -158,62 +172,94 @@ export default function AccountScreen({
             ) : null}
 
             <Card>
-                <Text style={styles.sectionTitle}>Segurança</Text>
+                <SectionTitle title={t('Segurança')} />
+                <Text style={styles.description}>
+                    {t('Sessão válida até')}{' '}
+                    {new Intl.DateTimeFormat(getLocale(), {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                    }).format(new Date(session.expiresAt))}
+                </Text>
                 {!session.isDemo ? (
-                    <ActionButton
+                    <SettingsRow
+                        icon="shield"
+                        title={t('Encerrar sessões em outros dispositivos')}
                         onPress={() =>
                             Alert.alert(
-                                'Encerrar todas as sessões?',
-                                'Todos os dispositivos serão desconectados.',
+                                t('Encerrar todas as sessões?'),
+                                t('Todos os dispositivos serão desconectados.'),
                                 [
-                                    { text: 'Cancelar', style: 'cancel' },
+                                    { text: t('Cancelar'), style: 'cancel' },
                                     {
-                                        text: 'Encerrar sessões',
+                                        text: t('Encerrar sessões'),
                                         onPress: () => void revokeAllTokens(),
                                     },
                                 ],
                             )
                         }
-                        variant="secondary"
                         disabled={busy}
-                    >
-                        Encerrar sessões em outros dispositivos
-                    </ActionButton>
+                    />
                 ) : null}
-                <ActionButton
+                <SettingsRow
+                    icon="logout"
+                    title={t('Sair desta conta')}
                     onPress={() => void onLogout()}
-                    variant="secondary"
                     disabled={busy}
-                >
-                    Sair desta conta
-                </ActionButton>
+                />
             </Card>
-
             {!session.isDemo ? (
                 <Card style={styles.dangerCard}>
-                    <Text style={styles.dangerTitle}>Excluir conta</Text>
-                    <Text style={styles.description}>
-                        A exclusão remove permanentemente sua conta e os dados
-                        associados. Também é possível solicitar pelo site, sem o
-                        app.
-                    </Text>
-                    <TextField
-                        label="Confirme sua senha"
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                        autoComplete="current-password"
-                        placeholder="Senha atual"
-                    />
-                    <ActionButton
-                        onPress={confirmAccountDeletion}
-                        variant="danger"
+                    <SettingsRow
+                        icon="trash"
+                        title={t('Excluir conta')}
+                        subtitle={t(
+                            'Gerenciar a exclusão permanente dos seus dados.',
+                        )}
+                        onPress={() => {
+                            setDeletionOpen(!deletionOpen);
+                            setPassword('');
+                        }}
                         disabled={busy}
-                    >
-                        Excluir minha conta
-                    </ActionButton>
+                    />
+                    {deletionOpen ? (
+                        <View style={styles.deletionContent}>
+                            <Text style={styles.description}>
+                                {t(
+                                    'A exclusão remove permanentemente sua conta e os dados associados. Também é possível solicitar pelo site, sem o app.',
+                                )}
+                            </Text>
+                            <TextField
+                                label={t('Confirme sua senha')}
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                                autoComplete="current-password"
+                                placeholder={t('Senha atual')}
+                            />
+                            <ActionButton
+                                onPress={confirmAccountDeletion}
+                                variant="danger"
+                                disabled={busy}
+                            >
+                                {t('Excluir minha conta')}
+                            </ActionButton>
+                            <ActionButton
+                                onPress={() => {
+                                    setDeletionOpen(false);
+                                    setPassword('');
+                                }}
+                                variant="quiet"
+                            >
+                                {t('Cancelar')}
+                            </ActionButton>
+                        </View>
+                    ) : null}
                 </Card>
             ) : null}
+            <PreferencesSheet
+                visible={preferencesOpen}
+                onClose={() => setPreferencesOpen(false)}
+            />
         </Page>
     );
 }
@@ -221,33 +267,52 @@ export default function AccountScreen({
 function errorMessageFor(error: unknown): string {
     return error instanceof ApiError
         ? error.message
-        : 'Não foi possível concluir a solicitação.';
+        : t('Não foi possível concluir a solicitação.');
 }
 
-const styles = StyleSheet.create({
-    demoBanner: {
-        backgroundColor: colors.primarySoft,
-        borderRadius: 10,
-        padding: 11,
-    },
-    demoBannerText: {
-        color: colors.primary,
-        fontSize: 12,
-        fontWeight: '700',
-        textAlign: 'center',
-    },
-    name: { color: colors.text, fontSize: 18, fontWeight: '700' },
-    email: { color: colors.muted, fontSize: 13 },
-    sessionInfo: { color: colors.muted, fontSize: 11 },
-    sectionTitle: { color: colors.text, fontSize: 15, fontWeight: '700' },
-    description: { color: colors.muted, fontSize: 13, lineHeight: 19 },
-    error: {
-        backgroundColor: colors.expenseSoft,
-        borderRadius: 10,
-        color: colors.expense,
-        fontSize: 13,
-        padding: 12,
-    },
-    dangerCard: { borderColor: '#F1D1D1' },
-    dangerTitle: { color: colors.expense, fontSize: 15, fontWeight: '700' },
-});
+const createStyles = (colors: ThemeColors) =>
+    StyleSheet.create({
+        demoBanner: {
+            backgroundColor: colors.primarySoft,
+            borderRadius: 14,
+            padding: 12,
+        },
+        demoBannerText: {
+            fontFamily: 'DMSans',
+            color: colors.primary,
+            fontSize: 12,
+            fontWeight: '700',
+            textAlign: 'center',
+        },
+        profileCard: { alignItems: 'center', paddingVertical: 28, gap: 16 },
+        profileCopy: { alignItems: 'center', gap: 7, width: '100%' },
+        name: {
+            fontFamily: 'SpaceGrotesk',
+            color: colors.text,
+            fontSize: 24,
+            fontWeight: '700',
+            textAlign: 'center',
+        },
+        email: {
+            fontFamily: 'DMSans',
+            color: colors.muted,
+            fontSize: 13,
+            textAlign: 'center',
+        },
+        description: {
+            fontFamily: 'DMSans',
+            color: colors.muted,
+            fontSize: 12,
+            lineHeight: 19,
+        },
+        error: {
+            fontFamily: 'DMSans',
+            backgroundColor: colors.surfaceMuted,
+            borderRadius: 14,
+            color: colors.text,
+            fontSize: 13,
+            padding: 14,
+        },
+        dangerCard: { borderColor: colors.border },
+        deletionContent: { gap: 16, paddingTop: 8 },
+    });

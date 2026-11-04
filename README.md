@@ -36,13 +36,19 @@ Gravações reais da aplicação em execução no ambiente de desenvolvimento co
 
 ### Aplicativo Móvel (Expo)
 
-Prévia do cliente Expo no navegador, em uma janela de 390 × 844, com dados fictícios da instância local de demonstração.
+Prévia atualizada em 04/11/2026 do cliente Expo no navegador, em uma janela de 390 × 844. As capturas usam respostas simuladas da API com dados fictícios; não representam um teste de login na API real ou das barras nativas do Android.
 
-![Demonstração do aplicativo móvel Expo](docs/images/mobile-expo.gif)
+<img src="docs/screenshots/mobile-dashboard-expo.png" alt="Dashboard mobile do Saldoa com a identidade visual atual" width="300">
 
-Capturas individuais: [Login](docs/screenshots/mobile-login-expo.png) · [Dashboard](docs/screenshots/mobile-dashboard-expo.png) · [Lançamentos](docs/screenshots/mobile-transactions-expo.png) · [Formulário de lançamento](docs/screenshots/mobile-transaction-form-expo.png) · [Categorias](docs/screenshots/mobile-categories-expo.png) · [Metas](docs/screenshots/mobile-budgets-expo.png) · [Recorrências](docs/screenshots/mobile-recurring-expo.png) · [Conta](docs/screenshots/mobile-account-expo.png).
+Capturas individuais: [Login](docs/screenshots/mobile-login-expo.png) · [Cadastro](docs/screenshots/mobile-register-expo.png) · [Dashboard](docs/screenshots/mobile-dashboard-expo.png) · [Lançamentos](docs/screenshots/mobile-transactions-expo.png) · [Formulário de lançamento](docs/screenshots/mobile-transaction-form-expo.png) · [Categorias](docs/screenshots/mobile-categories-expo.png) · [Metas](docs/screenshots/mobile-budgets-expo.png) · [Recorrências](docs/screenshots/mobile-recurring-expo.png) · [Conta](docs/screenshots/mobile-account-expo.png).
 
-> A prévia web é voltada à revisão visual: como o SecureStore não está disponível no navegador, a sessão web fica apenas em memória e é perdida ao recarregar a página. Para testar no celular, use o Expo Go.
+O mobile usa uma ilustração vetorial própria no login, ajustes em um painel acessível pelo botão superior e uma conta organizada por grupos de opções. O dashboard destaca o saldo, oferece atalhos e mostra a distribuição das despesas; as metas exibem gasto, limite e valor disponível ou excedido.
+
+A demonstração aparece como o link discreto **Experimentar sem criar conta**, somente quando uma URL demo válida foi configurada no build. A exibição não depende de ser um APK de teste; a instância demo precisa estar disponível e habilitada. Sem essa configuração, o acesso fica oculto.
+
+Preferências e versão em inglês: [Idioma e aparência](docs/screenshots/mobile-preferences-en.png) · [Dashboard em inglês](docs/screenshots/mobile-dashboard-en.png).
+
+> A prévia web é voltada à revisão visual: como o SecureStore não está disponível no navegador, a sessão web fica apenas em memória e é perdida ao recarregar a página. Para testar no celular, use o APK local ou o Expo Go; mudanças em ícones e barras nativas exigem recompilar o APK.
 
 ## Screenshots
 
@@ -131,6 +137,12 @@ Para testar contra o backend local a partir de um aparelho físico:
 
 Para abrir uma prévia visual no navegador, use `npm run web` dentro da pasta `mobile/`. Essa opção não substitui os testes no Expo Go.
 
+O aplicativo usa a identidade visual do desktop: carteira Saldoa, destaque laranja e fontes DM Sans e Space Grotesk incluídas no pacote, sem depender da internet. Em **Preferências**, disponíveis no login e em **Conta**, escolha **Português / English** e **Claro / Escuro / Sistema**. As escolhas ficam salvas no aparelho (SecureStore); na prévia web, apenas essas preferências usam armazenamento local, enquanto o token permanece em memória. O idioma inicial acompanha o aparelho quando ele usa inglês; nos demais casos, usa português. O tema inicial acompanha o sistema.
+
+O idioma muda os textos e a apresentação de valores e datas; a moeda continua sendo **BRL**, sem conversão. Os campos de data indicam explicitamente a ordem dia/mês/ano nos dois idiomas e enviam ISO para a API. Nomes de categorias e descrições escritos pelo usuário não são traduzidos. Erros de validação da API preservam os detalhes em português; em inglês, o cliente identifica os campos que precisam de correção.
+
+No Android, as barras superior e inferior do sistema ficam ocultas e podem reaparecer temporariamente por gesto. As telas e as abas respeitam as áreas seguras do aparelho, incluindo recortes e navegação inferior. O comportamento exato dos gestos deve ser confirmado no celular; a prévia web não reproduz as barras nativas.
+
 ### 3. Gerar um APK local de teste
 
 Com Android Studio, Android SDK e Java instalados, é possível gerar o APK sem conta EAS ou enviar o código para um serviço de build remoto. Configure `EXPO_PUBLIC_API_URL` em `mobile/.env` com o endereço LAN do computador, conectado à mesma rede Wi‑Fi do celular, e inicie a API Laravel aceitando conexões na rede local:
@@ -147,6 +159,8 @@ php artisan serve --host=0.0.0.0 --port=8000
 ```
 
 O build permite HTTP **somente para o endereço privado configurado em `EXPO_PUBLIC_API_URL`** e continua bloqueando HTTP para os demais domínios. O arquivo fica em `mobile/android/app/build/outputs/apk/release/app-release.apk`, inclui somente a arquitetura `arm64-v8a` e é assinado com a chave de depuração local: destina-se a testes na sua rede, não à Play Store. Sem URLs públicas, ele não funcionará fora dessa rede. Builds EAS ou AAB de produção exigem configuração de ambientes e assinatura próprios, além de uma API pública HTTPS.
+
+O script usa caminhos curtos no Windows e limita os trabalhos de compilação para reduzir o consumo de memória. O Gradle encerra seu processo ao terminar o build. A primeira compilação pode levar vários minutos; mantenha o IP local configurado atualizado caso ele mude no Wi-Fi.
 
 ## Autenticação, isolamento e segurança
 
@@ -213,6 +227,7 @@ Para o cliente móvel:
 
 ```powershell
 cd mobile
+npm test
 npx expo lint
 npx tsc --noEmit
 npx expo-doctor

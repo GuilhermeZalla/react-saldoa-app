@@ -1,3 +1,5 @@
+import { useThemeStyles } from './PreferencesContext';
+import { t } from './i18n';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { ApiError, sessionRequest } from './api';
@@ -9,10 +11,16 @@ import {
     PageTitle,
     SectionTitle,
     TextField,
-    commonStyles,
+    useCommonStyles,
 } from './components';
-import { amountForApi, formatCurrency, formatDate } from './format';
-import { colors } from './theme';
+import {
+    amountForApi,
+    dateForApi,
+    formatCurrency,
+    formatDate,
+    formatDateForInput,
+} from './format';
+import type { ThemeColors } from './theme';
 import type { Category, RecurringTransaction, Session } from './types';
 
 type Props = { session: Session };
@@ -37,6 +45,8 @@ const frequencies: { value: Frequency; label: string }[] = [
 ];
 
 export default function RecurringScreen({ session }: Props) {
+    const { styles } = useThemeStyles(createStyles);
+    const commonStyles = useCommonStyles();
     const [items, setItems] = useState<RecurringTransaction[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [description, setDescription] = useState('');
@@ -119,7 +129,15 @@ export default function RecurringScreen({ session }: Props) {
 
     async function createRecurring(): Promise<void> {
         if (!description.trim() || !amount.trim() || categoryId === null) {
-            setErrorMessage('Preencha a descrição, o valor e a categoria.');
+            setErrorMessage(t('Preencha a descrição, o valor e a categoria.'));
+            return;
+        }
+
+        const apiDate = dateForApi(startDate);
+        if (apiDate === null) {
+            setErrorMessage(
+                t('Informe uma data válida no formato DD/MM/AAAA.'),
+            );
             return;
         }
 
@@ -135,7 +153,7 @@ export default function RecurringScreen({ session }: Props) {
                     type,
                     category_id: categoryId,
                     frequency,
-                    start_date: startDate,
+                    start_date: apiDate,
                     end_date: null,
                 },
             });
@@ -152,12 +170,15 @@ export default function RecurringScreen({ session }: Props) {
 
     function askToDelete(item: RecurringTransaction): void {
         Alert.alert(
-            'Excluir recorrência?',
-            `A regra “${item.description}” será removida. Os lançamentos já criados permanecem.`,
+            t('Excluir recorrência?'),
+            t(
+                'A regra “{description}” será removida. Os lançamentos já criados permanecem.',
+                { description: item.description },
+            ),
             [
-                { text: 'Cancelar', style: 'cancel' },
+                { text: t('Cancelar'), style: 'cancel' },
                 {
-                    text: 'Excluir',
+                    text: t('Excluir'),
                     style: 'destructive',
                     onPress: () => void deleteRecurring(item.id),
                 },
@@ -179,8 +200,8 @@ export default function RecurringScreen({ session }: Props) {
     return (
         <Page>
             <PageTitle
-                title="Recorrências"
-                subtitle="Acompanhe lançamentos que se repetem."
+                title={t('Recorrências')}
+                subtitle={t('Acompanhe lançamentos que se repetem.')}
             />
             {errorMessage ? (
                 <Text accessibilityRole="alert" style={styles.error}>
@@ -190,16 +211,16 @@ export default function RecurringScreen({ session }: Props) {
 
             {!session.isDemo ? (
                 <Card>
-                    <SectionTitle title="Nova recorrência" />
+                    <SectionTitle title={t('Nova recorrência')} />
                     <TextField
-                        label="Descrição"
+                        label={t('Descrição')}
                         value={description}
                         onChangeText={setDescription}
                         maxLength={255}
-                        placeholder="Ex.: Mensalidade"
+                        placeholder={t('Ex.: Mensalidade')}
                     />
                     <TextField
-                        label="Valor"
+                        label={t('Valor')}
                         value={amount}
                         onChangeText={setAmount}
                         keyboardType="decimal-pad"
@@ -217,11 +238,11 @@ export default function RecurringScreen({ session }: Props) {
                             );
                         }}
                         options={[
-                            { value: 'expense', label: 'Despesa' },
-                            { value: 'income', label: 'Receita' },
+                            { value: 'expense', label: t('Despesa') },
+                            { value: 'income', label: t('Receita') },
                         ]}
                     />
-                    <Text style={styles.fieldLabel}>Categoria</Text>
+                    <Text style={styles.fieldLabel}>{t('Categoria')}</Text>
                     {availableCategories.length ? (
                         <ChoiceChips
                             selected={categoryId?.toString() ?? ''}
@@ -233,36 +254,43 @@ export default function RecurringScreen({ session }: Props) {
                         />
                     ) : (
                         <Text style={commonStyles.muted}>
-                            Crie uma categoria desse tipo antes de continuar.
+                            {t(
+                                'Crie uma categoria desse tipo antes de continuar.',
+                            )}
                         </Text>
                     )}
-                    <Text style={styles.fieldLabel}>Frequência</Text>
+                    <Text style={styles.fieldLabel}>{t('Frequência')}</Text>
                     <ChoiceChips
                         selected={frequency}
                         onSelect={(value) => setFrequency(value as Frequency)}
-                        options={frequencies}
+                        options={frequencies.map((item) => ({
+                            ...item,
+                            label: t(item.label),
+                        }))}
                     />
                     <TextField
-                        label="Data de início (AAAA-MM-DD)"
-                        value={startDate}
+                        label={t('Data de início (DD/MM/AAAA)')}
+                        value={formatDateForInput(startDate)}
                         onChangeText={setStartDate}
                         autoCapitalize="none"
+                        placeholder={t('DD/MM/AAAA')}
+                        maxLength={10}
                     />
                     <ActionButton
                         onPress={() => void createRecurring()}
                         disabled={saving}
                         loading={saving}
                     >
-                        Criar recorrência
+                        {t('Criar recorrência')}
                     </ActionButton>
                 </Card>
             ) : null}
 
             <Card>
-                <SectionTitle title="Regras cadastradas" />
+                <SectionTitle title={t('Regras cadastradas')} />
                 {loading ? (
                     <Text style={commonStyles.muted}>
-                        Carregando recorrências…
+                        {t('Carregando recorrências…')}
                     </Text>
                 ) : items.length ? (
                     items.map((item) => (
@@ -276,10 +304,10 @@ export default function RecurringScreen({ session }: Props) {
                                     {frequencyLabel(item.frequency)}
                                 </Text>
                                 <Text style={styles.meta}>
-                                    Próxima:{' '}
+                                    {t('Próxima:')}{' '}
                                     {item.next_occurrence_date
                                         ? formatDate(item.next_occurrence_date)
-                                        : 'não agendada'}
+                                        : t('não agendada')}
                                 </Text>
                             </View>
                             <View style={styles.itemActions}>
@@ -299,7 +327,7 @@ export default function RecurringScreen({ session }: Props) {
                                         variant="quiet"
                                         compact
                                     >
-                                        Excluir
+                                        {t('Excluir')}
                                     </ActionButton>
                                 ) : null}
                             </View>
@@ -307,7 +335,7 @@ export default function RecurringScreen({ session }: Props) {
                     ))
                 ) : (
                     <Text style={commonStyles.muted}>
-                        Nenhuma recorrência cadastrada.
+                        {t('Nenhuma recorrência cadastrada.')}
                     </Text>
                 )}
             </Card>
@@ -316,40 +344,54 @@ export default function RecurringScreen({ session }: Props) {
 }
 
 function frequencyLabel(frequency: Frequency): string {
-    return (
-        frequencies.find((item) => item.value === frequency)?.label ?? frequency
+    return t(
+        frequencies.find((item) => item.value === frequency)?.label ??
+            frequency,
     );
 }
 
 function errorMessageFor(error: unknown): string {
     return error instanceof ApiError
         ? error.message
-        : 'Não foi possível concluir a solicitação.';
+        : t('Não foi possível concluir a solicitação.');
 }
 
-const styles = StyleSheet.create({
-    error: {
-        backgroundColor: colors.expenseSoft,
-        borderRadius: 10,
-        color: colors.expense,
-        fontSize: 13,
-        padding: 12,
-    },
-    fieldLabel: { color: colors.text, fontSize: 13, fontWeight: '600' },
-    row: {
-        alignItems: 'center',
-        borderTopColor: colors.border,
-        borderTopWidth: 1,
-        flexDirection: 'row',
-        gap: 8,
-        justifyContent: 'space-between',
-        paddingTop: 11,
-    },
-    itemInfo: { flex: 1, gap: 3 },
-    name: { color: colors.text, fontSize: 13, fontWeight: '600' },
-    meta: { color: colors.muted, fontSize: 11 },
-    itemActions: { alignItems: 'flex-end' },
-    amount: { fontSize: 12, fontWeight: '700' },
-    income: { color: colors.income },
-    expense: { color: colors.expense },
-});
+const createStyles = (colors: ThemeColors) =>
+    StyleSheet.create({
+        error: {
+            fontFamily: 'DMSans',
+            backgroundColor: colors.expenseSoft,
+            borderRadius: 10,
+            color: colors.expense,
+            fontSize: 13,
+            padding: 12,
+        },
+        fieldLabel: {
+            fontFamily: 'DMSans',
+            color: colors.text,
+            fontSize: 15,
+            fontWeight: '600',
+        },
+        row: {
+            alignItems: 'center',
+            borderTopColor: colors.border,
+            borderTopWidth: 1,
+            flexDirection: 'row',
+            gap: 8,
+            justifyContent: 'space-between',
+            paddingTop: 16,
+            flexWrap: 'wrap',
+        },
+        itemInfo: { flex: 1, gap: 3 },
+        name: {
+            fontFamily: 'SpaceGrotesk',
+            color: colors.text,
+            fontSize: 15,
+            fontWeight: '600',
+        },
+        meta: { fontFamily: 'DMSans', color: colors.muted, fontSize: 11 },
+        itemActions: { alignItems: 'flex-end' },
+        amount: { fontFamily: 'DMSans', fontSize: 12, fontWeight: '700' },
+        income: { color: colors.income },
+        expense: { color: colors.expense },
+    });

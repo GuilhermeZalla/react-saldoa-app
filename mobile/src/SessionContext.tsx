@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import {
     createContext,
     useCallback,
@@ -70,10 +71,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
                 !(error instanceof ApiError && error.status === 401)
             ) {
                 Alert.alert(
-                    'Não foi possível restaurar a sessão',
+                    t('Não foi possível restaurar a sessão'),
                     error instanceof ApiError
                         ? error.message
-                        : 'Tente entrar novamente.',
+                        : t('Tente entrar novamente.'),
                 );
             }
         } finally {
@@ -106,8 +107,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
             } catch (error) {
                 if (!(error instanceof ApiError && error.status === 401)) {
                     Alert.alert(
-                        'Sessão encerrada neste dispositivo',
-                        'A API não confirmou a revogação. A sessão salva localmente foi removida.',
+                        t('Sessão encerrada neste dispositivo'),
+                        t(
+                            'A API não confirmou a revogação. A sessão salva localmente foi removida.',
+                        ),
                     );
                 }
             }
@@ -121,8 +124,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
         await clearSession();
         setSession(null);
         Alert.alert(
-            'Conta excluída',
-            'Sua conta e seus dados foram removidos.',
+            t('Conta excluída'),
+            t('Sua conta e seus dados foram removidos.'),
         );
     }, []);
 
