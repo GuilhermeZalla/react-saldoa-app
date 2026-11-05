@@ -162,7 +162,7 @@ Ele inclui SQL consistente do MySQL, arquivos de storage e configuração. Os ar
 
 Há uma cópia criptografada fora da EC2 em `.secrets/backups/saldoa-current.cms`. A restauração SQL foi conferida num MySQL temporário sem rede, sem usar os volumes de produção. O teste também verificou checksums e integridade dos arquivos de storage/configuração. O container temporário e seu volume foram removidos. Isso ainda não substitui ensaiar a recuperação completa da aplicação em uma segunda VM.
 
-O backup diário agora usa **Gmail**, por decisão do titular, sem S3, permissões IAM adicionais ou upgrade da AWS. O timer `saldoa-backup.timer` está habilitado para 06:30 UTC (03:30 em São Paulo), com atraso aleatório de até dez minutos. O primeiro envio pelo serviço systemd terminou com `Result=success` e `ExecMainStatus=0`; o titular confirmou recebimento.
+O backup usa **Gmail a cada 15 dias**, por decisão do titular, sem S3, permissões IAM adicionais ou upgrade da AWS. O timer `saldoa-backup.timer` faz uma checagem diária às 06:30 UTC (03:30 em São Paulo), com atraso aleatório de até dez minutos. A condição `backup-due.py` só permite gerar/enviar uma cópia quando passaram 15 dias de calendário UTC desde a data de `last-success`; a contagem continua válida após reiniciar a EC2. Sem registro anterior, o primeiro disparo gera a cópia. Falhas durante o backup são tentadas novamente no dia seguinte. O comando direto acima permite uma cópia manual imediata, que reinicia a contagem após sucesso. O primeiro envio pelo serviço systemd terminou com `Result=success` e `ExecMainStatus=0`; o titular confirmou recebimento.
 
 O Gmail pode agrupar os anexos `.cms` e `.sha256` em um ZIP ao baixar. A cópia recebida teve seu SHA256 comparado com o arquivo da EC2, passou pela autenticação criptográfica e foi usada em uma recuperação completa isolada: SQL, storage, APP_KEY, aplicação web e API. Cadastro, autenticação, lançamento, dashboard, exportação e exclusão de uma conta temporária passaram. A rede do ensaio era interna, sem portas publicadas, SMTP externo, worker ou scheduler; banco e volumes reais não foram utilizados.
 
@@ -170,17 +170,20 @@ Para consultar o agendamento, executar uma cópia manual ou conferir os registro
 
 ```bash
 sudo systemctl list-timers saldoa-backup.timer
+# Executa apenas se já chegou a data; para forçar, use o comando direto acima.
 sudo systemctl start saldoa-backup.service
 sudo systemctl show saldoa-backup.service --property=Result --property=ExecMainStatus
 sudo journalctl -u saldoa-backup.service --since today --no-pager
 sudo cat /var/backups/saldoa/last-success
 ```
 
+Nos dias em que ainda não venceu o intervalo, `Result=exec-condition` com `ExecCondition` encerrando em `status=1` significa que o envio foi pulado normalmente. Um registro `last-success` ilegível, inválido ou no futuro faz a condição falhar com status 255 e exige conferir o journal e o relógio do servidor.
+
 A configuração fica em `/etc/saldoa/backup.env`, com permissão 0600 e os campos `SALDOA_ROOT`, `SALDOA_BACKUP_DELIVERY=gmail`, `SALDOA_BACKUP_EMAIL` e `SALDOA_BACKUP_MAIL_SCRIPT`. O helper instalado em `/usr/local/lib/saldoa/send-backup.py` lê o SMTP da configuração Compose privada, sem imprimir credenciais. Envia somente um envelope CMS autenticado e seu checksum; arquivos sem criptografia e anexos acima de **15 MiB** são rejeitados. Esse teto deixa margem para a codificação do e-mail sob o [limite pessoal do Gmail](https://support.google.com/mail/answer/6584?hl=en).
 
 As cópias locais com mais de sete dias só são removidas se houver o marcador `.emailed`, criado após aceitação SMTP. Cópias com envio falho são preservadas. Na caixa Gmail, mantenha pelo menos os últimos 30 dias e uma cópia mensal; a limpeza da caixa é manual. Acompanhe o espaço disponível. Se o backup ultrapassar 15 MiB, será necessário outro destino antes de retomar o envio; o script não troca o arquivo por um link público.
 
-Falhas geram registro no journal e uma tentativa de aviso pelo mesmo SMTP. Se o próprio SMTP ou a EC2 estiver indisponível, esse aviso também pode não chegar: a ausência do e-mail diário exige verificação. O arquivo `last-success` registra a última execução concluída, não a confirmação humana de recebimento.
+Falhas geram registro no journal e uma tentativa de aviso pelo mesmo SMTP. Se o próprio SMTP ou a EC2 estiver indisponível, esse aviso também pode não chegar: a ausência do e-mail esperado a cada 15 dias exige verificação. O arquivo `last-success` registra a última execução concluída, não a confirmação humana de recebimento.
 
 ### Repetir a recuperação
 
@@ -207,7 +210,7 @@ O script anterior `docker/backup-production.sh` continua disponível para compat
 
 Em 05/11/2026, o titular decidiu manter o plano gratuito atual e dispensar a automação do deploy. **Fazer push no GitHub não atualiza o site nem a API.** O CI continua verificando o código; publicar na EC2 é uma operação separada, feita pelo administrador ou com ajuda do assistente.
 
-A conta usa a experiência simplificada da AWS baseada em projetos. O backup diário por Gmail não depende dessa integração GitHub/OIDC. A stack `saldoa-automation` falhou ao criar o provedor GitHub OIDC: `iam:CreateOpenIDConnectProvider` foi negado explicitamente por uma SCP da organização. O CloudShell também apresentou verificação de conta pendente. O titular não autorizou upgrade nem ativação dos recursos avançados.
+A conta usa a experiência simplificada da AWS baseada em projetos. O backup por Gmail a cada 15 dias não depende dessa integração GitHub/OIDC. A stack `saldoa-automation` falhou ao criar o provedor GitHub OIDC: `iam:CreateOpenIDConnectProvider` foi negado explicitamente por uma SCP da organização. O CloudShell também apresentou verificação de conta pendente. O titular não autorizou upgrade nem ativação dos recursos avançados.
 
 Os rascunhos de workflow, template e scripts de automação foram retirados dos arquivos candidatos a commit e arquivados localmente em `.secrets/deferred-deploy-20261105/`. O helper instalado anteriormente na EC2 permanece sem acionamento configurado; não houve deploy pelo novo fluxo. Não reutilize o ZIP antigo de preparação para repetir a stack.
 

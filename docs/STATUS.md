@@ -49,7 +49,8 @@ Atualizado em 05/11/2026. Projeto de controle financeiro pessoal e portfólio. *
 - Gmail configurado com senha de app fora do Git. Autenticação TLS e envio real aprovados; recebimento na caixa de entrada confirmado pelo titular. Site respondeu HTTP 200 após recriar app/worker/scheduler.
 - Criados `docker/backup-encrypted.sh` e `docker/verify-backup.sh`. Backup inclui SQL, storage e configuração, com criptografia autenticada AES-256-GCM e chave pública RSA. Chave privada somente no notebook (`.secrets/backup-private-key.pem`), com ACL restrita; nunca enviada à EC2.
 - Cópia criptografada externa em `.secrets/backups/saldoa-current.cms`. SQL restaurado em MySQL temporário sem rede e com volume próprio, removido após o teste. Dados e DDL conferidos, normalizando apenas declarações redundantes de charset. Storage/configuração tiveram integridade e checksums conferidos; na etapa de fechamento, a aplicação também foi recuperada em containers isolados a partir do arquivo recebido por Gmail. Reconstrução de outra VM é um procedimento de operação separado.
-- Backup diário ativo por Gmail: `SALDOA_BACKUP_DELIVERY=gmail`. Timer habilitado às 06:30 UTC (03:30 em São Paulo), com até dez minutos de atraso aleatório. Serviço executado com sucesso e recebimento confirmado. Cópia Gmail com checksum idêntico ao servidor e recuperação completa isolada aprovados. S3 não é utilizado.
+- Backup a cada 15 dias ativo por Gmail: `SALDOA_BACKUP_DELIVERY=gmail`. Timer verifica diariamente às 06:30 UTC (03:30 em São Paulo), com até dez minutos de atraso aleatório, mas `ExecCondition` só permite gerar/enviar após 15 dias de calendário UTC desde a data de `last-success`. A contagem persiste após reinícios; falhas de backup são tentadas no dia seguinte. Frequência alterada a pedido do titular em 05/11/2026; próximo envio previsto para 20/11/2026. Serviço executado com sucesso e recebimento confirmado. Cópia Gmail com checksum idêntico ao servidor e recuperação completa isolada aprovados. S3 não é utilizado.
+- Agendamento de 15 dias instalado e conferido na EC2: timer habilitado/ativo, condição pulando corretamente o envio antes do prazo e `last-success` preservado. Treze verificações cobriram o limite de 15 dias, virada de ano, fevereiro bissexto, registro ausente/inválido/futuro e códigos de saída; sintaxe Python e units systemd aprovados. Site saudável após o ajuste; nenhuma nova cópia ou mensagem gerada durante a validação.
 - A tentativa de stack `saldoa-automation` falhou: `iam:CreateOpenIDConnectProvider` negado explicitamente por SCP. Criação de `OperationsBucket` cancelada, com evento posterior `DELETE_SKIPPED`; existência/conteúdo do bucket ainda não conferidos. CloudShell também bloqueado por verificação da conta. Não há autorização para upgrade ou ativação de recursos avançados.
 - Por decisão do titular, retirados dos arquivos candidatos a commit os quatro rascunhos de automação: workflow, template CloudFormation, helper AWS e script de deploy. Arquivados em `.secrets/deferred-deploy-20261105/`, ignorado pelo Git. Helper instalado na EC2 permanece sem acionamento configurado; nenhum deploy automático foi executado. Scripts de backup e verificação foram preservados.
 - Suíte Laravel completa: 154 testes aprovados, 2 ignorados e 1.343 assertions, sem avisos após remover o import redundante `RuntimeException` de `DemoDataSeederTest.php`. Os dois testes ignorados dependem de autenticação em dois fatores, desativada no projeto. Nenhuma regra de negócio ou teste foi removido.
@@ -62,10 +63,10 @@ Escopo: versão funcional web e Android para portfólio, com distribuição dire
 
 - [x] Último APK confirmado no aparelho pelo titular.
 - [x] Recuperação de senha e exclusão por link de e-mail confirmadas pelo titular com conta descartável.
-- [x] Backup externo diário por Gmail habilitado, sem upgrade AWS ou dependências novas.
+- [x] Backup externo por Gmail a cada 15 dias habilitado, sem upgrade AWS ou dependências novas.
 - [x] Recebimento dos anexos confirmado; checksum do arquivo recebido idêntico ao da EC2.
 - [x] Recuperação de SQL, storage, APP_KEY, web e API em containers isolados, sem portas públicas ou internet. Cadastro, autenticação, lançamento, dashboard, exportação e exclusão passaram.
-- [x] Falhas de protocolo verificadas: arquivo sem criptografia, anexo acima de 15 MiB, recusa SMTP e adulteração criptográfica rejeitados. Aviso de falha tenta usar o mesmo SMTP; ausência do e-mail diário requer conferência manual.
+- [x] Falhas de protocolo verificadas: arquivo sem criptografia, anexo acima de 15 MiB, recusa SMTP e adulteração criptográfica rejeitados. Aviso de falha tenta usar o mesmo SMTP; ausência do e-mail esperado a cada 15 dias requer conferência manual.
 - [x] READMEs principal e mobile em inglês, mantendo imagens exclusivas do app na apresentação mobile e datas web 2025/mobile 2026.
 - [x] `composer ci:check`, build web, 13 testes mobile, tipos e lint mobile aprovados. Assinatura, pacote, versão 1.0.0 e ARM64 do APK conferidos.
 - [x] Integridade do código publicado conferida: 203 arquivos de runtime idênticos ao checkout que fecha a 1.0; nenhuma recompilação do app ou migration necessária nesta etapa.
@@ -74,7 +75,7 @@ A publicação Git/Release é registrada no fechamento desta entrega. A branch `
 
 ## Operação contínua e próximas versões
 
-1. Acompanhar o e-mail diário, o espaço da caixa Gmail e o disco da EC2. Manter cópias locais por pelo menos sete dias e retenção manual no Gmail; guardar a chave privada de recuperação em uma segunda localização segura fora do notebook.
+1. Acompanhar o e-mail a cada 15 dias, o espaço da caixa Gmail e o disco da EC2. Manter cópias locais por pelo menos sete dias e retenção manual no Gmail; guardar a chave privada de recuperação em uma segunda localização segura fora do notebook.
 2. Conferir recursos retidos da stack que falhou, antes de qualquer limpeza, sem alterar a EC2 ou volumes do Saldoa.
 3. Consultar créditos, prazo e consumo em AWS Settings/Billing durante o período de observação. O plano gratuito foi mantido; não ativar recursos avançados como parte de uma rotina de publicação.
 4. Realizar deploy manual quando houver mudanças de aplicação, com CI aprovado, backup e preservação de imagens/ajustes locais. Push não atualiza o site.

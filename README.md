@@ -97,7 +97,7 @@ Laravel tests use a separate test environment. Mobile-specific checks are docume
 
 ## Release scope
 
-Version 1.0 focuses on the existing web and mobile finance features. The public deployment uses HTTPS and Gmail SMTP. Encrypted backups are sent to the owner daily, and recovery was verified in isolated containers using a copy received by email. Releases are deployed manually; pushing to GitHub runs checks but does not update the server.
+Version 1.0 focuses on the existing web and mobile finance features. The public deployment uses HTTPS and Gmail SMTP. Encrypted backups are sent to the owner every 15 days, and recovery was verified in isolated containers using a copy received by email. Releases are deployed manually; pushing to GitHub runs checks but does not update the server.
 
 The Android APK currently uses a debug signing key and supports ARM64 devices. Google Play publishing, distribution signing, and automatic deployment are outside this release's scope.
 

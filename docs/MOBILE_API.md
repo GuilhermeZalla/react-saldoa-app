@@ -91,7 +91,7 @@ A API está publicada em `https://saldoa-app.duckdns.org`, numa EC2 com Docker C
 
 A instalação e reconstrução do servidor estão em [AWS_DEPLOY.md](AWS_DEPLOY.md); o acesso diário, logs e banco estão em [AWS_OPERACAO.md](AWS_OPERACAO.md). As instruções de instalação e build do aplicativo estão em [mobile/README.md](../mobile/README.md), evitando repetir procedimentos operacionais neste contrato da API.
 
-A versão funcional 1.0 usa `com.saldoa.app`, com a marca Fluxo. A distribuição direta pelo GitHub mantém a assinatura de depuração e a arquitetura ARM64; isso não representa assinatura de distribuição para a loja. Ainda não foi gerado um AAB de distribuição nem concluídos assinatura de produção, política de privacidade e requisitos de publicação na Play Store. SMTP Gmail validado em 05/11/2026, com recebimento confirmado. Backup criptografado copiado para o notebook e SQL restaurado em container isolado; backup diário por Gmail habilitado, com cópia recebida e recuperação completa em containers isolados validadas.
+A versão funcional 1.0 usa `com.saldoa.app`, com a marca Fluxo. A distribuição direta pelo GitHub mantém a assinatura de depuração e a arquitetura ARM64; isso não representa assinatura de distribuição para a loja. Ainda não foi gerado um AAB de distribuição nem concluídos assinatura de produção, política de privacidade e requisitos de publicação na Play Store. SMTP Gmail validado em 05/11/2026, com recebimento confirmado. Backup criptografado copiado para o notebook e SQL restaurado em container isolado; backup por Gmail a cada 15 dias habilitado, com cópia recebida e recuperação completa em containers isolados validadas.
 
 ## APK de teste com HTTPS público — 04/11/2026
 
