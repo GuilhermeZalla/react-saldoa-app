@@ -19,7 +19,12 @@ export type IconName =
     | 'download'
     | 'shield'
     | 'logout'
-    | 'trash';
+    | 'trash'
+    | 'calendar'
+    | 'more'
+    | 'eye'
+    | 'eye-off'
+    | 'search';
 
 export function AppIcon({
     name,
@@ -42,6 +47,32 @@ export function AppIcon({
             strokeLinejoin="round"
             accessible={false}
         >
+            {name === 'calendar' && (
+                <>
+                    <Rect x={3} y={5} width={18} height={16} rx={2} />
+                    <Path d="M16 3v4M8 3v4M3 11h18M8 15h2m4 0h2" />
+                </>
+            )}
+            {name === 'more' && (
+                <>
+                    <Circle cx={5} cy={12} r={1} />
+                    <Circle cx={12} cy={12} r={1} />
+                    <Circle cx={19} cy={12} r={1} />
+                </>
+            )}
+            {(name === 'eye' || name === 'eye-off') && (
+                <>
+                    <Path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z" />
+                    <Circle cx={12} cy={12} r={3} />
+                    {name === 'eye-off' && <Path d="m3 3 18 18" />}
+                </>
+            )}
+            {name === 'search' && (
+                <>
+                    <Circle cx={10} cy={10} r={6} />
+                    <Path d="m15 15 6 6" />
+                </>
+            )}
             {name === 'brand' && (
                 <Svg viewBox="0 0 130 140" width={24} height={24}>
                     <Path

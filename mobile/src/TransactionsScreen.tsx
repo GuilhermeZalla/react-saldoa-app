@@ -1,18 +1,19 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { ApiError, apiTextRequest, sessionRequest } from './api';
 import { useThemeStyles } from './PreferencesContext';
-import { t } from './i18n';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { ApiError, sessionRequest } from './api';
+import { ActionButton, ChoiceChips, Page, TextField } from './components';
 import {
-    ActionButton,
-    Card,
-    ChoiceChips,
-    Page,
-    PageTitle,
-    SectionTitle,
-    TextField,
-    useCommonStyles,
-} from './components';
+    EmptyFinance,
+    FinanceError,
+    FinanceHeader,
+    FinanceSheet,
+    InlineAction,
+    MonthPicker,
+    FinanceCard as Card,
+} from './finance-components';
+import { AppIcon } from './icons';
 import {
     amountForApi,
     currentDate,
@@ -22,154 +23,179 @@ import {
     formatDate,
     formatDateForInput,
 } from './format';
+import { t } from './i18n';
 import type { ThemeColors } from './theme';
 import type { Category, Session, Transaction } from './types';
 
-type Props = { session: Session };
-type Collection<T> = { data: T[] };
-
-export default function TransactionsScreen({ session }: Props) {
-    const { styles } = useThemeStyles(createStyles);
-    const commonStyles = useCommonStyles();
+type Collection<T> = {
+    data: T[];
+    meta?: { current_page: number; last_page: number; total: number };
+};
+export default function TransactionsScreen({ session }: { session: Session }) {
+    const { colors, styles } = useThemeStyles(createStyles);
+    const [month, setMonth] = useState(currentMonth());
+    const [filter, setFilter] = useState('all');
+    const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [pageNumber, setPageNumber] = useState(1);
+    const [lastPage, setLastPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [exporting, setExporting] = useState(false);
+    const [error, setError] = useState('');
+    const [manualFormOpen, setFormOpen] = useState(false);
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
     const [type, setType] = useState<'income' | 'expense'>('expense');
     const [categoryId, setCategoryId] = useState<number | null>(null);
     const [date, setDate] = useState(currentDate());
     const [editingId, setEditingId] = useState<number | null>(null);
-    const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-
+    const requestSequence = useRef(0);
+    const parameters = useLocalSearchParams<{ create?: string }>();
+    const formOpen =
+        manualFormOpen || (parameters.create === '1' && !session.isDemo);
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300);
+        return () => clearTimeout(timer);
+    }, [search]);
     const availableCategories = useMemo(
         () => categories.filter((category) => category.type === type),
         [categories, type],
     );
-
-    const fetchData = useCallback(async () => {
-        const [transactionResponse, categoryResponse] = await Promise.all([
-            sessionRequest<Collection<Transaction>>(
-                session,
-                `/transactions?month=${currentMonth()}&page=1`,
-            ),
-            sessionRequest<Collection<Category>>(session, '/categories'),
-        ]);
-
-        return {
-            transactions: transactionResponse.data,
-            categories: categoryResponse.data,
-        };
-    }, [session]);
-
-    const loadData = useCallback(async () => {
-        setErrorMessage('');
-
-        try {
-            const data = await fetchData();
-            setTransactions(data.transactions);
-            setCategories(data.categories);
-        } catch (error) {
-            setErrorMessage(
-                messageForError(
-                    error,
-                    t('Não foi possível carregar os lançamentos.'),
-                ),
-            );
-        } finally {
-            setLoading(false);
-        }
-    }, [fetchData]);
-
-    useEffect(() => {
-        let isCurrent = true;
-
-        async function loadInitialData(): Promise<void> {
+    const selectedCategoryId = availableCategories.some(
+        (category) => category.id === categoryId,
+    )
+        ? categoryId
+        : (availableCategories[0]?.id ?? null);
+    const query = useMemo(
+        () =>
+            new URLSearchParams({
+                month,
+                type: filter,
+                search: debouncedSearch,
+            }).toString(),
+        [month, filter, debouncedSearch],
+    );
+    const loadData = useCallback(
+        async (nextPage = 1) => {
+            const sequence = ++requestSequence.current;
+            if (nextPage === 1) {
+                setLoading(true);
+                setTransactions([]);
+            } else setLoadingMore(true);
+            setError('');
             try {
-                const data = await fetchData();
-
-                if (isCurrent) {
-                    setTransactions(data.transactions);
-                    setCategories(data.categories);
-                    setCategoryId((currentId) => {
-                        if (
-                            data.categories.some(
-                                (category) =>
-                                    category.id === currentId &&
-                                    category.type === 'expense',
-                            )
-                        ) {
-                            return currentId;
-                        }
-
-                        return (
-                            data.categories.find(
-                                (category) => category.type === 'expense',
-                            )?.id ?? null
-                        );
-                    });
-                    setErrorMessage('');
-                }
-            } catch (error) {
-                if (isCurrent) {
-                    setErrorMessage(
-                        messageForError(
-                            error,
-                            t('Não foi possível carregar os lançamentos.'),
-                        ),
+                const [response, categoryResponse] = await Promise.all([
+                    sessionRequest<Collection<Transaction>>(
+                        session,
+                        `/transactions?${query}&page=${nextPage}`,
+                    ),
+                    nextPage === 1
+                        ? sessionRequest<Collection<Category>>(
+                              session,
+                              '/categories',
+                          )
+                        : Promise.resolve(null),
+                ]);
+                if (sequence !== requestSequence.current) return;
+                setTransactions((current) =>
+                    nextPage === 1
+                        ? response.data
+                        : [...current, ...response.data],
+                );
+                setPageNumber(response.meta?.current_page ?? nextPage);
+                setLastPage(response.meta?.last_page ?? 1);
+                setTotal(response.meta?.total ?? response.data.length);
+                if (categoryResponse) setCategories(categoryResponse.data);
+            } catch (reason) {
+                if (sequence === requestSequence.current)
+                    setError(
+                        reason instanceof ApiError
+                            ? reason.message
+                            : t('Não foi possível carregar os lançamentos.'),
                     );
-                }
             } finally {
-                if (isCurrent) {
+                if (sequence === requestSequence.current) {
                     setLoading(false);
+                    setLoadingMore(false);
                 }
             }
-        }
-
-        void loadInitialData();
-
-        return () => {
-            isCurrent = false;
-        };
-    }, [fetchData]);
-
-    function startEditing(transaction: Transaction): void {
+        },
+        [session, query],
+    );
+    useFocusEffect(
+        useCallback(() => {
+            void loadData();
+            return () => {
+                requestSequence.current++;
+            };
+        }, [loadData]),
+    );
+    function newTransaction() {
+        if (session.isDemo) return;
+        setEditingId(null);
+        setDescription('');
+        setAmount('');
+        setType('expense');
+        setDate(month === currentMonth() ? currentDate() : `${month}-01`);
+        setError('');
+        setFormOpen(true);
+    }
+    function editTransaction(transaction: Transaction) {
+        if (session.isDemo) return;
         setEditingId(transaction.id);
         setDescription(transaction.description);
         setAmount(transaction.amount);
         setType(transaction.type);
         setCategoryId(transaction.category.id);
         setDate(transaction.date);
+        setError('');
+        setFormOpen(true);
     }
-
-    function resetForm(): void {
+    function resetForm() {
+        setFormOpen(false);
         setEditingId(null);
         setDescription('');
         setAmount('');
         setType('expense');
         setCategoryId(null);
         setDate(currentDate());
+        router.setParams({ create: undefined });
     }
-
-    async function saveTransaction(): Promise<void> {
-        if (!description.trim() || !amount.trim() || categoryId === null) {
-            setErrorMessage(t('Preencha a descrição, o valor e a categoria.'));
+    function closeForm() {
+        if (saving) return;
+        resetForm();
+        setError('');
+    }
+    async function saveTransaction() {
+        if (session.isDemo || saving) return;
+        if (
+            !description.trim() ||
+            !amount.trim() ||
+            selectedCategoryId === null
+        ) {
+            setError(t('Preencha a descrição, o valor e a categoria.'));
             return;
         }
-
         const apiDate = dateForApi(date);
-
         if (apiDate === null) {
-            setErrorMessage(
-                t('Informe uma data válida no formato DD/MM/AAAA.'),
-            );
+            setError(t('Informe uma data válida no formato DD/MM/AAAA.'));
             return;
         }
-
+        const parsedAmount = amountForApi(amount);
+        if (
+            !Number.isFinite(Number(parsedAmount)) ||
+            Number(parsedAmount) <= 0
+        ) {
+            setError(t('Informe um valor maior que zero.'));
+            return;
+        }
         setSaving(true);
-        setErrorMessage('');
-
+        setError('');
         try {
             await sessionRequest(
                 session,
@@ -180,28 +206,42 @@ export default function TransactionsScreen({ session }: Props) {
                     method: editingId === null ? 'POST' : 'PUT',
                     body: {
                         description: description.trim(),
-                        amount: amountForApi(amount),
+                        amount: parsedAmount,
                         type,
-                        category_id: categoryId,
+                        category_id: selectedCategoryId,
                         date: apiDate,
                     },
                 },
             );
             resetForm();
-            await loadData();
-        } catch (error) {
-            setErrorMessage(
-                messageForError(
-                    error,
-                    t('Não foi possível salvar o lançamento.'),
-                ),
+            if (apiDate.slice(0, 7) !== month) setMonth(apiDate.slice(0, 7));
+            else await loadData();
+        } catch (reason) {
+            setError(
+                reason instanceof ApiError
+                    ? reason.message
+                    : t('Não foi possível salvar o lançamento.'),
             );
         } finally {
             setSaving(false);
         }
     }
-
-    function confirmDelete(transaction: Transaction): void {
+    async function removeTransaction(transaction: Transaction) {
+        if (session.isDemo) return;
+        try {
+            await sessionRequest(session, `/transactions/${transaction.id}`, {
+                method: 'DELETE',
+            });
+            await loadData();
+        } catch (reason) {
+            setError(
+                reason instanceof ApiError
+                    ? reason.message
+                    : t('Não foi possível excluir o lançamento.'),
+            );
+        }
+    }
+    function confirmDelete(transaction: Transaction) {
         Alert.alert(
             t('Excluir lançamento?'),
             t('“{description}” será movido para a lixeira.', {
@@ -212,218 +252,379 @@ export default function TransactionsScreen({ session }: Props) {
                 {
                     text: t('Excluir'),
                     style: 'destructive',
-                    onPress: () => void deleteTransaction(transaction.id),
+                    onPress: () => void removeTransaction(transaction),
                 },
             ],
         );
     }
-
-    async function deleteTransaction(transactionId: number): Promise<void> {
+    async function exportTransactions() {
+        setExporting(true);
+        setError('');
         try {
-            await sessionRequest(session, `/transactions/${transactionId}`, {
-                method: 'DELETE',
-            });
-            await loadData();
-        } catch (error) {
-            setErrorMessage(
-                messageForError(
-                    error,
-                    t('Não foi possível excluir o lançamento.'),
-                ),
+            const csv = await apiTextRequest(
+                session,
+                `/transactions/export?${query}`,
             );
+            await Share.share({ message: csv, title: t('Lançamentos Saldoa') });
+        } catch (reason) {
+            setError(
+                reason instanceof ApiError
+                    ? reason.message
+                    : t('Não foi possível exportar os dados.'),
+            );
+        } finally {
+            setExporting(false);
         }
     }
-
+    const groups = transactions.reduce<Record<string, Transaction[]>>(
+        (all, transaction) => {
+            (all[transaction.date] ??= []).push(transaction);
+            return all;
+        },
+        {},
+    );
     return (
-        <Page>
-            <PageTitle
+        <Page contentStyle={styles.page}>
+            <FinanceHeader
                 title={t('Lançamentos')}
-                subtitle={t('Receitas e despesas do mês atual.')}
+                subtitle={t('Cada movimentação, no seu lugar.')}
+                name={session.user.name}
+                eyebrow={t('Seu dia a dia')}
             />
-
-            {errorMessage ? (
-                <Text accessibilityRole="alert" style={styles.error}>
-                    {errorMessage}
-                </Text>
-            ) : null}
-
-            {!session.isDemo ? (
-                <Card>
-                    <SectionTitle
-                        title={
-                            editingId === null
-                                ? t('Novo lançamento')
-                                : t('Editar lançamento')
-                        }
-                    />
-                    <TextField
-                        label={t('Descrição')}
-                        value={description}
-                        onChangeText={setDescription}
-                        maxLength={255}
-                        placeholder={t('Ex.: Conta de luz')}
-                    />
-                    <TextField
-                        label={t('Valor')}
-                        value={amount}
-                        onChangeText={setAmount}
-                        keyboardType="decimal-pad"
-                        placeholder="0,00"
-                    />
+            <View style={styles.toolbar}>
+                <MonthPicker month={month} onChange={setMonth} />
+                <InlineAction
+                    label={t('Novo')}
+                    onPress={newTransaction}
+                    disabled={session.isDemo}
+                />
+            </View>
+            <TextField
+                label={t('Buscar lançamentos')}
+                value={search}
+                onChangeText={setSearch}
+                placeholder={t('Buscar descrição')}
+                maxLength={255}
+                autoCapitalize="none"
+            />
+            <View style={styles.filterRow}>
+                <View style={styles.filters}>
                     <ChoiceChips
-                        selected={type}
-                        onSelect={(value) => {
-                            const nextType = value as 'income' | 'expense';
-                            setType(nextType);
-                            setCategoryId(
-                                categories.find(
-                                    (category) => category.type === nextType,
-                                )?.id ?? null,
-                            );
-                        }}
+                        selected={filter}
+                        onSelect={setFilter}
                         options={[
-                            { value: 'expense', label: t('Despesa') },
-                            { value: 'income', label: t('Receita') },
+                            { value: 'all', label: t('Todos') },
+                            { value: 'income', label: t('Receitas') },
+                            { value: 'expense', label: t('Despesas') },
                         ]}
                     />
-                    <Text style={styles.fieldLabel}>{t('Categoria')}</Text>
-                    {availableCategories.length ? (
-                        <ChoiceChips
-                            selected={categoryId?.toString() ?? ''}
-                            onSelect={(value) => setCategoryId(Number(value))}
-                            options={availableCategories.map((category) => ({
-                                value: category.id.toString(),
-                                label: category.name,
-                            }))}
-                        />
-                    ) : (
-                        <Text style={commonStyles.muted}>
-                            {t(
-                                'Crie uma categoria desse tipo antes de adicionar um lançamento.',
-                            )}
+                </View>
+                <ActionButton
+                    variant="secondary"
+                    compact
+                    loading={exporting}
+                    disabled={exporting || loading}
+                    onPress={() => void exportTransactions()}
+                >
+                    {t('Exportar')}
+                </ActionButton>
+            </View>
+            {!formOpen && <FinanceError message={error} />}
+            {loading ? (
+                <EmptyFinance>{t('Carregando lançamentos…')}</EmptyFinance>
+            ) : (
+                <>
+                    <View style={styles.toolbar}>
+                        <Text style={styles.meta}>{t('Histórico do mês')}</Text>
+                        <Text style={styles.meta}>
+                            {t('{count} lançamentos', { count: total })}
                         </Text>
-                    )}
-                    <TextField
-                        label={t('Data (DD/MM/AAAA)')}
-                        value={formatDateForInput(date)}
-                        onChangeText={setDate}
-                        autoCapitalize="none"
-                        maxLength={10}
-                        placeholder={t('DD/MM/AAAA')}
-                    />
-                    <ActionButton
-                        onPress={() => void saveTransaction()}
-                        disabled={saving}
-                        loading={saving}
-                    >
-                        {editingId === null
-                            ? t('Adicionar lançamento')
-                            : t('Salvar alterações')}
-                    </ActionButton>
-                    {editingId !== null ? (
-                        <ActionButton onPress={resetForm} variant="quiet">
-                            {t('Cancelar edição')}
-                        </ActionButton>
-                    ) : null}
-                </Card>
-            ) : null}
-
-            <Card>
-                <SectionTitle title={t('Este mês')} />
-                {loading ? (
-                    <Text style={commonStyles.muted}>
-                        {t('Carregando lançamentos…')}
-                    </Text>
-                ) : transactions.length ? (
-                    transactions.map((transaction) => (
-                        <View key={transaction.id} style={styles.transaction}>
-                            <Pressable
-                                accessibilityRole="button"
-                                disabled={session.isDemo}
-                                onPress={() => startEditing(transaction)}
-                                style={styles.transactionMain}
-                            >
-                                <Text
-                                    style={styles.description}
-                                    numberOfLines={1}
-                                >
-                                    {transaction.description}
+                    </View>
+                    {transactions.length ? (
+                        Object.entries(groups).map(([day, items]) => (
+                            <View key={day}>
+                                <Text style={styles.groupLabel}>
+                                    {formatDate(day)}
                                 </Text>
-                                <Text style={styles.meta}>
-                                    {transaction.category.name} ·{' '}
-                                    {formatDate(transaction.date)}
-                                </Text>
-                                <Text
-                                    style={[
-                                        styles.amount,
-                                        transaction.type === 'income'
-                                            ? styles.income
-                                            : styles.expense,
-                                    ]}
-                                >
-                                    {transaction.type === 'income' ? '+' : '−'}
-                                    {formatCurrency(transaction.amount)}
-                                </Text>
-                            </Pressable>
-                            {!session.isDemo ? (
+                                {items.map((transaction) => (
+                                    <View
+                                        key={transaction.id}
+                                        style={styles.transaction}
+                                    >
+                                        <Pressable
+                                            accessibilityRole="button"
+                                            accessibilityLabel={t(
+                                                'Editar lançamento',
+                                            )}
+                                            disabled={session.isDemo}
+                                            onPress={() =>
+                                                editTransaction(transaction)
+                                            }
+                                            style={styles.transactionMain}
+                                        >
+                                            <View style={styles.categoryIcon}>
+                                                <AppIcon
+                                                    name={
+                                                        transaction.type ===
+                                                        'income'
+                                                            ? 'arrow-down'
+                                                            : 'arrow-up'
+                                                    }
+                                                    color={colors.muted}
+                                                    size={19}
+                                                />
+                                            </View>
+                                            <View style={styles.copy}>
+                                                <Text
+                                                    style={styles.description}
+                                                >
+                                                    {transaction.description}
+                                                </Text>
+                                                <Text style={styles.meta}>
+                                                    {transaction.category.name}
+                                                </Text>
+                                            </View>
+                                            <Text
+                                                style={[
+                                                    styles.amount,
+                                                    {
+                                                        color:
+                                                            transaction.type ===
+                                                            'income'
+                                                                ? colors.income
+                                                                : colors.expense,
+                                                    },
+                                                ]}
+                                            >
+                                                {transaction.type === 'income'
+                                                    ? '+'
+                                                    : '−'}{' '}
+                                                {formatCurrency(
+                                                    transaction.amount,
+                                                )}
+                                            </Text>
+                                        </Pressable>
+                                        {!session.isDemo && (
+                                            <Pressable
+                                                accessibilityRole="button"
+                                                accessibilityLabel={t(
+                                                    'Excluir lançamento',
+                                                )}
+                                                onPress={() =>
+                                                    confirmDelete(transaction)
+                                                }
+                                                style={styles.delete}
+                                            >
+                                                <AppIcon
+                                                    name="trash"
+                                                    size={17}
+                                                    color={colors.muted}
+                                                />
+                                            </Pressable>
+                                        )}
+                                    </View>
+                                ))}
+                            </View>
+                        ))
+                    ) : (
+                        <Card>
+                            <EmptyFinance>
+                                {error
+                                    ? t('Tente novamente mais tarde.')
+                                    : t(
+                                          'Nenhum lançamento encontrado. Experimente outro mês ou filtro.',
+                                      )}
+                            </EmptyFinance>
+                            {!error && (
                                 <ActionButton
-                                    onPress={() => confirmDelete(transaction)}
                                     variant="quiet"
                                     compact
+                                    onPress={() => {
+                                        setSearch('');
+                                        setFilter('all');
+                                    }}
                                 >
-                                    {t('Excluir')}
+                                    {t('Limpar filtros')}
                                 </ActionButton>
-                            ) : null}
-                        </View>
-                    ))
+                            )}
+                            {!!error && (
+                                <ActionButton
+                                    variant="secondary"
+                                    onPress={() => void loadData()}
+                                >
+                                    {t('Tentar novamente')}
+                                </ActionButton>
+                            )}
+                        </Card>
+                    )}
+                    {pageNumber < lastPage && (
+                        <ActionButton
+                            variant="secondary"
+                            loading={loadingMore}
+                            disabled={loadingMore}
+                            onPress={() => void loadData(pageNumber + 1)}
+                        >
+                            {t('Carregar mais')}
+                        </ActionButton>
+                    )}
+                </>
+            )}
+            <FinanceSheet
+                visible={formOpen && !session.isDemo}
+                title={
+                    editingId === null
+                        ? t('Novo lançamento')
+                        : t('Editar lançamento')
+                }
+                onClose={closeForm}
+                busy={saving}
+            >
+                <FinanceError message={error} />
+                <ChoiceChips
+                    selected={type}
+                    onSelect={(value) => {
+                        setType(value as 'income' | 'expense');
+                        setCategoryId(null);
+                    }}
+                    options={[
+                        { value: 'expense', label: t('Despesa') },
+                        { value: 'income', label: t('Receita') },
+                    ]}
+                />
+                <TextField
+                    label={t('Valor (R$)')}
+                    value={amount}
+                    onChangeText={setAmount}
+                    keyboardType="decimal-pad"
+                    placeholder="0,00"
+                />
+                <TextField
+                    label={t('Descrição')}
+                    value={description}
+                    onChangeText={setDescription}
+                    placeholder={t('Ex.: compra no mercado')}
+                    maxLength={255}
+                />
+                <Text style={styles.fieldLabel}>{t('Categoria')}</Text>
+                {availableCategories.length ? (
+                    <ChoiceChips
+                        selected={selectedCategoryId?.toString() ?? ''}
+                        onSelect={(value) => setCategoryId(Number(value))}
+                        options={availableCategories.map((category) => ({
+                            value: String(category.id),
+                            label: category.name,
+                        }))}
+                    />
                 ) : (
-                    <Text style={commonStyles.muted}>
-                        {t('Não há lançamentos neste período.')}
+                    <Text style={styles.meta}>
+                        {t(
+                            'Crie uma categoria desse tipo antes de adicionar um lançamento.',
+                        )}
                     </Text>
                 )}
-            </Card>
+                <TextField
+                    label={t('Data (DD/MM/AAAA)')}
+                    value={formatDateForInput(date)}
+                    onChangeText={setDate}
+                    placeholder={t('DD/MM/AAAA')}
+                    maxLength={10}
+                />
+                <ActionButton
+                    loading={saving}
+                    disabled={saving || !availableCategories.length}
+                    onPress={() => void saveTransaction()}
+                >
+                    {editingId === null
+                        ? t('Adicionar lançamento')
+                        : t('Salvar alterações')}
+                </ActionButton>
+                <ActionButton
+                    variant="quiet"
+                    disabled={saving}
+                    onPress={closeForm}
+                >
+                    {t('Cancelar')}
+                </ActionButton>
+            </FinanceSheet>
         </Page>
     );
 }
-
-function messageForError(error: unknown, fallback: string): string {
-    return error instanceof ApiError ? error.message : fallback;
-}
-
 const createStyles = (colors: ThemeColors) =>
     StyleSheet.create({
-        error: {
+        page: { padding: 18, gap: 16 },
+        toolbar: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 8,
+            flexWrap: 'wrap',
+        },
+        filterRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            flexWrap: 'wrap',
+        },
+        filters: { flex: 1, minWidth: 220 },
+        meta: {
             fontFamily: 'DMSans',
-            backgroundColor: colors.expenseSoft,
+            fontSize: 11,
+            lineHeight: 17,
+            color: colors.muted,
+        },
+        groupLabel: {
+            fontFamily: 'DMSans',
+            fontSize: 11,
+            color: colors.muted,
+            marginTop: 10,
+            marginBottom: 5,
+        },
+        transaction: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            borderTopWidth: 1,
+            borderTopColor: colors.border,
+        },
+        transactionMain: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 9,
+            paddingVertical: 16,
+        },
+        categoryIcon: {
+            width: 34,
+            height: 34,
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.border,
             borderRadius: 10,
-            color: colors.expense,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        copy: { flex: 1, gap: 3 },
+        description: {
+            fontFamily: 'DMSans',
             fontSize: 13,
-            padding: 12,
+            fontWeight: '600',
+            color: colors.text,
+        },
+        amount: {
+            fontFamily: 'SpaceGrotesk',
+            fontSize: 13,
+            fontWeight: '600',
+            flexShrink: 0,
+        },
+        delete: {
+            width: 30,
+            minHeight: 44,
+            justifyContent: 'center',
+            alignItems: 'center',
         },
         fieldLabel: {
             fontFamily: 'DMSans',
+            fontSize: 13,
             color: colors.text,
-            fontSize: 15,
             fontWeight: '600',
         },
-        transaction: {
-            alignItems: 'center',
-            borderTopColor: colors.border,
-            borderTopWidth: 1,
-            flexDirection: 'row',
-            gap: 5,
-            paddingTop: 16,
-            paddingBottom: 4,
-        },
-        transactionMain: { flex: 1, gap: 4, paddingVertical: 2 },
-        description: {
-            fontFamily: 'DMSans',
-            color: colors.text,
-            fontSize: 16,
-            fontWeight: '600',
-        },
-        meta: { fontFamily: 'DMSans', color: colors.muted, fontSize: 11 },
-        amount: { fontFamily: 'DMSans', fontSize: 13, fontWeight: '700' },
-        income: { color: colors.income },
-        expense: { color: colors.expense },
     });

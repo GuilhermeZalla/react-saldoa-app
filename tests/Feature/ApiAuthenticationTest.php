@@ -3,6 +3,7 @@
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Password;
 
 test('a user can register for the mobile API and receives a bearer token', function () {
     $response = $this->postJson('/api/v1/auth/register', [
@@ -259,4 +260,25 @@ test('web authentication remains available alongside API token authentication', 
     ])->assertRedirect();
 
     $this->assertAuthenticatedAs($user);
+});
+
+test('API password policy failures explain length complexity and confirmation', function () {
+    Password::defaults(fn () => Password::min(12)->mixedCase()->numbers()->symbols());
+    try {
+        foreach ([
+            ['Ab1!', 'Ab1!', 'O campo senha deve ter pelo menos 12 caracteres.'],
+            ['lowercase123!', 'lowercase123!', 'A senha deve conter letras maiúsculas e minúsculas.'],
+            ['LongPassword!', 'LongPassword!', 'A senha deve conter pelo menos um número.'],
+            ['LongPassword123', 'LongPassword123', 'A senha deve conter pelo menos um símbolo.'],
+            ['ValidPassword123!', 'DifferentPassword123!', 'A confirmação de senha não confere.'],
+        ] as [$password, $confirmation, $message]) {
+            $this->postJson('/api/v1/auth/register', [
+                'name' => 'Mobile User', 'email' => 'policy@example.com', 'device_name' => 'Android',
+                'password' => $password, 'password_confirmation' => $confirmation,
+            ])->assertUnprocessable()->assertJsonPath('error.details.password.0', $message);
+        }
+        $this->assertDatabaseMissing('users', ['email' => 'policy@example.com']);
+    } finally {
+        Password::defaults(fn () => null);
+    }
 });

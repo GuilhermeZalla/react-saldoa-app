@@ -1,16 +1,9 @@
-import { Form, Link } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Form, Link, router } from '@inertiajs/react';
+import { Search } from 'lucide-react';
 import TransactionController from '@/actions/App/Http/Controllers/TransactionController';
+import { FinancePeriod } from '@/components/finance-layout';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -25,156 +18,100 @@ import type {
     TransactionMonthNavigation,
 } from '@/types/transaction';
 
-type TransactionFiltersProps = {
+type Props = {
     categories: TransactionCategoryOption[];
     filters: TransactionFilters;
     monthNavigation: TransactionMonthNavigation;
 };
-
 export function TransactionFiltersPanel({
     categories,
     filters,
     monthNavigation,
-}: TransactionFiltersProps) {
-    const periodFormatter = new Intl.DateTimeFormat('pt-BR', {
-        month: 'long',
-        year: 'numeric',
-        timeZone: 'UTC',
-    });
-    const currentPeriod = periodFormatter.format(
-        new Date(`${monthNavigation.current}-01T00:00:00Z`),
-    );
-
-    function monthUrl(month: string) {
-        return transactions.index({
-            query: {
-                ...filters,
-                month,
-            },
-        });
-    }
-
+}: Props) {
     return (
-        <Card className="rounded-2xl shadow-sm">
-            <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="space-y-1">
-                    <CardTitle className="capitalize">
-                        {currentPeriod}
-                    </CardTitle>
-                    <CardDescription>
-                        Navegue entre os meses ou combine os filtros.
-                    </CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" asChild>
-                        <Link
-                            href={monthUrl(monthNavigation.previous)}
-                            aria-label="Ir para o mês anterior"
-                        >
-                            <ChevronLeft />
-                        </Link>
-                    </Button>
-                    <Button variant="outline" size="icon" asChild>
-                        <Link
-                            href={monthUrl(monthNavigation.next)}
-                            aria-label="Ir para o próximo mês"
-                        >
-                            <ChevronRight />
-                        </Link>
-                    </Button>
-                </div>
-            </CardHeader>
-            <CardContent>
-                <Form
-                    {...TransactionController.index.form()}
-                    options={{ preserveScroll: true }}
-                    className="space-y-4"
-                >
-                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="month">Mês</Label>
-                            <Input
-                                id="month"
-                                name="month"
-                                type="month"
-                                defaultValue={filters.month}
-                                required
+        <Form
+            {...TransactionController.index.form()}
+            key={JSON.stringify(filters)}
+            options={{ preserveScroll: true }}
+            className="space-y-4"
+        >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <FinancePeriod
+                    month={filters.month}
+                    onChange={(month) =>
+                        router.get(
+                            transactions.index().url,
+                            { ...filters, month },
+                            { preserveScroll: true },
+                        )
+                    }
+                />
+                <fieldset className="flex items-center gap-1 rounded-xl border border-border bg-card p-1">
+                    <legend className="sr-only">Tipo de lançamento</legend>
+                    {[
+                        ['all', 'Todos'],
+                        ['income', 'Receitas'],
+                        ['expense', 'Despesas'],
+                    ].map(([value, label]) => (
+                        <label key={value} className="cursor-pointer">
+                            <input
+                                type="radio"
+                                className="peer sr-only"
+                                name="type"
+                                value={value}
+                                defaultChecked={filters.type === value}
                             />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="type">Tipo</Label>
-                            <Select name="type" defaultValue={filters.type}>
-                                <SelectTrigger id="type" className="w-full">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Todos</SelectItem>
-                                    <SelectItem value="income">
-                                        Receitas
-                                    </SelectItem>
-                                    <SelectItem value="expense">
-                                        Despesas
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="category_id">Categoria</Label>
-                            <Select
-                                name="category_id"
-                                defaultValue={filters.category_id}
+                            <span className="block rounded-lg px-4 py-2 text-xs text-muted-foreground peer-checked:bg-primary/10 peer-checked:font-medium peer-checked:text-primary peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
+                                {label}
+                            </span>
+                        </label>
+                    ))}
+                </fieldset>
+            </div>
+            <input type="hidden" name="month" value={filters.month} />
+            <div className="flex flex-wrap items-center gap-3">
+                <div className="relative min-w-48 flex-1">
+                    <Search className="pointer-events-none absolute top-3 left-3 size-4 text-muted-foreground" />
+                    <Input
+                        aria-label="Buscar descrição"
+                        name="search"
+                        type="search"
+                        defaultValue={filters.search}
+                        placeholder="Buscar descrição"
+                        maxLength={255}
+                        className="h-10 bg-card pl-10"
+                    />
+                </div>
+                <Select name="category_id" defaultValue={filters.category_id}>
+                    <SelectTrigger
+                        aria-label="Categoria"
+                        className="h-10 w-full bg-card sm:w-52"
+                    >
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Todas as categorias</SelectItem>
+                        {categories.map((category) => (
+                            <SelectItem
+                                key={category.id}
+                                value={String(category.id)}
                             >
-                                <SelectTrigger
-                                    id="category_id"
-                                    className="w-full"
-                                >
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">
-                                        Todas as categorias
-                                    </SelectItem>
-                                    {categories.map((category) => (
-                                        <SelectItem
-                                            key={category.id}
-                                            value={category.id.toString()}
-                                        >
-                                            {category.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="search">Descrição</Label>
-                            <Input
-                                id="search"
-                                name="search"
-                                type="search"
-                                defaultValue={filters.search}
-                                placeholder="Buscar descrição"
-                                maxLength={255}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                        <Button variant="outline" asChild>
-                            <Link
-                                href={transactions.index({
-                                    query: { month: monthNavigation.default },
-                                })}
-                            >
-                                Limpar filtros
-                            </Link>
-                        </Button>
-                        <Button type="submit">Aplicar filtros</Button>
-                    </div>
-                </Form>
-            </CardContent>
-        </Card>
+                                {category.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Button type="submit">Aplicar filtros</Button>
+                <Button variant="ghost" asChild>
+                    <Link
+                        href={transactions.index({
+                            query: { month: monthNavigation.default },
+                        })}
+                    >
+                        Limpar filtros
+                    </Link>
+                </Button>
+            </div>
+        </Form>
     );
 }

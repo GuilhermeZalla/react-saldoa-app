@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateBudgetRequest;
 use App\Models\Budget;
 use App\Models\Category;
 use App\Services\BudgetSummaryService;
+use App\Services\DashboardDataService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,12 +21,12 @@ class BudgetController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): Response
+    public function index(Request $request, DashboardDataService $dashboardData): Response
     {
         $this->authorize('viewAny', Budget::class);
 
         $user = $request->user();
-        $month = $request->query('month', now()->format('Y-m'));
+        $month = $dashboardData->normalizeMonth($request->query('month'));
         [$year, $monthNumber] = explode('-', $month);
 
         $summary = (new BudgetSummaryService)->getSummary($user, (int) $year, (int) $monthNumber);
@@ -57,6 +58,8 @@ class BudgetController extends Controller
 
         return Inertia::render('budgets/index', [
             'budgets' => $budgets,
+            'upcomingTransactions' => $dashboardData->upcomingTransactions($user, $month),
+            'month' => $month,
             'categoriesWithoutBudget' => $categoriesWithoutBudget,
             'currentMonth' => $month,
         ]);

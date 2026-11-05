@@ -1,48 +1,36 @@
-﻿import { Form, Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
-    ArrowDown,
-    ArrowUp,
-    ChevronLeft,
-    ChevronRight,
-    Target,
+    ArrowDownLeft,
+    ArrowUpRight,
+    Eye,
+    EyeOff,
+    Plus,
+    Wallet,
 } from 'lucide-react';
 import TransactionController from '@/actions/App/Http/Controllers/TransactionController';
 import { DashboardCharts } from '@/components/dashboard-charts';
-import { Button } from '@/components/ui/button';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+    FinanceHeader,
+    FinancePeriod,
+    UpcomingTransactions,
+} from '@/components/finance-layout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { dashboard } from '@/routes';
 import budgets from '@/routes/budgets';
 import type {
     BudgetAlert,
     DashboardExpenseCategory,
     DashboardMonthNavigation,
-    DashboardMonthlyComparison,
     DashboardMonthlyTotal,
     DashboardRecentTransaction,
     DashboardSummary,
+    UpcomingTransaction,
 } from '@/types/dashboard';
 
-const currencyFormatter = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-});
-const percentageFormatter = new Intl.NumberFormat('pt-BR', {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-});
-
 type DashboardProps = {
-    filters: {
-        month: string;
-    };
+    filters: { month: string };
     monthNavigation: DashboardMonthNavigation;
     summary: DashboardSummary;
     expensesByCategory: DashboardExpenseCategory[];
@@ -52,43 +40,12 @@ type DashboardProps = {
     hasTransactionsInChartRange: boolean;
     budgetAlerts: BudgetAlert[];
     hasBudgets: boolean;
+    upcomingTransactions?: UpcomingTransaction[];
 };
-
-function MonthlyComparison({
-    comparison,
-}: {
-    comparison: DashboardMonthlyComparison;
-}) {
-    if (comparison.state === 'none') {
-        return null;
-    }
-
-    if (comparison.state === 'unchanged') {
-        return (
-            <p className="text-xs font-medium text-muted-foreground">
-                0% vs. mês anterior
-            </p>
-        );
-    }
-
-    const isPositive = comparison.sentiment === 'positive';
-    const DirectionIcon = isPositive ? ArrowUp : ArrowDown;
-    const className = isPositive ? 'text-income' : 'text-expense-text';
-    const label =
-        comparison.state === 'new'
-            ? 'Novo'
-            : `${isPositive ? 'Melhorou' : 'Piorou'} ${percentageFormatter.format(Math.abs(comparison.percentageChange ?? 0))}% vs. mês anterior`;
-
-    return (
-        <p
-            className={`flex items-center gap-1.5 text-xs font-medium ${className}`}
-        >
-            <DirectionIcon className="size-3.5" aria-hidden="true" />
-            <span>{label}</span>
-        </p>
-    );
-}
-
+const currency = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+});
 export default function Dashboard({
     filters,
     monthNavigation,
@@ -96,306 +53,282 @@ export default function Dashboard({
     expensesByCategory,
     monthlyTrend,
     recentTransactions,
-    hasTransactionsInMonth,
     hasTransactionsInChartRange,
     budgetAlerts,
     hasBudgets,
+    upcomingTransactions = [],
 }: DashboardProps) {
-    const summaryCards = [
+    const { auth } = usePage().props;
+    const [hidden, setHidden] = useState(false);
+    const value = (amount: string) =>
+        hidden ? '••••' : currency.format(Number(amount));
+    const cards = [
         {
-            title: 'Saldo geral',
-            value: summary.overallBalance,
-            description: 'Receitas menos despesas desde o início.',
-            valueClassName: '',
+            label: 'Saldo geral',
+            amount: summary.overallBalance,
+            description: 'Todos os períodos',
+            kind: 'balance',
             comparison: null,
         },
         {
-            title: 'Receitas do mês',
-            value: summary.monthlyIncome,
+            label: 'Receitas do mês',
+            amount: summary.monthlyIncome,
             description: monthNavigation.label,
-            valueClassName: 'text-income',
+            kind: 'income',
             comparison: summary.monthlyComparison.income,
         },
         {
-            title: 'Despesas do mês',
-            value: summary.monthlyExpense,
+            label: 'Despesas do mês',
+            amount: summary.monthlyExpense,
             description: monthNavigation.label,
-            valueClassName: 'text-expense-text',
+            kind: 'expense',
             comparison: summary.monthlyComparison.expense,
         },
         {
-            title: 'Saldo do mês',
-            value: summary.monthlyBalance,
-            description: 'Receitas menos despesas no período.',
-            valueClassName: '',
+            label: 'Saldo do mês',
+            amount: summary.monthlyBalance,
+            description: 'Resultado do período selecionado',
+            kind: 'monthly',
             comparison: summary.monthlyComparison.balance,
         },
     ];
-
-    const hasAlerts = budgetAlerts.length > 0;
-
+    const chartProps = {
+        expensesByCategory,
+        selectedMonth: filters.month,
+        selectedMonthLabel: monthNavigation.label,
+        monthlyTrend,
+        hasTransactionsInChartRange,
+    };
     return (
         <>
             <Head title="Dashboard" />
-
-            <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 md:p-8">
-                <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                    <div className="space-y-1">
-                        <h1 className="text-2xl font-semibold tracking-tight">
-                            Dashboard
-                        </h1>
-                        <p className="text-sm text-muted-foreground">
-                            Uma visão geral das suas finanças.
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" size="icon" asChild>
-                            <Link
-                                href={dashboard({
-                                    query: { month: monthNavigation.previous },
-                                })}
-                                aria-label="Ir para o mês anterior"
-                            >
-                                <ChevronLeft />
-                            </Link>
-                        </Button>
-                        <Form
-                            {...dashboard.form()}
-                            options={{ preserveScroll: true }}
-                            className="flex items-end gap-2"
-                        >
-                            <div className="grid gap-2">
-                                <Label
-                                    htmlFor="dashboard-month"
-                                    className="sr-only"
-                                >
-                                    Mês e ano
-                                </Label>
-                                <Input
-                                    id="dashboard-month"
-                                    name="month"
-                                    type="month"
-                                    defaultValue={filters.month}
-                                    required
-                                    className="w-40"
-                                />
-                            </div>
-                            <Button type="submit">Ver mês</Button>
-                        </Form>
-                        <Button variant="outline" size="icon" asChild>
-                            <Link
-                                href={dashboard({
-                                    query: { month: monthNavigation.next },
-                                })}
-                                aria-label="Ir para o próximo mês"
-                            >
-                                <ChevronRight />
-                            </Link>
-                        </Button>
-                    </div>
-                </header>
-
-                {!hasTransactionsInMonth && (
-                    <Card className="rounded-2xl shadow-sm">
-                        <CardContent className="flex flex-col items-start justify-between gap-4 py-5 sm:flex-row sm:items-center">
-                            <div className="space-y-1">
-                                <p className="font-medium">
-                                    Ainda não há lançamentos em{' '}
-                                    {monthNavigation.label}.
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    Adicione receitas e despesas para acompanhar
-                                    este período.
-                                </p>
-                            </div>
-                            <Button asChild>
-                                <Link href={TransactionController.create()}>
-                                    Adicionar lançamento
-                                </Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
-                )}
-
-                <section
-                    aria-label="Resumo financeiro"
-                    className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+            <main className="finance-page">
+                <FinanceHeader
+                    eyebrow="Seu resumo financeiro"
+                    title={`Olá, ${auth.user.name.split(' ')[0]}`}
+                    subtitle="Um olhar claro para o seu dinheiro."
                 >
-                    {summaryCards.map((summaryCard) => (
-                        <Card
-                            key={summaryCard.title}
-                            className="rounded-2xl shadow-sm"
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setHidden((current) => !current)}
+                        aria-label={
+                            hidden ? 'Mostrar valores' : 'Ocultar valores'
+                        }
+                    >
+                        {hidden ? <EyeOff /> : <Eye />}
+                    </Button>
+                    <FinancePeriod
+                        month={filters.month}
+                        onChange={(month) =>
+                            router.get(
+                                dashboard().url,
+                                { month },
+                                { preserveState: true, preserveScroll: true },
+                            )
+                        }
+                    />
+                    <Button asChild>
+                        <Link
+                            href={TransactionController.create({
+                                query: { month: filters.month },
+                            })}
                         >
-                            <CardHeader className="gap-2">
-                                <CardDescription>
-                                    {summaryCard.title}
-                                </CardDescription>
-                                <CardTitle
-                                    className={`text-2xl tabular-nums ${summaryCard.valueClassName}`}
-                                >
-                                    {currencyFormatter.format(
-                                        Number(summaryCard.value),
+                            <Plus className="size-4" />
+                            Novo lançamento
+                        </Link>
+                    </Button>
+                </FinanceHeader>
+                <section
+                    className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+                    aria-label="Resumo financeiro"
+                >
+                    {cards.map((card) => (
+                        <Card
+                            key={card.label}
+                            className={`finance-surface gap-2 py-5 ${card.kind === 'balance' ? 'border-primary/25 bg-primary/5' : ''}`}
+                        >
+                            <CardContent className="space-y-3 px-5">
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    {card.kind === 'income' ? (
+                                        <ArrowDownLeft className="size-4 text-income" />
+                                    ) : card.kind === 'expense' ? (
+                                        <ArrowUpRight className="size-4 text-expense-text" />
+                                    ) : (
+                                        <Wallet className="size-4 text-primary" />
                                     )}
-                                </CardTitle>
-                                {summaryCard.comparison && (
-                                    <MonthlyComparison
-                                        comparison={summaryCard.comparison}
-                                    />
-                                )}
-                                <p className="text-xs text-muted-foreground">
-                                    {summaryCard.description}
+                                    {card.label}
+                                </div>
+                                <p
+                                    className={`money-value text-2xl font-semibold tracking-tight ${card.kind === 'income' ? 'text-income' : card.kind === 'expense' ? 'text-expense-text' : ''}`}
+                                >
+                                    {value(card.amount)}
                                 </p>
-                            </CardHeader>
+                                <p className="text-xs text-muted-foreground">
+                                    {card.description}
+                                </p>
+                                {!hidden &&
+                                    card.comparison &&
+                                    card.comparison.state !== 'none' && (
+                                        <p className="text-xs text-muted-foreground">
+                                            {card.comparison.state === 'new'
+                                                ? 'Novo neste período'
+                                                : card.comparison.state ===
+                                                    'unchanged'
+                                                  ? 'Sem alteração'
+                                                  : `${card.comparison.sentiment === 'positive' ? 'Melhorou' : 'Piorou'} ${Math.abs(card.comparison.percentageChange ?? 0).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`}{' '}
+                                            vs. mês anterior
+                                        </p>
+                                    )}
+                            </CardContent>
                         </Card>
                     ))}
                 </section>
-
-                {hasBudgets && (
-                    <Card className="rounded-2xl shadow-sm">
-                        <CardHeader className="flex flex-row items-center justify-between gap-4">
-                            <div className="space-y-1">
-                                <CardTitle className="flex items-center gap-2">
-                                    <Target
-                                        className="size-5"
-                                        aria-hidden="true"
-                                    />
-                                    <span>Metas do mês</span>
-                                </CardTitle>
-                                <CardDescription>
-                                    {hasAlerts
-                                        ? 'Acompanhe suas categorias que precisam de atenção.'
-                                        : 'Todas as suas metas estão dentro do limite.'}
-                                </CardDescription>
-                            </div>
-                            <Button
-                                variant="link"
-                                asChild
-                                className="shrink-0 px-0"
+                <div className="grid items-start gap-5 xl:grid-cols-[1.45fr_1fr]">
+                    <div className={hidden ? 'finance-chart-private' : ''}>
+                        <DashboardCharts {...chartProps} mode="trend" />
+                    </div>
+                    <UpcomingTransactions
+                        items={upcomingTransactions}
+                        hidden={hidden}
+                        compact
+                    />
+                </div>
+                <div className="grid items-start gap-5 xl:grid-cols-[1.45fr_1fr]">
+                    <Card className="finance-surface">
+                        <CardHeader className="flex-row items-center justify-between gap-3">
+                            <CardTitle>Limites de gastos</CardTitle>
+                            <Link
+                                href={budgets.index({
+                                    query: { month: filters.month },
+                                })}
+                                className="text-xs font-medium text-primary"
                             >
-                                <Link href={budgets.index()}>Ver metas</Link>
-                            </Button>
+                                Planejar
+                            </Link>
                         </CardHeader>
-                        <CardContent>
-                            {hasAlerts ? (
-                                <ul className="space-y-3">
-                                    {budgetAlerts.map((alert) => (
-                                        <li
-                                            key={alert.category_name}
-                                            className="flex items-center justify-between gap-3 rounded-lg border border-border/60 p-3"
-                                        >
-                                            <div className="min-w-0">
-                                                <p className="truncate font-medium">
-                                                    {alert.category_name}
-                                                </p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {alert.status === 'warning'
-                                                        ? 'Atenção: próximo do limite'
-                                                        : 'Limite estourado'}
-                                                </p>
-                                            </div>
-                                            <p
-                                                className={`shrink-0 text-lg font-semibold tabular-nums ${
-                                                    alert.status === 'warning'
-                                                        ? 'text-warning'
-                                                        : 'text-expense-text'
-                                                }`}
-                                            >
-                                                {percentageFormatter.format(
-                                                    alert.percentage,
-                                                )}
-                                                %
-                                            </p>
-                                        </li>
-                                    ))}
-                                </ul>
+                        <CardContent className="space-y-4">
+                            {budgetAlerts.length ? (
+                                budgetAlerts.map((alert) => (
+                                    <Link
+                                        key={alert.category_name}
+                                        href={budgets.index({
+                                            query: { month: filters.month },
+                                        })}
+                                        className="block space-y-2 rounded-xl border border-border p-4"
+                                    >
+                                        <div className="flex justify-between gap-3">
+                                            <span className="text-sm font-medium">
+                                                {alert.category_name}
+                                            </span>
+                                            <span className="text-xs font-semibold text-warning">
+                                                {hidden
+                                                    ? '••••'
+                                                    : `${alert.percentage.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`}
+                                            </span>
+                                        </div>
+                                        <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
+                                            <div
+                                                className="h-full rounded-full bg-warning"
+                                                style={{
+                                                    width: `${Math.min(100, Math.max(0, alert.percentage))}%`,
+                                                }}
+                                            />
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            {alert.status === 'exceeded'
+                                                ? 'Limite ultrapassado'
+                                                : 'Próximo do limite mensal'}
+                                        </p>
+                                    </Link>
+                                ))
                             ) : (
-                                <p className="py-2 text-sm text-muted-foreground">
-                                    Todas as suas categorias estão dentro do
-                                    limite estabelecido.
+                                <p className="py-6 text-sm text-muted-foreground">
+                                    {hasBudgets
+                                        ? 'Nenhum limite exige atenção neste mês.'
+                                        : 'Defina limites por categoria para acompanhar seus gastos.'}
                                 </p>
                             )}
                         </CardContent>
                     </Card>
-                )}
-
-                <DashboardCharts
-                    expensesByCategory={expensesByCategory}
-                    selectedMonth={filters.month}
-                    selectedMonthLabel={monthNavigation.label}
-                    monthlyTrend={monthlyTrend}
-                    hasTransactionsInChartRange={hasTransactionsInChartRange}
-                />
-
-                <Card className="rounded-2xl shadow-sm">
-                    <CardHeader className="flex flex-row items-center justify-between gap-4">
-                        <div className="space-y-1">
-                            <CardTitle>Lançamentos recentes</CardTitle>
-                            <CardDescription>
-                                Seus cinco lançamentos mais recentes.
-                            </CardDescription>
-                        </div>
-                        <Button
-                            variant="link"
-                            asChild
-                            className="shrink-0 px-0"
-                        >
+                    <Card className="finance-surface">
+                        <CardHeader className="flex-row items-center justify-between gap-3">
+                            <CardTitle>Últimos lançamentos</CardTitle>
                             <Link
                                 href={TransactionController.index({
                                     query: { month: filters.month },
                                 })}
+                                className="text-xs font-medium text-primary"
                             >
-                                Ver todos
+                                Ver lançamentos
                             </Link>
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        {recentTransactions.length > 0 ? (
-                            <ul className="divide-y divide-border/60">
-                                {recentTransactions.map((transaction) => (
-                                    <li
-                                        key={transaction.id}
-                                        className="flex flex-col gap-2 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
-                                    >
-                                        <div className="min-w-0 space-y-1">
-                                            <p className="truncate font-medium">
-                                                {transaction.description}
-                                            </p>
-                                            <p className="text-sm text-muted-foreground">
-                                                {transaction.category} ·{' '}
-                                                {transaction.formattedDate}
-                                            </p>
-                                        </div>
-                                        <p
-                                            className={`shrink-0 font-medium tabular-nums ${transaction.type === 'income' ? 'text-income' : 'text-expense-text'}`}
-                                        >
-                                            {transaction.type === 'income'
-                                                ? '+ '
-                                                : '− '}
-                                            {currencyFormatter.format(
-                                                Number(transaction.amount),
+                        </CardHeader>
+                        <CardContent>
+                            {recentTransactions.length ? (
+                                <div className="divide-y divide-border">
+                                    {recentTransactions.map((transaction) => (
+                                        <Link
+                                            key={transaction.id}
+                                            href={TransactionController.edit(
+                                                transaction.id,
                                             )}
-                                        </p>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="py-4 text-sm text-muted-foreground">
-                                Você ainda não tem lançamentos. Adicione o
-                                primeiro para começar.
+                                            className="flex items-center gap-3 py-3 first:pt-0"
+                                        >
+                                            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground">
+                                                {transaction.type ===
+                                                'income' ? (
+                                                    <ArrowDownLeft className="size-4" />
+                                                ) : (
+                                                    <ArrowUpRight className="size-4" />
+                                                )}
+                                            </span>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-sm font-medium break-words">
+                                                    {transaction.description}
+                                                </p>
+                                                <p className="mt-1 text-xs text-muted-foreground">
+                                                    {transaction.category} ·{' '}
+                                                    {transaction.formattedDate}
+                                                </p>
+                                            </div>
+                                            <span
+                                                className={`money-value shrink-0 text-sm font-semibold ${transaction.type === 'income' ? 'text-income' : 'text-expense-text'}`}
+                                            >
+                                                {hidden
+                                                    ? '••••'
+                                                    : `${transaction.type === 'income' ? '+' : '−'} ${value(transaction.amount)}`}
+                                            </span>
+                                        </Link>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="py-6 text-sm text-muted-foreground">
+                                    Você ainda não tem lançamentos. Adicione o
+                                    primeiro para começar.
+                                </p>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+                <details className="rounded-2xl border border-border bg-card p-5">
+                    <summary className="cursor-pointer text-sm font-medium">
+                        Despesas por categoria
+                    </summary>
+                    <div className="mt-5">
+                        {hidden ? (
+                            <p className="text-sm text-muted-foreground">
+                                Valores ocultos.
                             </p>
+                        ) : (
+                            <DashboardCharts
+                                {...chartProps}
+                                mode="categories"
+                            />
                         )}
-                    </CardContent>
-                </Card>
+                    </div>
+                </details>
             </main>
         </>
     );
 }
-
-Dashboard.layout = {
-    breadcrumbs: [
-        {
-            title: 'Dashboard',
-            href: dashboard(),
-        },
-    ],
-};
+Dashboard.layout = { breadcrumbs: [{ title: 'Dashboard', href: dashboard() }] };

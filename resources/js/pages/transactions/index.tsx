@@ -1,4 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
+import { FinanceHeader } from '@/components/finance-layout';
 import TransactionController from '@/actions/App/Http/Controllers/TransactionController';
 import { TransactionFiltersPanel } from '@/components/transaction-filters';
 import { TransactionSummary } from '@/components/transaction-summary';
@@ -57,51 +58,51 @@ export default function TransactionsIndex({
         <>
             <Head title="Lançamentos" />
 
-            <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 md:p-8">
-                <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                    <div className="space-y-1">
-                        <h1 className="text-2xl font-semibold tracking-tight">
-                            Lançamentos
-                        </h1>
-                        <p className="text-sm text-muted-foreground">
-                            Acompanhe suas receitas e despesas.
-                        </p>
-                    </div>
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                        <Button variant="outline" asChild>
-                            <a
-                                href={TransactionController.export.url({
-                                    query: filters,
-                                })}
-                            >
-                                Exportar CSV
-                            </a>
-                        </Button>
-                        <Button asChild>
-                            <Link href={TransactionController.create()}>
-                                Novo lançamento
-                            </Link>
-                        </Button>
-                    </div>
-                </header>
+            <main className="finance-page">
+                <FinanceHeader
+                    eyebrow="Seu dia a dia"
+                    title="Lançamentos"
+                    subtitle="Cada movimentação, no seu lugar."
+                >
+                    <Button variant="outline" asChild>
+                        <a
+                            href={TransactionController.export.url({
+                                query: filters,
+                            })}
+                        >
+                            Exportar CSV
+                        </a>
+                    </Button>
+                    <Button asChild>
+                        <Link href={TransactionController.create()}>
+                            Novo lançamento
+                        </Link>
+                    </Button>
+                </FinanceHeader>
 
+                <TransactionSummary month={filters.month} summary={summary} />
                 <TransactionFiltersPanel
                     categories={categories}
                     filters={filters}
                     monthNavigation={monthNavigation}
                 />
 
-                <TransactionSummary month={filters.month} summary={summary} />
-
                 <Card className="overflow-hidden rounded-2xl shadow-sm">
                     {hasTransactions ? (
                         <CardContent className="p-0">
                             <div className="divide-y divide-border/60 xl:hidden">
-                                {transactions.data.map((transaction) => (
+                                {transactions.data.map((transaction, index) => (
                                     <article
                                         key={transaction.id}
                                         className="p-4"
                                     >
+                                        {(index === 0 ||
+                                            transactions.data[index - 1]
+                                                .date !== transaction.date) && (
+                                            <p className="mb-4 text-xs text-muted-foreground">
+                                                {transaction.formattedDate}
+                                            </p>
+                                        )}
                                         <div className="flex items-start justify-between gap-4">
                                             <div className="min-w-0 space-y-1">
                                                 <p className="font-medium break-words">

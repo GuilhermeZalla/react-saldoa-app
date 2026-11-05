@@ -2,6 +2,91 @@ export type Locale = 'pt-BR' | 'en';
 let currentLocale: Locale = 'pt-BR';
 
 export const english: Record<string, string> = {
+    Despesas: 'Expenses',
+    'Excluir lançamento': 'Delete transaction',
+    Exportar: 'Export',
+    Limite: 'Limit',
+    Receitas: 'Income',
+    Todos: 'All',
+
+    Agenda: 'Schedule',
+    'Agenda do mês': 'Monthly schedule',
+    'Buscar descrição': 'Search description',
+    'Buscar lançamentos': 'Search transactions',
+    'Cada movimentação, no seu lugar.': 'Every transaction, in its place.',
+    'Carregar mais': 'Load more',
+    'Escala máxima: {amount}': 'Maximum scale: {amount}',
+    'Espaço no orçamento': 'Budget remaining',
+    'Ex.: compra no mercado': 'E.g. grocery shopping',
+    Gasto: 'Spent',
+    'Gerenciar recorrências': 'Manage recurring transactions',
+    'Histórico do mês': 'Monthly history',
+    'Informe um valor maior que zero.': 'Enter an amount greater than zero.',
+    Limites: 'Limits',
+    'Limites das categorias': 'Category limits',
+    'Limites de gastos': 'Spending limits',
+    'Limpar filtros': 'Clear filters',
+    Mais: 'More',
+    'Minha conta': 'My account',
+    'Mês anterior': 'Previous month',
+    'Nas categorias com limite': 'For budgeted categories',
+    'Nenhum lançamento encontrado. Experimente outro mês ou filtro.':
+        'No transactions found. Try another month or filter.',
+    'Nenhuma recorrência prevista neste período.':
+        'No recurring transactions expected in this period.',
+    'No período selecionado': 'In the selected period',
+    'Novo limite': 'New limit',
+    'Organização, preferências e sua conta.':
+        'Organization, preferences and your account.',
+    'Organize o mês e enxergue o que vem depois.':
+        'Plan your month and see what comes next.',
+    'Organize o que se repete.': 'Organize repeating transactions.',
+    'Organize suas receitas e despesas.': 'Organize your income and expenses.',
+    'Orçamento do mês': 'Monthly budget',
+    'Perfil, exportação e segurança.': 'Profile, exports and security.',
+    Planejamento: 'Planning',
+    Planejar: 'Plan',
+    Previsto: 'Expected',
+    'Próxima ocorrência de cada recorrência. Valores previstos, fora do saldo realizado.':
+        'Next occurrence of each recurring transaction. Expected amounts are separate from your actual balance.',
+    'Próximo mês': 'Next month',
+    'Próximos lançamentos': 'Upcoming transactions',
+    'Receitas e despesas dos últimos seis meses':
+        'Income and expenses over the last six months',
+    'Saldo do mês': 'Monthly balance',
+    'Saldo geral': 'Overall balance',
+    'Seu Saldoa': 'Your Saldoa',
+    'Seu dia a dia': 'Your daily finances',
+    'Seu dinheiro ao longo do tempo': 'Your money over time',
+    'Seus próximos passos': 'Your next steps',
+    'Todos os períodos': 'All periods',
+    'Um olhar claro para o seu dinheiro.': 'A clear view of your money.',
+    'Valor (R$)': 'Amount (BRL)',
+    'Ver todos': 'View all',
+    'Visão geral': 'Overview',
+    'Últimos lançamentos': 'Recent transactions',
+    'Mostrar valores': 'Show amounts',
+    'Ocultar valores': 'Hide amounts',
+    Fechar: 'Close',
+    Novo: 'New',
+
+    'A senha deve ter pelo menos {min} caracteres.':
+        'Your password must contain at least {min} characters.',
+    'A confirmação de senha não confere.':
+        'The password confirmation does not match.',
+    'A senha deve conter letras maiúsculas e minúsculas.':
+        'Your password must contain uppercase and lowercase letters.',
+    'A senha deve conter pelo menos uma letra.':
+        'Your password must contain at least one letter.',
+    'A senha deve conter pelo menos um número.':
+        'Your password must contain at least one number.',
+    'A senha deve conter pelo menos um símbolo.':
+        'Your password must contain at least one symbol.',
+    'Esta senha apareceu em um vazamento de dados. Escolha outra senha.':
+        'This password appeared in a data breach. Choose another password.',
+    'Use pelo menos 12 caracteres, com maiúsculas, minúsculas, números e símbolos.':
+        'Use at least 12 characters, including uppercase and lowercase letters, numbers and symbols.',
+
     'Abrir preferências': 'Open preferences',
     'Fechar preferências': 'Close preferences',
     'Experimentar sem criar conta': 'Try without an account',

@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\RecurringTransaction;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Support\DecimalAmount;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -183,11 +185,39 @@ class DashboardDataService
             'expensesByCategory' => $categoryExpenses,
             'monthlyTrend' => $monthlyTrend,
             'recentTransactions' => $recentTransactions,
+            'upcomingTransactions' => $this->upcomingTransactions($user, $month),
             'hasTransactionsInMonth' => (int) data_get($monthTotals, 'transaction_count', 0) > 0,
             'hasTransactionsInChartRange' => $monthlyTotals->isNotEmpty(),
             'budgetAlerts' => $this->budgetAlerts($user, $monthStart),
             'hasBudgets' => $user->budgets()->exists(),
         ];
+    }
+
+    /**
+     * @return array<int, array{id: int, description: string, amount: string, type: string, date: string, category: string}>
+     */
+    public function upcomingTransactions(User $user, string $month): array
+    {
+        $monthStart = Carbon::parse($month.'-01')->startOfMonth();
+        $firstDate = max($monthStart->toDateString(), now()->toDateString());
+
+        return $user->recurringTransactions()
+            ->with(['category' => fn (BelongsTo $query) => $query->where('user_id', $user->id)->select(['id', 'name'])])
+            ->where('next_occurrence_date', '>=', $firstDate)
+            ->where('next_occurrence_date', '<', $monthStart->copy()->addMonth()->toDateString())
+            ->where(fn (Builder $query) => $query->whereNull('end_date')->orWhereColumn('next_occurrence_date', '<=', 'end_date'))
+            ->orderBy('next_occurrence_date')
+            ->orderBy('id')
+            ->limit(20)
+            ->get()
+            ->map(fn (RecurringTransaction $rule): array => [
+                'id' => $rule->id,
+                'description' => $rule->description,
+                'amount' => (string) $rule->amount,
+                'type' => $rule->type,
+                'date' => $rule->next_occurrence_date?->toDateString() ?? '',
+                'category' => $rule->category->name ?? 'Categoria indisponível',
+            ])->all();
     }
 
     /**

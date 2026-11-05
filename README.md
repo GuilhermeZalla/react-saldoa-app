@@ -2,7 +2,7 @@
 
 Personal finance tracking for income, expenses, and budgets, on the web and on your phone.
 
-**[Visit the website](https://saldoa-app.duckdns.org)** · **[Download the Android APK](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.0.0/saldoa-android-v1.0.0.apk)** · [Release notes](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.0.0)
+**[Visit the website](https://saldoa-app.duckdns.org)** · **[Download the Android APK](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.0/saldoa-android-v1.1.0.apk)** · [Release notes](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0)
 
 The **web application was completed in 2025**. In **2026**, Saldoa gained a mobile app that shares the same backend. This is a learning and portfolio project, with a live website hosted on AWS and an Android APK available for direct installation.
 
@@ -95,9 +95,15 @@ php artisan test --compact
 
 Laravel tests use a separate test environment. Mobile-specific checks are documented in the [mobile guide](mobile/README.md).
 
+## Version 1.1.0
+
+Version 1.1.0 refreshes the signed-in dashboard, transaction history, and planning screens on web and mobile. The app adds month navigation, search, pagination, and a four-tab navigation bar. Upcoming recurring transactions are shown separately from recorded balances. Public home and authentication screens keep their current design.
+
+See the [changelog](CHANGELOG.md) for the version history and the [latest release](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0) for the Android download and release notes.
+
 ## Release scope
 
-Version 1.0 focuses on the existing web and mobile finance features. The public deployment uses HTTPS and Gmail SMTP. Encrypted backups are sent to the owner every 15 days, and recovery was verified in isolated containers using a copy received by email. Releases are deployed manually; pushing to GitHub runs checks but does not update the server.
+Version 1.1.0 builds on the web and mobile finance features introduced in 1.0. The public deployment uses HTTPS and Gmail SMTP. Encrypted backups are sent to the owner every 15 days, and recovery was verified in isolated containers using a copy received by email. Releases are deployed manually; pushing to GitHub runs checks but does not update the server.
 
 The Android APK currently uses a debug signing key and supports ARM64 devices. Google Play publishing, distribution signing, and automatic deployment are outside this release's scope.
 

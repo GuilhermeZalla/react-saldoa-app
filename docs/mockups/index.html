@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Saldoa · Propostas das telas internas</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <div class="review-bar">
+            <span
+                ><strong>Saldoa · Estudo visual</strong
+                ><span class="review-note"
+                    >Dados fictícios · sem conexão com a API</span
+                ></span
+            >
+            <div>
+                <button data-screen="dashboard">Dashboard</button
+                ><button data-screen="transactions">Lançamentos</button
+                ><button data-screen="planning">Planejamento</button
+                ><button id="review-theme" aria-label="Alternar tema">
+                    Claro / escuro
+                </button>
+            </div>
+        </div>
+        <div class="app-shell">
+            <aside class="sidebar">
+                <a class="brand" href="?screen=dashboard"
+                    ><img src="assets/fluxo.svg" alt="" /><strong
+                        >saldoa</strong
+                    ></a
+                ><span class="nav-label">SEU DINHEIRO</span>
+                <nav id="sidebar-nav"></nav>
+                <div class="sidebar-bottom">
+                    <div class="sidebar-note">
+                        <span data-icon="ShieldCheck"></span>
+                        <div>
+                            <strong>Seu espaço pessoal</strong
+                            ><small>Organize hoje. Planeje o próximo.</small>
+                        </div>
+                    </div>
+                    <button class="user-row" data-more>
+                        <span class="avatar">MS</span
+                        ><span
+                            ><strong>Marina Souza</strong
+                            ><small>Minha conta</small></span
+                        ><span data-icon="ChevronRight"></span>
+                    </button>
+                </div>
+            </aside>
+            <div class="workspace">
+                <div class="statusbar">
+                    <strong>9:41</strong
+                    ><span
+                        ><span data-icon="Signal"></span
+                        ><span data-icon="Wifi"></span
+                        ><span data-icon="BatteryFull"></span
+                    ></span>
+                </div>
+                <header class="appbar">
+                    <span id="breadcrumb">Visão geral</span>
+                    <div>
+                        <button
+                            class="icon-button theme-toggle"
+                            aria-label="Alternar tema"
+                        >
+                            <span data-icon="SunMoon"></span></button
+                        ><button
+                            class="icon-button privacy-toggle"
+                            aria-label="Ocultar valores"
+                        >
+                            <span data-icon="Eye"></span></button
+                        ><button
+                            class="avatar small"
+                            data-more
+                            aria-label="Minha conta"
+                        >
+                            MS
+                        </button>
+                    </div>
+                </header>
+                <div class="scroll-area">
+                    <main class="page" id="page"></main>
+                </div>
+                <nav
+                    class="mobile-nav"
+                    id="mobile-nav"
+                    aria-label="Navegação principal"
+                ></nav>
+            </div>
+        </div>
+        <dialog id="entry-dialog">
+            <form id="entry-form">
+                <div class="dialog-head">
+                    <div>
+                        <span class="eyebrow">UM PASSO DE CADA VEZ</span>
+                        <h2>Novo lançamento</h2>
+                    </div>
+                    <button
+                        class="icon-button"
+                        type="button"
+                        data-close
+                        aria-label="Fechar"
+                    >
+                        <span data-icon="X"></span>
+                    </button>
+                </div>
+                <div class="form-types">
+                    <label
+                        ><input
+                            type="radio"
+                            name="type"
+                            value="expense"
+                            checked
+                        />
+                        Despesa</label
+                    ><label
+                        ><input type="radio" name="type" value="income" />
+                        Receita</label
+                    >
+                </div>
+                <label class="field"
+                    >Valor (R$)<input
+                        name="amount"
+                        inputmode="decimal"
+                        placeholder="0,00"
+                        required
+                        pattern="[0-9]+([,.][0-9]{1,2})?" /></label
+                ><label class="field"
+                    >Descrição<input
+                        name="description"
+                        placeholder="Ex.: compra no mercado"
+                        required
+                        maxlength="80"
+                /></label>
+                <div class="form-grid">
+                    <label class="field"
+                        >Categoria<select name="category">
+                            <option>Alimentação</option>
+                            <option>Moradia</option>
+                            <option>Transporte</option>
+                            <option>Outros</option>
+                        </select></label
+                    ><label class="field"
+                        >Data<input
+                            name="date"
+                            type="date"
+                            value="2026-11-05"
+                            required
+                    /></label>
+                </div>
+                <button class="button primary full" type="submit">
+                    Adicionar à prévia
+                </button>
+                <p class="prototype-note">
+                    Simulação local. Nenhum dado será enviado ou salvo no
+                    Saldoa.
+                </p>
+            </form>
+        </dialog>
+        <dialog id="more-dialog">
+            <div class="dialog-head">
+                <h2>Seu Saldoa</h2>
+                <button class="icon-button" data-close aria-label="Fechar">
+                    <span data-icon="X"></span>
+                </button>
+            </div>
+            <div class="more-links">
+                <button data-screen="planning">
+                    <span data-icon="Tags"></span>Categorias e limites<span
+                        data-icon="ChevronRight"
+                    ></span></button
+                ><button data-screen="planning">
+                    <span data-icon="Repeat2"></span>Recorrências<span
+                        data-icon="ChevronRight"
+                    ></span></button
+                ><button class="theme-toggle">
+                    <span data-icon="SunMoon"></span>Alternar tema<span
+                        data-icon="ChevronRight"
+                    ></span></button
+                ><button class="privacy-toggle">
+                    <span data-icon="Eye"></span>Mostrar / ocultar valores<span
+                        data-icon="ChevronRight"
+                    ></span>
+                </button>
+            </div>
+            <p class="prototype-note">
+                Prévia visual de navegação. Configurações completas serão
+                definidas na implementação.
+            </p>
+        </dialog>
+        <div class="toast" role="status" id="toast" hidden></div>
+        <script src="icons.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>

@@ -1,11 +1,13 @@
 <?php
 
 use App\Models\Category;
+use App\Models\RecurringTransaction;
 use App\Models\Transaction;
 use App\Models\User;
 use Database\Seeders\FinancialDataSeeder;
 use Illuminate\Support\Carbon;
 use Inertia\Testing\AssertableInertia as Assert;
+use Laravel\Sanctum\Sanctum;
 
 test('guests are redirected to the login page', function () {
     $response = $this->get(route('dashboard'));
@@ -499,4 +501,26 @@ test('dashboard aggregates exclude soft-deleted transactions from every widget',
             ->where('recentTransactions.0.description', 'June expense')
             ->where('recentTransactions.1.description', 'June income')
             ->where('recentTransactions.4.description', 'March expense'));
+});
+
+test('upcoming recurring transactions are private future previews and do not affect balances', function () {
+    $this->travelTo(Carbon::parse('2026-11-05 12:00:00'));
+    $user = User::factory()->create();
+    $category = Category::factory()->for($user)->create(['type' => 'expense']);
+    foreach ([['2026-11-05', null], ['2026-11-08', null], ['2026-11-30', null], ['2026-11-04', null], ['2026-12-01', null], ['2026-11-10', '2026-11-09']] as [$date, $end]) {
+        RecurringTransaction::factory()->for($user)->for($category)->create([
+            'description' => 'Internet', 'amount' => '120.00', 'type' => 'expense',
+            'start_date' => '2026-01-01', 'next_occurrence_date' => $date, 'end_date' => $end,
+        ]);
+    }
+    RecurringTransaction::factory()->create(['next_occurrence_date' => '2026-11-07']);
+    Sanctum::actingAs($user);
+    $this->getJson('/api/v1/dashboard?month=2026-11')
+        ->assertOk()->assertJsonCount(3, 'data.upcomingTransactions')
+        ->assertJsonPath('data.upcomingTransactions.0.date', '2026-11-05')
+        ->assertJsonPath('data.upcomingTransactions.2.date', '2026-11-30')
+        ->assertJsonPath('data.summary.monthlyExpense', '0.00')
+        ->assertJsonPath('data.summary.overallBalance', '0.00');
+    $this->actingAs($user, 'web')->get(route('dashboard', ['month' => '2026-11']))
+        ->assertOk()->assertInertia(fn (Assert $page) => $page->has('upcomingTransactions', 3));
 });

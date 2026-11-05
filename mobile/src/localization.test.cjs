@@ -149,3 +149,59 @@ void test('the current export month follows the local calendar at the UTC month 
         else process.env.TZ = previousTimeZone;
     }
 });
+
+void test('password requirements and untranslated validation keys stay understandable in both languages', () => {
+    for (const [locale, shortMessage, fallback, confirmation] of [
+        [
+            'pt-BR',
+            'A senha deve ter pelo menos 12 caracteres.',
+            'Use pelo menos 12 caracteres, com maiúsculas, minúsculas, números e símbolos.',
+            'A confirmação de senha não confere.',
+        ],
+        [
+            'en',
+            'Your password must contain at least 12 characters.',
+            'Use at least 12 characters, including uppercase and lowercase letters, numbers and symbols.',
+            'The password confirmation does not match.',
+        ],
+    ]) {
+        setLocale(locale);
+        const response = (message) => ({
+            error: { details: { password: [message] } },
+        });
+        assert.equal(
+            apiErrorMessage(
+                response('O campo senha deve ter pelo menos 12 caracteres.'),
+                422,
+            ),
+            shortMessage,
+        );
+        assert.equal(
+            apiErrorMessage(response('string.min.value'), 422),
+            fallback,
+        );
+        assert.equal(
+            apiErrorMessage(
+                response('A confirmação de senha não confere.'),
+                422,
+            ),
+            confirmation,
+        );
+        assert.equal(
+            apiErrorMessage(
+                { error: { details: { name: ['validation.string.max'] } } },
+                422,
+            ),
+            t('Verifique os dados informados.'),
+        );
+    }
+});
+
+void test('month navigation preserves year boundaries without crossing supported years', () => {
+    const { shiftMonth } = loadUtility('format');
+    assert.equal(shiftMonth('2026-12', 1), '2027-01');
+    assert.equal(shiftMonth('2026-01', -1), '2025-12');
+    assert.equal(shiftMonth('0001-01', -1), '0001-01');
+    assert.equal(shiftMonth('9999-12', 1), '9999-12');
+    assert.equal(shiftMonth('2028-02', 1), '2028-03');
+});

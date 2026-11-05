@@ -85,10 +85,12 @@ export function IconButton({
     icon,
     label,
     onPress,
+    variant = 'default',
 }: {
     icon: IconName;
     label: string;
     onPress: () => void;
+    variant?: 'default' | 'ghost';
 }) {
     const { colors, styles } = useThemeStyles(createStyles);
     return (
@@ -96,12 +98,18 @@ export function IconButton({
             accessibilityRole="button"
             accessibilityLabel={label}
             onPress={onPress}
+            hitSlop={variant === 'ghost' ? 4 : undefined}
             style={({ pressed }) => [
                 styles.iconButton,
+                variant === 'ghost' && styles.ghostIconButton,
                 pressed && styles.buttonPressed,
             ]}
         >
-            <AppIcon name={icon} color={colors.text} size={22} />
+            <AppIcon
+                name={icon}
+                color={colors.text}
+                size={variant === 'ghost' ? 18 : 22}
+            />
         </Pressable>
     );
 }
@@ -561,6 +569,11 @@ const createStyles = (colors: ThemeColors) =>
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: colors.surfaceMuted,
+        },
+        ghostIconButton: {
+            width: 36,
+            height: 36,
+            backgroundColor: 'transparent',
         },
         settingsRow: {
             flexDirection: 'row',

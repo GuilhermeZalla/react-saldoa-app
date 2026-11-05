@@ -51,7 +51,17 @@ export type RecurringTransaction = {
     category: { id: number; name: string };
 };
 
+export type UpcomingTransaction = {
+    id: number;
+    description: string;
+    amount: string;
+    type: 'income' | 'expense';
+    date: string;
+    category: string;
+};
+
 export type Dashboard = {
+    upcomingTransactions?: UpcomingTransaction[];
     filters: { month: string };
     monthNavigation: { label: string };
     summary: {
