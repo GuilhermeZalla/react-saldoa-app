@@ -4,7 +4,7 @@ Projeto de estudo independente e portfólio para controle financeiro pessoal.
 
 **Site:** [Acessar o Saldoa](https://saldoa-app.duckdns.org)
 
-**Android:** [Baixar APK de teste — pré-lançamento](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/mobile-v1.0.0-preview.1). Assinatura de depuração e arquitetura ARM64; não destinado à Play Store.
+**Android:** [Baixar APK de teste](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/mobile-v1.0.0-preview.1/saldoa-android-public-preview.apk) · [Notas do pré-lançamento](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/mobile-v1.0.0-preview.1). Assinatura de depuração e arquitetura ARM64; não destinado à Play Store.
 
 Desenvolvido como uma aplicação web completa com **Laravel 13**, **React 19**, **Inertia.js 3** e **Tailwind CSS 4**, acompanhada por um cliente mobile complementar construído com **Expo (React Native)** e **TypeScript**.
 

@@ -6,7 +6,7 @@ Projeto: app de controle financeiro pessoal (portfólio). Laravel + React (Inert
 
 - Usuário autorizou integrar a versão atual de `feat/mobile-api` na `main`, incluindo código e README. Antes da integração, a `main` estava 15 commits atrás e não tinha commits exclusivos. As branches de trabalho foram preservadas.
 - Release pública: https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/mobile-v1.0.0-preview.1. APK disponível em Assets. Removida somente a tag temporária sem Release `untagged-29e9879810e28b50943d`, criada durante a preparação; a tag publicada continua vinculada ao commit `29354c2`.
-- README principal inclui links do site, APK de teste e capa. A integração no GitHub não ativa deploy automático nem executa migrations.
+- README principal inclui links do site, download direto do APK de teste, notas da versão e capa. O CI da main precisava instalar as dependências mobile antes do check global, que resolve `expo/tsconfig.base`; adicionada instalação com `npm ci --ignore-scripts` usando o lockfile existente, sem novos pacotes. A integração no GitHub não ativa deploy automático nem executa migrations.
 
 ## Favicon e cache do navegador — 04/11/2026
 

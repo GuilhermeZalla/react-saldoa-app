@@ -34,5 +34,9 @@ jobs:
       - name: Setup Application
         run: composer setup
 
+      - name: Install Mobile Dependencies
+        working-directory: mobile
+        run: npm ci --ignore-scripts
+
       - name: Run CI Checks
         run: composer ci:check
