@@ -1,6 +1,6 @@
 # API móvel
 
-Esta API fornece o backend JSON autenticado por tokens Sanctum para o aplicativo Expo/React Native em `mobile/`. A interface nativa cobre autenticação, leitura do dashboard e gestão de lançamentos, categorias, metas e recorrências, além de exportação e gestão da conta. O cliente ainda precisa ser validado contra instâncias publicadas antes de qualquer distribuição.
+Esta API fornece o backend JSON autenticado por tokens Sanctum para o aplicativo Expo/React Native em `mobile/`. A interface nativa cobre autenticação, leitura do dashboard e gestão de lançamentos, categorias, metas e recorrências, além de exportação e gestão da conta. Há um APK de teste publicado com a API pública HTTPS. O usuário confirmou o primeiro build público por dados móveis; a versão seguinte com a marca Fluxo ainda aguarda confirmação no aparelho. Para instalação e uso, consulte [mobile/README.md](../mobile/README.md).
 
 ## Endereços e instâncias
 
@@ -17,7 +17,7 @@ O endereço configurado em `mobile/.env` é incorporado ao APK durante o build. 
 
 ## Interface, preferências e idioma
 
-O cliente acompanha a identidade desktop com carteira Saldoa, DM Sans, Space Grotesk e temas laranja/cinza. Português e inglês e a aparência claro/escuro/sistema podem ser escolhidos no painel de preferências: botão de ajustes no topo do login/cadastro ou opção **Idioma e aparência** em Conta. O painel respeita áreas seguras, permite rolagem em telas baixas e fecha pelo botão, pelo fundo ou pela ação de voltar do sistema. Preferências são locais ao dispositivo, salvas no SecureStore, sem alterar o perfil ou o contrato da API; na prévia web, ficam no localStorage, separado do token que continua em memória. A moeda permanece BRL nos dois idiomas.
+O cliente acompanha a identidade desktop com a marca Fluxo do Saldoa, DM Sans, Space Grotesk e temas laranja/cinza. Português e inglês e a aparência claro/escuro/sistema podem ser escolhidos no painel de preferências: botão de ajustes no topo do login/cadastro ou opção **Idioma e aparência** em Conta. O painel respeita áreas seguras, permite rolagem em telas baixas e fecha pelo botão, pelo fundo ou pela ação de voltar do sistema. Preferências são locais ao dispositivo, salvas no SecureStore, sem alterar o perfil ou o contrato da API; na prévia web, ficam no localStorage, separado do token que continua em memória. A moeda permanece BRL nos dois idiomas.
 
 O login/cadastro usa uma ilustração vetorial local, reduzida no cadastro, em telas baixas ou quando o teclado nativo abre. A tela de acesso não exibe hosts nem nomes de variáveis de ambiente. O dashboard usa somente os dados já recebidos da API, com atalhos para telas existentes, barras de distribuição das despesas e movimentações recentes. Metas mostram gasto, limite e disponibilidade/excesso; o formulário abre ao criar ou editar. Conta agrupa preferências, exportação e segurança; a exclusão fica recolhida e mantém senha e confirmação final. Nenhum endpoint ou regra de autorização foi alterado por esse redesign.
 
@@ -87,18 +87,11 @@ Antes de publicar ou iniciar teste fechado na Play Store:
 
 ## Deploy e operação
 
-- Caminho escolhido pelo usuário: VM AWS EC2 administrada pelo próprio usuário. O fluxo separado de produção usa Docker Compose, PHP 8.4, MySQL 8.4, Caddy/HTTPS, fila e scheduler; consulte [deploy na AWS](AWS_DEPLOY.md) para conta/VM, domínio gratuito opcional, configuração, validação e backups. Nenhum recurso externo foi criado; conta e domínio ainda precisam ser configurados. O plano gratuito AWS é temporário e depende de créditos/eligibilidade; planejar custos e continuidade antes da distribuição pública.
-- A configuração local versionada usa SQLite, sessões/cache/filas no banco e e-mail em `log`. Em produção, configurar um banco persistente (MySQL já é suportado), `APP_KEY` exclusiva, `APP_DEBUG=false`, `APP_URL` HTTPS, sessão/cache/fila conforme os serviços provisionados e um provedor de e-mail real. Nunca reutilizar o `.env` local.
-- Configurar a execução do Scheduler para lançamentos recorrentes e expiração de solicitações de exclusão. Validar a configuração de proxies confiáveis com a documentação da plataforma antes de ativá-la, preservando a identificação correta do IP para limites de requisição.
-- Configure `APP_ENV=production`, `APP_DEBUG=false`, `APP_KEY` e segredos exclusivos do ambiente.
-- Ative HTTPS, configure `APP_URL` e `TrustProxies` de acordo com o balanceador real. A identificação correta do IP é necessária para que limites por IP funcionem como esperado.
-- Execute migrations com `php artisan migrate --force`.
-- Configure o cron do Laravel Scheduler e um worker de fila se a configuração de e-mail ou outras tarefas de produção usarem fila. O scheduler também gera lançamentos recorrentes, limpa pedidos de exclusão expirados e, somente na instância demo, executa `demo:reset` diariamente.
-- Na produção principal, valide primeiro o alvo e execute `php artisan demo:purge --force`; confirme que a conta demo não existe. Na instância isolada de demonstração, configure banco e domínio próprios e monitore o `demo:reset`.
-- Não habilite `DEMO_INSTANCE` na produção principal.
-- `mobile/eas.json` define um build de teste interno (APK) e um build de produção (AAB). Para iniciar o APK, execute `npx eas-cli@latest init` e depois `npx eas-cli@latest build --profile preview --platform android` na pasta `mobile/`; para o AAB, use `--profile production`. O build EAS exige uma conta, projeto associado e assinatura configurada.
-- Configure `EXPO_PUBLIC_API_URL` e `EXPO_PUBLIC_WEB_URL` com URLs HTTPS públicas no ambiente de build; configure `EXPO_PUBLIC_API_URL_DEMO` somente para uma instância isolada publicada. O arquivo `.env` local deste ambiente aponta para um endereço privado HTTP e não serve para um APK distribuível.
-- Android Studio, JDK e Android SDK estão instalados e o fluxo de APK local está implementado; ele é independente do EAS. Não foi gerado um AAB de distribuição. O identificador de teste é `com.saldoa.app` e os ícones locais usam a carteira Saldoa; confirme o identificador antes da publicação. Para a Play Store, configure a assinatura de produção, publique a política de privacidade e disponibilize e teste o fluxo público de exclusão de conta.
+A API está publicada em `https://saldoa-app.duckdns.org`, numa EC2 com Docker Compose, PHP 8.4, MySQL 8.4, Caddy, worker e scheduler. O ambiente público usa configuração e banco separados do notebook, sem demonstração habilitada.
+
+A instalação e reconstrução do servidor estão em [AWS_DEPLOY.md](AWS_DEPLOY.md); o acesso diário, logs e banco estão em [AWS_OPERACAO.md](AWS_OPERACAO.md). As instruções de instalação e build do aplicativo estão em [mobile/README.md](../mobile/README.md), evitando repetir procedimentos operacionais neste contrato da API.
+
+O identificador de teste é `com.saldoa.app`, com a marca Fluxo. Ainda não foi gerado um AAB de distribuição nem concluídos assinatura de produção, política de privacidade e requisitos de publicação na Play Store. SMTP real e backup externo continuam pendentes.
 
 ## APK de teste com HTTPS público — 04/11/2026
 

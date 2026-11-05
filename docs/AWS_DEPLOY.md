@@ -1,12 +1,14 @@
 # Deploy do Saldoa na AWS EC2
 
+Referência técnica para instalar ou reconstruir o ambiente. Para acesso diário, logs, banco e custos, use [AWS_OPERACAO.md](AWS_OPERACAO.md).
+
 Destino escolhido em 04/11/2026: uma instância EC2 administrada pelo usuário, executando Laravel/site, MySQL, Caddy/HTTPS, scheduler e worker com o Docker Compose de produção existente. O app mobile usa a mesma origem com `/api/v1`.
 
 Estado verificado por SSH em 04/11/2026: EC2 `t3.small` na região `us-east-2` (Ohio), Ubuntu 26.04.1 LTS, x86_64, 1,9 GiB RAM e disco raiz de 28 GiB. Docker 29.9.3 e Compose 5.7.0 instalados; Docker habilitado no boot. Swap de 4 GiB ativo e registrado em `/etc/fstab`, sem teste de reboot. Código do commit `242f69f` em `/opt/saldoa`; imagens de produção compiladas na própria VM. MySQL saudável, migrations existentes aplicadas e app/scheduler/worker iniciados, sem portas publicadas. O serviço web está publicado em `https://saldoa-app.duckdns.org`, com HTTPS válido e redirecionamento HTTP; somente ele publica portas 80/443. Chaves e senhas foram geradas somente no servidor. Plano/saldo AWS, SMTP real e backup externo continuam pendentes.
 
 A infraestrutura genérica já passou por build Linux AMD64, cinco containers isolados, respostas HTTP esperadas, requisitos PHP, execução do backup e restauração SQL num segundo banco descartável. Essa evidência vem da preparação anterior (commit `242f69f`); os arquivos Docker não mudaram na troca de provedor. O build e a inicialização interna na EC2 passaram; dimensionamento sob carga, SMTP e recuperação após perda do servidor continuam pendentes.
 
-Validação pública em 04/11/2026: `/up` e `/login` responderam 200 via HTTPS, HTTP redirecionou com 308, `/api/v1/auth/me` sem token respondeu 401 e `/.env` respondeu 404. O APK existente continua com a URL local; não houve novo build mobile. SMTP real ainda não foi configurado, portanto recuperação de senha e confirmação de exclusão por e-mail não estão prontas para uso público.
+Validação pública em 04/11/2026: `/up` e `/login` responderam 200 via HTTPS, HTTP redirecionou com 308, `/api/v1/auth/me` sem token respondeu 401 e `/.env` respondeu 404. Desde essa validação inicial, foi publicado um APK de teste com API pública HTTPS; o usuário confirmou acesso por dados móveis na primeira compilação pública. A compilação seguinte com a marca Fluxo está disponível na Release e ainda aguarda novo retorno do aparelho. SMTP real ainda não foi configurado, portanto recuperação de senha e confirmação de exclusão por e-mail não estão prontas para uso público.
 
 ## 1. Conta, custos, EC2 e endereço público
 
@@ -138,7 +140,7 @@ A VM deve manter Docker habilitado na inicialização (`sudo systemctl enable do
 - Verifique fila e scheduler com `docker compose ... logs --tail=100 worker scheduler`, sem publicar tokens ou conteúdo sensível dos logs.
 - Confirme certificado válido e ausência de acesso às portas 3306/9000 pela internet. Consulte `docker compose ... ps`; somente `web` deve publicar 80/443.
 - Configure no build mobile `EXPO_PUBLIC_API_URL=https://HOST` e `EXPO_PUBLIC_WEB_URL=https://HOST`, sem `/api/v1`. A demo permanece vazia até existir uma segunda instância realmente isolada.
-- Gere um build de distribuição e teste no celular por dados móveis. O comando `apk:local` aceita apenas HTTP privado e não é o comando deste build público. Assinatura, EAS/AAB, política de privacidade e exigências atuais da Play Store são uma etapa posterior.
+- Para um APK de teste compilado localmente com HTTPS público, use `npm run apk:local -- --public-api` com as URLs no ambiente do processo, conforme [mobile/README.md](../mobile/README.md). O comando sem essa opção continua restrito ao HTTP privado. Assinatura de distribuição, EAS/AAB, política de privacidade e exigências da Play Store são uma etapa posterior.
 
 ## 6. Backups e recuperação
 
