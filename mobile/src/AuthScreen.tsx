@@ -157,7 +157,7 @@ export default function AuthScreen({ onAuthenticated }: Props) {
                     <View style={styles.brand}>
                         <View style={styles.logoMark}>
                             <AppIcon
-                                name="wallet"
+                                name="brand"
                                 color={colors.primaryForeground}
                                 size={24}
                             />

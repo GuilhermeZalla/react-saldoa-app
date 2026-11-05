@@ -8,9 +8,15 @@ Desenvolvido como uma aplicação web completa com **Laravel 13**, **React 19**,
 
 O Saldoa ajuda a acompanhar de perto o fluxo financeiro. O usuário registra receitas e despesas com categorias personalizadas, estipula metas mensais de gastos com indicadores visuais de progresso, agenda lançamentos recorrentes automáticos e visualiza a evolução do patrimônio por meio de gráficos e comparativos em um dashboard interativo. A aplicação conta com separação estrita por usuário, exportação de lançamentos em CSV com sanitização de fórmulas, suporte a exclusão lógica com ação de desfazer e ambiente de demonstração seguro com acesso em um clique.
 
+## Identidade e capa para portfólio
+
+A marca **Fluxo** representa entradas e saídas em um S. [SVG da marca](docs/images/saldoa-logo-01-fluxo.svg) · [Capa PNG em 1920 × 1080](docs/images/saldoa-portfolio-cover.png) · [Capa SVG](docs/images/saldoa-portfolio-cover.svg). A capa combina o site público com o login do cliente Expo no navegador; não representa captura de um aparelho físico.
+
+![Saldoa na web e no mobile](docs/images/saldoa-portfolio-cover.png)
+
 ## Demonstrações
 
-Gravações reais da aplicação em execução no ambiente de desenvolvimento com dados de demonstração.
+Gravações reais da aplicação em execução no ambiente de desenvolvimento com dados de demonstração. Estas galerias podem mostrar a identidade anterior; a capa acima e o site público já usam a marca Fluxo.
 
 ### Visão geral e Landing Page
 
@@ -163,6 +169,20 @@ php artisan serve --host=0.0.0.0 --port=8000
 O build permite HTTP **somente para o endereço privado configurado em `EXPO_PUBLIC_API_URL`** e continua bloqueando HTTP para os demais domínios. O arquivo fica em `mobile/android/app/build/outputs/apk/release/app-release.apk`, inclui somente a arquitetura `arm64-v8a` e é assinado com a chave de depuração local: destina-se a testes na sua rede, não à Play Store. Sem URLs públicas, ele não funcionará fora dessa rede. Builds EAS ou AAB de produção exigem configuração de ambientes e assinatura próprios, além de uma API pública HTTPS.
 
 O script usa caminhos curtos no Windows e limita os trabalhos de compilação para reduzir o consumo de memória. O Gradle encerra seu processo ao terminar o build. A primeira compilação pode levar vários minutos; mantenha o IP local configurado atualizado caso ele mude no Wi-Fi.
+
+### APK de teste com a API pública
+
+Para compilar localmente usando a API hospedada, execute no PowerShell a partir da raiz:
+
+```powershell
+cd mobile
+$env:EXPO_PUBLIC_API_URL = 'https://saldoa-app.duckdns.org'
+$env:EXPO_PUBLIC_WEB_URL = 'https://saldoa-app.duckdns.org'
+$env:EXPO_PUBLIC_API_URL_DEMO = ''
+npm run apk:local -- --public-api
+```
+
+Esse modo exige URLs HTTPS e remove a exceção HTTP da rede local. As variáveis valem para a sessão do terminal; `mobile/.env` permanece disponível para desenvolvimento local. O APK pode acessar a API pelo 4G/5G, mas continua sendo ARM64 e assinado com a chave de depuração, sem distribuição pela Play Store. O arquivo gerado é `mobile/android/app/build/outputs/apk/release/app-release.apk`. A API pública usa um banco separado do notebook. Envio real de e-mails ainda está pendente.
 
 ## Autenticação, isolamento e segurança
 

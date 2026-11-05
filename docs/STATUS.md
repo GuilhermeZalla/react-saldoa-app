@@ -2,6 +2,26 @@
 
 Projeto: app de controle financeiro pessoal (portfólio). Laravel + React (Inertia, TypeScript), SQLite, Tailwind e shadcn/ui, toasts com Sonner. Interface web em português e mobile em português/inglês; código em inglês.
 
+## Favicon e cache do navegador — 04/11/2026
+
+- Os arquivos públicos já entregavam a marca Fluxo, mas os links mantinham as URLs anteriores. Adicionado `?v=fluxo-1` aos links ICO, SVG e Apple Touch em `resources/views/app.blade.php` para invalidar o cache dos navegadores. Publicação manual por rebuild da imagem app; sem mudanças no APK ou no banco.
+
+## Marca Fluxo, revisão de qualidade e capa — 04/11/2026
+
+- Usuário escolheu a opção 01: marca Fluxo, um S com setas de entrada/saída, preservando o laranja. SVG original em `docs/images/saldoa-logo-01-fluxo.svg`; aplicado aos componentes web, login mobile, favicon, ícones nativos/adaptativo/monocromático e abertura. Ícones funcionais mantêm seus significados. Instruções de identidade foram alinhadas à escolha.
+- Site publicado com a nova marca; título corrigido para `Bem-vindo - Saldoa`. Nome do frontend definido durante o build Docker. Browser validou 1440 px e 390 px sem overflow horizontal e sem erros JavaScript. Imagens anteriores de produção preservadas como `saldoa-app:pre-flow` e `saldoa-web:pre-flow`; nenhuma migration executada.
+- Revisão: sessão preservada diante de falhas temporárias, mantendo remoção em 401; prazo de requisição cobre a leitura do corpo, com limpeza em `finally` e erros traduzidos para JSON inválido/interrupção; exportação mensal reutiliza calendário local; limpeza do build tenta todas as etapas mesmo se uma falhar; script preserva a formatação do manifesto sem alterar dependências.
+- Notificação de exclusão implementa `ShouldQueue`, usando a fila já configurada em produção. Falha de SMTP passa a ser processada pelo worker, sem bloquear a resposta HTTP da solicitação. SMTP real permanece pendente; esta alteração não confirma entrega de e-mails.
+- Verificações: 13 testes mobile (incluindo falhas de rede/corpo, sessão inválida e virada de mês), tipos mobile/web, lint mobile e check completo passaram. Um teste unitário PHP sem banco confirma a entrega pela fila; Pint passou. Testes Feature não foram executados nesta etapa para respeitar a restrição de migrations/alteração de banco.
+- Capa para portfólio criada em `docs/images/saldoa-portfolio-cover.png` (1920 × 1080) e SVG independente. Usa captura real do site público e captura do login Expo no navegador, sem contas/dados reais ou alteração do portfólio externo. Capturas originais ficam em `docs/screenshots/saldoa-*-flow*.png`.
+- O usuário confirmou que o APK público anterior funcionou pelo 4G/5G; a causa da falha transitória inicial não foi confirmada. Novo APK com a marca Fluxo e correções compilado com sucesso em 17 min 44 s: `mobile/android/app/build/outputs/apk/release/app-release.apk`, 29,21 MiB, `com.saldoa.app`, versão 1.0.0/código 1, ARM64. Assinatura v2 e certificado iguais ao APK anterior; URL pública confirmada no bundle e exceção HTTP local ausente. Ícone nativo gerado conferido visualmente. Esta nova compilação ainda aguarda teste no aparelho. Release manual criada como rascunho (`mobile-v1.0.0-preview.1`), com APK validado anexado como `saldoa-android-public-preview.apk`; aguarda commit correspondente e atualização da referência antes de publicar. Link do rascunho: https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/untagged-29e9879810e28b50943d. SHA-256 do APK: `dab39f980804367d505ca31b387561a608bfeb54385fd63533e8a72f0e445040`. Não foi criado commit/push automaticamente. Preparação da Release manual não habilita deploy automático.
+
+## APK de teste com API pública — 04/11/2026
+
+- Script `mobile/scripts/build-local-apk.mjs` recebeu o modo `--public-api`: exige URLs HTTPS para API/site e desativa a exceção HTTP da rede local. O modo LAN existente foi preservado; nenhuma dependência foi alterada.
+- Build iniciado com `https://saldoa-app.duckdns.org` para API/site e demo vazia, sem alterar `mobile/.env`. O banco da AWS é separado do banco local. Envio real de e-mails continua pendente.
+- Cinco testes mobile, TypeScript, Expo lint, lint/formatação do script e rejeição de HTTP no modo público passaram. README e contrato mobile documentam o comando. Build Gradle concluído em 18 min 13 s; APK de 29,15 MiB em `mobile/android/app/build/outputs/apk/release/app-release.apk`, `com.saldoa.app`, somente `arm64-v8a`, assinatura de depuração v2 verificada. Bundle final contém a URL pública e não contém o IP LAN configurado; recurso de exceção HTTP local ausente. API pública respondeu 200 em `/up` e 401 para login inválido. Teste no aparelho pelo 4G/5G ainda pendente.
+
 ## Correção da página inicial — 04/11/2026
 
 - Removido de `resources/js/pages/welcome.tsx` o bloco de rodapé de solicitação de exclusão que estava inserido dentro do cabeçalho e desorganizava o layout. O fluxo privado e a rota pública `/account-deletion` foram preservados.

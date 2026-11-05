@@ -99,3 +99,11 @@ Antes de publicar ou iniciar teste fechado na Play Store:
 - `mobile/eas.json` define um build de teste interno (APK) e um build de produção (AAB). Para iniciar o APK, execute `npx eas-cli@latest init` e depois `npx eas-cli@latest build --profile preview --platform android` na pasta `mobile/`; para o AAB, use `--profile production`. O build EAS exige uma conta, projeto associado e assinatura configurada.
 - Configure `EXPO_PUBLIC_API_URL` e `EXPO_PUBLIC_WEB_URL` com URLs HTTPS públicas no ambiente de build; configure `EXPO_PUBLIC_API_URL_DEMO` somente para uma instância isolada publicada. O arquivo `.env` local deste ambiente aponta para um endereço privado HTTP e não serve para um APK distribuível.
 - Android Studio, JDK e Android SDK estão instalados e o fluxo de APK local está implementado; ele é independente do EAS. Não foi gerado um AAB de distribuição. O identificador de teste é `com.saldoa.app` e os ícones locais usam a carteira Saldoa; confirme o identificador antes da publicação. Para a Play Store, configure a assinatura de produção, publique a política de privacidade e disponibilize e teste o fluxo público de exclusão de conta.
+
+## APK de teste com HTTPS público — 04/11/2026
+
+O script aceita `--public-api` para compilar localmente sem a exceção de HTTP privado. Informe `EXPO_PUBLIC_API_URL` e `EXPO_PUBLIC_WEB_URL` como `https://saldoa-app.duckdns.org` no ambiente do processo e mantenha a URL demo vazia. O modo exige HTTPS; assinatura de depuração e arquitetura ARM64 permanecem. Consulte o comando completo no README. O banco da AWS é independente do banco local e SMTP real ainda está pendente.
+
+## Robustez do cliente — 04/11/2026
+
+Falhas temporárias de rede/servidor ao restaurar a sessão preservam o token salvo; uma resposta 401 ainda invalida a sessão local. O limite de 15 segundos inclui leitura do corpo JSON/texto, e o temporizador é limpo em todos os caminhos. JSON inválido e interrupção da resposta resultam em erros locais traduzidos. A exportação mensal usa o calendário local, sem alterar endpoints ou contratos de API. A notificação pública de exclusão é processada pela fila existente; SMTP real ainda precisa ser configurado e testado.

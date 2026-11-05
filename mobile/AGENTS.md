@@ -25,12 +25,12 @@ Run lint and typecheck before declaring any task done.
 
 ## Saldoa identity and preferences
 
-- Match the existing desktop identity: orange accent, neutral surfaces, DM Sans body text, Space Grotesk headings and the wallet mark. Use `src/theme.ts` tokens for both themes.
+- Match the existing desktop identity: orange accent, neutral surfaces, DM Sans body text, Space Grotesk headings and the approved Flow mark (S with incoming/outgoing arrows). Use `src/theme.ts` tokens for both themes.
 - Use `useThemeStyles` for theme-dependent styles. Keep font families explicit in text styles.
 - Translate app text with `src/i18n.ts`; preserve user-entered names and descriptions. Support Portuguese and English and keep all financial amounts in BRL.
 - Language and light/dark/system preferences live in `PreferencesContext` and are saved per device, separately from authentication.
 - Use safe-area insets for screens and bottom tabs. Android system bars are hidden using the SDK 58 declarative components; gestures can reveal them temporarily. Do not hard-code status bar or navigation bar heights.
-- Keep native behavior in app config/plugins. Launcher/adaptive/monochrome/splash assets must use the Saldoa wallet, never Expo or React Native defaults.
+- Keep native behavior in app config/plugins. Launcher/adaptive/monochrome/splash assets must use the approved Saldoa Flow mark, never Expo or React Native defaults.
 - Keep login/register focused on authentication: preferences open from the top settings button and the demo is a quiet link only when a valid demo URL is configured. Do not expose environment variable names or API hosts on the access screen. Demo visibility is independent of build type.
 - Reuse `PreferencesSheet`, `SettingsRow`, `UserAvatar` and `ProgressBar`; keep the vector illustration local and theme-aware. Preserve password/confirmation safeguards when presenting account deletion in a collapsed section.
 - Run `npm test`, `npm run types:check` and `npm run lint` for changes to preferences, localization or formatting. Validate Android bars on an emulator or physical phone; a web preview cannot prove native behavior.

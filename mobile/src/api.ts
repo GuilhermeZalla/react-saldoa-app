@@ -49,20 +49,56 @@ export function configuredApiUrl(isDemo: boolean): string | null {
     }
 }
 
-export async function apiRequest<T>(
-    apiUrl: string,
-    path: string,
-    options: RequestOptions = {},
+async function withRequestTimeout<T>(
+    request: (signal: AbortSignal) => Promise<T>,
 ): Promise<T> {
     const controller = new AbortController();
     const timeout = setTimeout(
         () => controller.abort(),
         API_REQUEST_TIMEOUT_MS,
     );
-    let response: Response;
 
     try {
-        response = await fetch(`${apiUrl}/api/v1${path}`, {
+        return await request(controller.signal);
+    } catch (error) {
+        if (error instanceof ApiError) {
+            throw error;
+        }
+        if (error instanceof Error && error.name === 'AbortError') {
+            throw new ApiError(
+                t(
+                    'A API não respondeu em 15 segundos. Verifique se o servidor está ativo e acessível pelo celular.',
+                ),
+                0,
+                'request_timeout',
+            );
+        }
+        if (error instanceof SyntaxError) {
+            throw new ApiError(
+                t(
+                    'O servidor encontrou um problema. Tente novamente mais tarde.',
+                ),
+                0,
+                'invalid_response',
+            );
+        }
+        throw new ApiError(
+            t('Não foi possível conectar à API. Verifique sua conexão.'),
+            0,
+            'network_error',
+        );
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+export async function apiRequest<T>(
+    apiUrl: string,
+    path: string,
+    options: RequestOptions = {},
+): Promise<T> {
+    return withRequestTimeout(async (signal) => {
+        const response = await fetch(`${apiUrl}/api/v1${path}`, {
             method: options.method ?? 'GET',
             headers: {
                 Accept: 'application/json',
@@ -77,48 +113,27 @@ export async function apiRequest<T>(
             ...(options.body === undefined
                 ? {}
                 : { body: JSON.stringify(options.body) }),
-            signal: controller.signal,
+            signal,
         });
-    } catch (error) {
-        clearTimeout(timeout);
-
-        if (error instanceof Error && error.name === 'AbortError') {
+        const contentType = response.headers.get('content-type') ?? '';
+        const payload = contentType.includes('application/json')
+            ? ((await response.json()) as ApiErrorPayload & T)
+            : null;
+        if (!response.ok) {
+            const apiError = payload as ApiErrorPayload | null;
             throw new ApiError(
-                t(
-                    'A API não respondeu em 15 segundos. Verifique se o servidor está ativo e acessível pelo celular.',
+                apiErrorMessage(
+                    apiError,
+                    response.status,
+                    path === '/auth/login',
                 ),
-                0,
-                'request_timeout',
+                response.status,
+                apiError?.error?.code,
+                apiError?.error?.details,
             );
         }
-
-        throw new ApiError(
-            t(
-                'Não foi possível conectar à API. Verifique a URL e sua conexão.',
-            ),
-            0,
-            'network_error',
-        );
-    }
-
-    const contentType = response.headers.get('content-type') ?? '';
-    const payload = contentType.includes('application/json')
-        ? ((await response.json()) as ApiErrorPayload & T)
-        : null;
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-        const apiError = payload as ApiErrorPayload | null;
-
-        throw new ApiError(
-            apiErrorMessage(apiError, response.status, path === '/auth/login'),
-            response.status,
-            apiError?.error?.code,
-            apiError?.error?.details,
-        );
-    }
-
-    return payload as T;
+        return payload as T;
+    });
 }
 
 export function apiErrorMessage(
@@ -204,53 +219,22 @@ export async function apiTextRequest(
     session: Session,
     path: string,
 ): Promise<string> {
-    const controller = new AbortController();
-    const timeout = setTimeout(
-        () => controller.abort(),
-        API_REQUEST_TIMEOUT_MS,
-    );
-    let response: Response;
-
-    try {
-        response = await fetch(`${session.apiUrl}/api/v1${path}`, {
-            signal: controller.signal,
+    return withRequestTimeout(async (signal) => {
+        const response = await fetch(`${session.apiUrl}/api/v1${path}`, {
+            signal,
             headers: {
                 'Accept-Language': getLocale(),
                 Authorization: `Bearer ${session.accessToken}`,
             },
         });
-    } catch (error) {
-        clearTimeout(timeout);
-
-        if (error instanceof Error && error.name === 'AbortError') {
+        if (!response.ok) {
             throw new ApiError(
-                t(
-                    'A API não respondeu em 15 segundos. Verifique se o servidor está ativo e acessível pelo celular.',
-                ),
-                0,
-                'request_timeout',
+                response.status === 401
+                    ? t('Sua sessão expirou. Entre novamente.')
+                    : t('Não foi possível exportar os dados.'),
+                response.status,
             );
         }
-
-        throw new ApiError(
-            t('Não foi possível conectar à API. Verifique sua conexão.'),
-            0,
-            'network_error',
-        );
-    }
-
-    if (!response.ok) {
-        clearTimeout(timeout);
-        throw new ApiError(
-            response.status === 401
-                ? t('Sua sessão expirou. Entre novamente.')
-                : t('Não foi possível exportar os dados.'),
-            response.status,
-        );
-    }
-
-    const text = await response.text();
-    clearTimeout(timeout);
-
-    return text;
+        return await response.text();
+    });
 }

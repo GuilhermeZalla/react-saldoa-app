@@ -119,3 +119,33 @@ void test('validation preserves Portuguese details and identifies invalid fields
         'Check the information you entered.',
     );
 });
+
+void test('the current export month follows the local calendar at the UTC month boundary', () => {
+    const previousTimeZone = process.env.TZ;
+    process.env.TZ = 'America/Sao_Paulo';
+    try {
+        const exports = {};
+        const source = readFileSync(require.resolve('./format.ts'), 'utf8');
+        const compiled = ts.transpileModule(source, {
+            compilerOptions: {
+                module: ts.ModuleKind.CommonJS,
+                target: ts.ScriptTarget.ES2022,
+            },
+        }).outputText;
+        class FixedDate extends Date {
+            constructor(...args) {
+                super(...(args.length ? args : ['2026-12-01T01:30:00Z']));
+            }
+        }
+        vm.runInNewContext(compiled, {
+            exports,
+            Date: FixedDate,
+            require: () => ({ getLocale: () => 'pt-BR' }),
+        });
+        assert.equal(new FixedDate().toISOString().slice(0, 7), '2026-12');
+        assert.equal(exports.currentMonth(), '2026-11');
+    } finally {
+        if (previousTimeZone === undefined) delete process.env.TZ;
+        else process.env.TZ = previousTimeZone;
+    }
+});

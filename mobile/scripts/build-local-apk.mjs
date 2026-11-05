@@ -10,10 +10,11 @@ const mobileDirectory = path.resolve(
     '..',
 );
 const repositoryDirectory = path.dirname(mobileDirectory);
+const usesPublicApi = process.argv.includes('--public-api');
 const environment = {
     ...process.env,
-    EXPO_PUBLIC_LOCAL_APK: 'true',
-    SALDOA_LOCAL_APK: 'true',
+    EXPO_PUBLIC_LOCAL_APK: usesPublicApi ? 'false' : 'true',
+    SALDOA_LOCAL_APK: usesPublicApi ? 'false' : 'true',
     CMAKE_BUILD_PARALLEL_LEVEL: '2',
 };
 
@@ -149,6 +150,17 @@ function run(command, args, workingDirectory) {
 }
 
 async function buildLocalApk() {
+    if (usesPublicApi) {
+        const apiUrl = new URL(environment.EXPO_PUBLIC_API_URL ?? '');
+        const webUrl = new URL(environment.EXPO_PUBLIC_WEB_URL ?? '');
+
+        if (apiUrl.protocol !== 'https:' || webUrl.protocol !== 'https:') {
+            throw new Error(
+                'Public API builds require HTTPS API and web URLs.',
+            );
+        }
+    }
+
     configureAndroidEnvironment();
 
     const isWindows = process.platform === 'win32';
@@ -256,7 +268,7 @@ allprojects {
             packageJson.scripts.ios = 'expo start --ios';
             await writeFile(
                 packageJsonPath,
-                `${JSON.stringify(packageJson, null, 2)}\n`,
+                `${JSON.stringify(packageJson, null, 4)}\n`,
                 'utf8',
             );
         }
@@ -341,32 +353,42 @@ allprojects {
 
         console.log(`Local test APK created: ${apkPath}`);
     } finally {
-        if (originalAutolinkingConfig !== undefined) {
-            await writeFile(
-                autolinkingConfigPath,
-                originalAutolinkingConfig,
-                'utf8',
-            );
-        }
-
-        if (isWindows) {
-            if (gradleInitScriptCreated) {
-                await unlink(gradleInitScript);
-            }
-
-            if (shortCmakeDrive) {
-                removeShortWindowsPath(shortCmakeDrive);
-            }
-
-            if (shortRepositoryDrive) {
-                removeShortWindowsPath(shortRepositoryDrive);
-            }
-
-            if (cmakeStagingDirectoryCreated) {
-                await rm(cmakeStagingDirectory, {
-                    force: true,
-                    recursive: true,
-                });
+        const cleanupTasks = [
+            ...(originalAutolinkingConfig !== undefined
+                ? [
+                      () =>
+                          writeFile(
+                              autolinkingConfigPath,
+                              originalAutolinkingConfig,
+                              'utf8',
+                          ),
+                  ]
+                : []),
+            ...(isWindows && gradleInitScriptCreated
+                ? [() => unlink(gradleInitScript)]
+                : []),
+            ...(isWindows && shortCmakeDrive
+                ? [() => removeShortWindowsPath(shortCmakeDrive)]
+                : []),
+            ...(isWindows && shortRepositoryDrive
+                ? [() => removeShortWindowsPath(shortRepositoryDrive)]
+                : []),
+            ...(isWindows && cmakeStagingDirectoryCreated
+                ? [
+                      () =>
+                          rm(cmakeStagingDirectory, {
+                              force: true,
+                              recursive: true,
+                          }),
+                  ]
+                : []),
+        ];
+        for (const cleanupTask of cleanupTasks) {
+            try {
+                await Promise.resolve().then(cleanupTask);
+            } catch (error) {
+                console.error('APK build cleanup failed:', error);
+                process.exitCode = 1;
             }
         }
     }

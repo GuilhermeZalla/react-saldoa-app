@@ -170,3 +170,7 @@ Para ensaiar recuperação, use uma **segunda instalação isolada**, nunca o ba
 Faça backup e registre o commit/tag anterior. Compile imagens com uma tag nova antes da janela de manutenção. Pare scheduler/worker, ative `php artisan down`, aplique migrations na nova imagem, recrie os serviços, execute `optimize` e finalize com `php artisan up`. O arquivo de manutenção está no storage compartilhado. Valide saúde, autenticação e assets antes de liberar usuários.
 
 Não aplique rollback de migrations ou restauração em cima do banco ativo automaticamente. Voltar a uma imagem anterior só funciona se ela continuar compatível com o schema atual. Preserve as imagens e o backup anteriores até aprovar a nova versão.
+
+## Atualização de identidade e revisão — 04/11/2026
+
+Marca Fluxo e título `Bem-vindo - Saldoa` publicados por atualização manual dos arquivos e recompilação das imagens. As imagens anteriores foram preservadas como `saldoa-app:pre-flow` e `saldoa-web:pre-flow`. A notificação de exclusão usa a fila existente; o worker permanece responsável por tentativas/erros de SMTP. Isso não substitui configurar envio real de e-mails. Nenhuma migration foi executada nesta atualização. O checkout da EC2 contém alterações diretas e precisa ser sincronizado com o próximo commit antes de uma atualização via Git; não executar `git reset --hard` para descartar essas mudanças.

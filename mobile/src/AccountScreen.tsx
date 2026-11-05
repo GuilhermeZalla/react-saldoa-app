@@ -3,6 +3,7 @@ import { getLocale, t } from './i18n';
 import { useState } from 'react';
 import { Alert, Share, StyleSheet, Text, View } from 'react-native';
 import { ApiError, apiTextRequest, sessionRequest } from './api';
+import { currentMonth } from './format';
 import {
     ActionButton,
     Card,
@@ -157,7 +158,7 @@ export default function AccountScreen({
                         subtitle={t('Seus lançamentos em uma planilha.')}
                         onPress={() =>
                             void shareExport(
-                                `/transactions/export?month=${new Date().toISOString().slice(0, 7)}`,
+                                `/transactions/export?month=${currentMonth()}`,
                                 t('Lançamentos Saldoa'),
                             )
                         }

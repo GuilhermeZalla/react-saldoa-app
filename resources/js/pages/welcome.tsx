@@ -6,10 +6,10 @@ import {
     ChartNoAxesCombined,
     Github,
     Tags,
-    WalletCards,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import AppLogoIcon from '@/components/app-logo-icon';
 import { dashboard, login, register } from '@/routes';
 
 export default function Welcome() {
@@ -27,7 +27,7 @@ export default function Welcome() {
                             className="inline-flex min-w-0 items-center gap-2.5 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background focus-visible:outline-none"
                         >
                             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                                <WalletCards
+                                <AppLogoIcon
                                     aria-hidden="true"
                                     className="size-5"
                                 />
@@ -318,7 +318,7 @@ export default function Welcome() {
                             href={auth.user ? dashboard() : '/'}
                             className="inline-flex w-fit items-center gap-2 rounded-md font-heading font-semibold tracking-tight focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background focus-visible:outline-none"
                         >
-                            <WalletCards
+                            <AppLogoIcon
                                 aria-hidden="true"
                                 className="size-4 text-primary"
                             />

@@ -27,6 +27,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     const [loading, setLoading] = useState(true);
 
     async function restoreSession(isCurrent: () => boolean): Promise<void> {
+        let currentSession: Session | null = null;
         try {
             const storedSession = await readSession();
 
@@ -34,7 +35,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
                 return;
             }
 
-            let currentSession = storedSession;
+            currentSession = storedSession;
             const expirationTime = Date.parse(storedSession.expiresAt);
 
             if (
@@ -64,7 +65,11 @@ export function SessionProvider({ children }: PropsWithChildren) {
                 setSession(restoredSession);
             }
         } catch (error) {
-            await clearSession();
+            if (error instanceof ApiError && error.status === 401) {
+                await clearSession();
+            } else if (isCurrent() && currentSession !== null) {
+                setSession(currentSession);
+            }
 
             if (
                 isCurrent() &&

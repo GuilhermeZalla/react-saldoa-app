@@ -15,7 +15,7 @@ COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && ln -s ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
 COPY . .
-ENV APP_ENV=production CACHE_STORE=array SESSION_DRIVER=array
+ENV APP_ENV=production CACHE_STORE=array SESSION_DRIVER=array VITE_APP_NAME=Saldoa
 RUN mkdir -p storage/framework/cache/data storage/framework/sessions \
     storage/framework/views storage/logs storage/app/private storage/app/public bootstrap/cache \
     && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader \
