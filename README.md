@@ -1,68 +1,68 @@
 # Saldoa
 
-Controle financeiro pessoal para acompanhar receitas, despesas e metas na web e no celular.
+Personal finance tracking for income, expenses, and budgets, on the web and on your phone.
 
-**[Acessar o site](https://saldoa-app.duckdns.org)** · **[Baixar o APK Android](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/mobile-v1.0.0-preview.1/saldoa-android-public-preview.apk)** · [Notas da versão](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/mobile-v1.0.0-preview.1)
+**[Visit the website](https://saldoa-app.duckdns.org)** · **[Download the Android APK](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.0.0/saldoa-android-v1.0.0.apk)** · [Release notes](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.0.0)
 
-A versão **web foi finalizada em 2025**. Em **2026**, o projeto ganhou um aplicativo mobile que utiliza o mesmo backend. O Saldoa é um projeto de estudo e portfólio, com publicação web na AWS e uma versão Android disponível para testes.
+The **web application was completed in 2025**. In **2026**, Saldoa gained a mobile app that shares the same backend. This is a learning and portfolio project, with a live website hosted on AWS and an Android APK available for direct installation.
 
 ## Preview
 
-![Saldoa na web e no celular](docs/images/saldoa-portfolio-cover.png)
+![Saldoa on the web and mobile](docs/images/saldoa-portfolio-cover.png)
 
-## O que é possível fazer
+## Features
 
-- Registrar receitas e despesas e organizar tudo por categorias.
-- Consultar saldo, gráficos e movimentações do mês.
-- Definir limites de gastos por categoria e acompanhar o progresso.
-- Programar lançamentos recorrentes e exportar os dados.
-- Gerenciar o perfil e solicitar a exclusão da conta.
-- No mobile, escolher português ou inglês e tema claro, escuro ou do sistema.
+- Track income and expenses, organized by category.
+- View monthly balances, charts, and transactions.
+- Set spending budgets by category and track progress.
+- Schedule recurring transactions and export your data.
+- Manage your profile and delete your account.
+- Choose Portuguese or English and light, dark, or system themes in the mobile app.
 
-## Aplicação web
+## Web application
 
-![Dashboard do Saldoa](docs/screenshots/dashboard-desktop.png)
+![Saldoa dashboard](docs/screenshots/dashboard-desktop.png)
 
-| Tela         | Desktop                                                 | Celular                                                |
-| ------------ | ------------------------------------------------------- | ------------------------------------------------------ |
-| Início       | [Ver imagem](docs/screenshots/home-desktop.png)         | [Ver imagem](docs/screenshots/home-mobile.png)         |
-| Login        | [Ver imagem](docs/screenshots/login-desktop.png)        | [Ver imagem](docs/screenshots/login-mobile.png)        |
-| Cadastro     | [Ver imagem](docs/screenshots/register-desktop.png)     | [Ver imagem](docs/screenshots/register-mobile.png)     |
-| Dashboard    | [Ver imagem](docs/screenshots/dashboard-desktop.png)    | [Ver imagem](docs/screenshots/dashboard-mobile.png)    |
-| Lançamentos  | [Ver imagem](docs/screenshots/transactions-desktop.png) | [Ver imagem](docs/screenshots/transactions-mobile.png) |
-| Categorias   | [Ver imagem](docs/screenshots/categories-desktop.png)   | [Ver imagem](docs/screenshots/categories-mobile.png)   |
-| Metas        | [Ver imagem](docs/screenshots/budgets-desktop.png)      | [Ver imagem](docs/screenshots/budgets-mobile.png)      |
-| Recorrências | [Ver imagem](docs/screenshots/recurring-desktop.png)    | [Ver imagem](docs/screenshots/recurring-mobile.png)    |
-| Perfil       | [Ver imagem](docs/screenshots/account-desktop.png)      | [Ver imagem](docs/screenshots/account-mobile.png)      |
+| Screen                 | Desktop                                                 | Mobile browser                                         |
+| ---------------------- | ------------------------------------------------------- | ------------------------------------------------------ |
+| Home                   | [Screenshot](docs/screenshots/home-desktop.png)         | [Screenshot](docs/screenshots/home-mobile.png)         |
+| Sign in                | [Screenshot](docs/screenshots/login-desktop.png)        | [Screenshot](docs/screenshots/login-mobile.png)        |
+| Sign up                | [Screenshot](docs/screenshots/register-desktop.png)     | [Screenshot](docs/screenshots/register-mobile.png)     |
+| Dashboard              | [Screenshot](docs/screenshots/dashboard-desktop.png)    | [Screenshot](docs/screenshots/dashboard-mobile.png)    |
+| Transactions           | [Screenshot](docs/screenshots/transactions-desktop.png) | [Screenshot](docs/screenshots/transactions-mobile.png) |
+| Categories             | [Screenshot](docs/screenshots/categories-desktop.png)   | [Screenshot](docs/screenshots/categories-mobile.png)   |
+| Budgets                | [Screenshot](docs/screenshots/budgets-desktop.png)      | [Screenshot](docs/screenshots/budgets-mobile.png)      |
+| Recurring transactions | [Screenshot](docs/screenshots/recurring-desktop.png)    | [Screenshot](docs/screenshots/recurring-mobile.png)    |
+| Account                | [Screenshot](docs/screenshots/account-desktop.png)      | [Screenshot](docs/screenshots/account-mobile.png)      |
 
-## Aplicativo mobile
+## Mobile app
 
 <p>
-  <img src="docs/screenshots/mobile-login-expo.png" alt="Login do Saldoa mobile" width="240">
-  <img src="docs/screenshots/mobile-dashboard-expo.png" alt="Dashboard do Saldoa mobile" width="240">
-  <img src="docs/screenshots/mobile-budgets-expo.png" alt="Metas no Saldoa mobile" width="240">
+  <img src="docs/screenshots/mobile-login-expo.png" alt="Saldoa mobile sign-in screen" width="240">
+  <img src="docs/screenshots/mobile-dashboard-expo.png" alt="Saldoa mobile dashboard" width="240">
+  <img src="docs/screenshots/mobile-budgets-expo.png" alt="Saldoa mobile spending budgets" width="240">
 </p>
 
-O APK acessa a API pública e pode ser usado pelo Wi-Fi ou 4G/5G, sem depender do notebook. A versão disponível é de teste para Android ARM64 e ainda não foi publicada na Play Store. Veja como instalar, executar e compilar em [mobile/README.md](mobile/README.md).
+The APK connects to the public API over Wi-Fi or mobile data. Your computer does not need to be running. It supports Android ARM64 and is distributed directly through GitHub; it is not on Google Play. See the [mobile guide](mobile/README.md) for installation, development, and build instructions.
 
-As imagens foram atualizadas com a interface atual. Telas privadas usam dados de exemplo; as imagens mobile foram capturadas na prévia web do aplicativo.
+Private screens use sample data. Mobile screenshots were captured in the app's web preview. The web interface is in Portuguese; the mobile app supports Portuguese and English.
 
-## Tecnologias
+## Built with
 
-| Parte      | Tecnologias atuais                                            |
-| ---------- | ------------------------------------------------------------- |
-| Backend    | Laravel 13, PHP 8.4 e Sanctum                                 |
-| Web        | React 19, Inertia, TypeScript e Tailwind CSS                  |
-| Mobile     | Expo, React Native e TypeScript                               |
-| Banco      | SQLite no desenvolvimento e MySQL na AWS                      |
-| Hospedagem | AWS EC2 com Docker Compose e HTTPS                            |
-| Qualidade  | Pest, análise de tipos, lint e verificações no GitHub Actions |
+| Area     | Technologies                                                   |
+| -------- | -------------------------------------------------------------- |
+| Backend  | Laravel 13, PHP 8.4, and Sanctum                               |
+| Web      | React 19, Inertia, TypeScript, and Tailwind CSS                |
+| Mobile   | Expo, React Native, and TypeScript                             |
+| Database | SQLite for local development; MySQL on AWS                     |
+| Hosting  | AWS EC2, Docker Compose, and HTTPS                             |
+| Quality  | Pest, static analysis, type checking, lint, and GitHub Actions |
 
-## Executar no computador
+## Run locally
 
-Requisitos: PHP 8.4, Composer, Node.js 22.13 ou superior e npm. O PHP deve ter SQLite, OpenSSL, mbstring, intl e as extensões exigidas pelo Composer.
+Requirements: PHP 8.4, Composer, Node.js 22.13 or later, and npm. Enable SQLite, OpenSSL, mbstring, intl, and the PHP extensions required by Composer.
 
-Para a primeira instalação, em uma cópia nova do repositório, use o PowerShell:
+For the first installation in a fresh checkout, use PowerShell:
 
 ```powershell
 composer install
@@ -78,13 +78,13 @@ php artisan migrate --seed
 composer run dev
 ```
 
-Abra `http://localhost:8000`. Esses passos criam um **ambiente local**; não devem ser usados sobre o banco de produção. Não sobrescreva um `.env` que já esteja configurado.
+Open `http://localhost:8000`. These commands initialize a **local development environment**. Do not run them against production or overwrite an existing environment file.
 
-O seeder local inclui a conta `demo@exemplo.com`, senha `demo1234`. Essa conta serve apenas para demonstração local ou para uma instância demo separada; ela não deve existir na produção principal.
+The local seeder includes `demo@exemplo.com`, password `demo1234`. This account belongs only in local development or a separate demo deployment, never in the main production database.
 
-Para iniciar o aplicativo mobile e configurar o endereço da API, consulte o [guia mobile](mobile/README.md).
+For mobile development and API configuration, see the [mobile README](mobile/README.md).
 
-## Verificações
+## Checks
 
 ```powershell
 npm --prefix mobile ci
@@ -93,19 +93,23 @@ npm run types:check
 php artisan test --compact
 ```
 
-Os testes Laravel devem usar o ambiente de testes, separado dos dados reais. Comandos específicos do mobile estão no seu [README](mobile/README.md).
+Laravel tests use a separate test environment. Mobile-specific checks are documented in the [mobile guide](mobile/README.md).
 
-## Situação atual
+## Release scope
 
-O site está publicado em HTTPS e há um APK de teste com acesso à API pública. O envio real de e-mails, o backup externo com restauração validada e a distribuição na Play Store continuam pendentes. O deploy ainda é manual.
+Version 1.0 focuses on the existing web and mobile finance features. The public deployment uses HTTPS and Gmail SMTP. Encrypted backups are sent to the owner daily, and recovery was verified in isolated containers using a copy received by email. Releases are deployed manually; pushing to GitHub runs checks but does not update the server.
 
-## Documentação
+The Android APK currently uses a debug signing key and supports ARM64 devices. Google Play publishing, distribution signing, and automatic deployment are outside this release's scope.
 
-- [Guia de operação da AWS](docs/AWS_OPERACAO.md): acesso à máquina, logs, banco, backup e custos.
-- [Implantação na AWS](docs/AWS_DEPLOY.md): configuração e reconstrução do ambiente.
-- [API mobile](docs/MOBILE_API.md): contratos e orientações para integração.
-- [Status do projeto](docs/STATUS.md): entregas, validações e próximos passos.
+## Documentation
 
-## Apoio de IA
+The operational guides below are currently written in Portuguese:
 
-Ferramentas de IA apoiaram o desenvolvimento, a revisão e a documentação. As decisões e a validação do projeto permanecem sob responsabilidade do autor.
+- [AWS operations](docs/AWS_OPERACAO.md): server access, logs, database, backups, and costs.
+- [AWS deployment](docs/AWS_DEPLOY.md): deployment setup and recovery.
+- [Mobile API](docs/MOBILE_API.md): API contracts and integration details.
+- [Project status](docs/STATUS.md): delivery records, validation, and remaining work.
+
+## AI assistance
+
+AI tools supported development, review, and documentation. The author remains responsible for project decisions and validation.

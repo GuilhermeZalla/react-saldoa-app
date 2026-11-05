@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Saldoa backup
+
+[Timer]
+OnCalendar=*-*-* 06:30:00 UTC
+RandomizedDelaySec=600
+Persistent=true
+Unit=saldoa-backup.service
+
+[Install]
+WantedBy=timers.target

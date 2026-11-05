@@ -5,7 +5,6 @@ use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\DemoDataSeeder;
 use Illuminate\Support\Facades\Hash;
-use RuntimeException;
 
 test('demo data seeder creates a usable account and three months of data idempotently', function () {
     $this->seed(DatabaseSeeder::class);

@@ -4,11 +4,11 @@ Referência técnica para instalar ou reconstruir o ambiente. Para acesso diári
 
 Destino escolhido em 04/11/2026: uma instância EC2 administrada pelo usuário, executando Laravel/site, MySQL, Caddy/HTTPS, scheduler e worker com o Docker Compose de produção existente. O app mobile usa a mesma origem com `/api/v1`.
 
-Estado verificado por SSH em 04/11/2026: EC2 `t3.small` na região `us-east-2` (Ohio), Ubuntu 26.04.1 LTS, x86_64, 1,9 GiB RAM e disco raiz de 28 GiB. Docker 29.9.3 e Compose 5.7.0 instalados; Docker habilitado no boot. Swap de 4 GiB ativo e registrado em `/etc/fstab`, sem teste de reboot. Código do commit `242f69f` em `/opt/saldoa`; imagens de produção compiladas na própria VM. MySQL saudável, migrations existentes aplicadas e app/scheduler/worker iniciados, sem portas publicadas. O serviço web está publicado em `https://saldoa-app.duckdns.org`, com HTTPS válido e redirecionamento HTTP; somente ele publica portas 80/443. Chaves e senhas foram geradas somente no servidor. Plano/saldo AWS, SMTP real e backup externo continuam pendentes.
+Estado verificado por SSH em 04/11/2026: EC2 `t3.small` na região `us-east-2` (Ohio), Ubuntu 26.04.1 LTS, x86_64, 1,9 GiB RAM e disco raiz de 28 GiB. Docker 29.9.3 e Compose 5.7.0 instalados; Docker habilitado no boot. Swap de 4 GiB ativo e registrado em `/etc/fstab`, sem teste de reboot. Código do commit `242f69f` em `/opt/saldoa`; imagens de produção compiladas na própria VM. MySQL saudável, migrations existentes aplicadas e app/scheduler/worker iniciados, sem portas publicadas. O serviço web está publicado em `https://saldoa-app.duckdns.org`, com HTTPS válido e redirecionamento HTTP; somente ele publica portas 80/443. Chaves e senhas foram geradas somente no servidor. Plano/saldo AWS ainda não conferidos. Atualização em 05/11/2026: Gmail real validado; backup criptografado copiado para o notebook e SQL restaurado em MySQL isolado. Backup diário por Gmail ativado e recuperação completa isolada validada em 05/11/2026. S3 não é utilizado. Deploy continuará manual por decisão do titular em 05/11/2026, mantendo o plano gratuito atual.
 
-A infraestrutura genérica já passou por build Linux AMD64, cinco containers isolados, respostas HTTP esperadas, requisitos PHP, execução do backup e restauração SQL num segundo banco descartável. Essa evidência vem da preparação anterior (commit `242f69f`); os arquivos Docker não mudaram na troca de provedor. O build e a inicialização interna na EC2 passaram; dimensionamento sob carga, SMTP e recuperação após perda do servidor continuam pendentes.
+A infraestrutura genérica já passou por build Linux AMD64, cinco containers isolados, respostas HTTP esperadas, requisitos PHP, execução do backup e restauração SQL num segundo banco descartável. Essa evidência vem da preparação anterior (commit `242f69f`); os arquivos Docker não mudaram na troca de provedor. O build e a inicialização interna na EC2 passaram; dimensionamento sob carga e ensaio completo de recuperação após perda da VM continuam pendentes. O envio Gmail foi validado em 05/11/2026.
 
-Validação pública em 04/11/2026: `/up` e `/login` responderam 200 via HTTPS, HTTP redirecionou com 308, `/api/v1/auth/me` sem token respondeu 401 e `/.env` respondeu 404. Desde essa validação inicial, foi publicado um APK de teste com API pública HTTPS; o usuário confirmou acesso por dados móveis na primeira compilação pública. A compilação seguinte com a marca Fluxo está disponível na Release e ainda aguarda novo retorno do aparelho. SMTP real ainda não foi configurado, portanto recuperação de senha e confirmação de exclusão por e-mail não estão prontas para uso público.
+Validação pública em 04/11/2026: `/up` e `/login` responderam 200 via HTTPS, HTTP redirecionou com 308, `/api/v1/auth/me` sem token respondeu 401 e `/.env` respondeu 404. Desde essa validação inicial, foi publicado um APK de teste com API pública HTTPS; o usuário confirmou acesso por dados móveis na primeira compilação pública. A compilação com a marca Fluxo foi confirmada pelo titular no aparelho, incluindo os fluxos funcionais, temas e idiomas. O SMTP Gmail foi configurado em 05/11/2026, com recebimento de teste confirmado. O titular confirmou em 05/11/2026 os fluxos completos de recuperação de senha e exclusão de uma conta descartável pelos links recebidos.
 
 ## 1. Conta, custos, EC2 e endereço público
 
@@ -104,7 +104,7 @@ Edite `.env.production` com um editor no servidor. Use o primeiro resultado como
 - `TLS_EMAIL`: e-mail para avisos dos certificados.
 - `SALDOA_IMAGE_TAG`: identificador único do código revisado, por exemplo o resultado de `git rev-parse --short HEAD`. Não reutilize a tag em atualizações se precisar voltar à imagem anterior.
 - `DB_DATABASE`/`DB_USERNAME`: mantenha `saldoa` em uma VM nova e configure uma senha aleatória.
-- O usuário confirmou que usa **Mailtrap Email Sandbox**, que captura mensagens de teste e não entrega aos usuários. Ele não foi configurado como envio de produção. Será necessário um serviço de envio real com remetente autorizado. Consulte a [documentação do Mailtrap](https://docs.mailtrap.io/getting-started/email-api-smtp).
+- Mailtrap Email Sandbox era usado apenas nos testes. Em 05/11/2026 o Gmail pessoal foi configurado para envio real com senha de app e TLS na porta 465 (`MAIL_SCHEME=smtps`); teste recebido na caixa de entrada. Senhas permanecem fora do Git.
 - `MAIL_*`: use SMTP real e um remetente autorizado pelo provedor. O subdomínio DuckDNS não cria uma caixa postal nem autoriza envio de e-mail; o remetente precisa ser validado separadamente. Porta 587 normalmente usa `MAIL_SCHEME=smtp`; 465 usa `smtps`.
 - Coloque valores com caracteres especiais entre aspas simples no arquivo de ambiente. Não publique o resultado de `docker compose config` sem `--quiet`, pois ele contém segredos.
 
@@ -144,35 +144,28 @@ A VM deve manter Docker habilitado na inicialização (`sudo systemctl enable do
 
 ## 6. Backups e recuperação
 
-O script não roda sozinho nem envia arquivos a um serviço externo. Na VM:
+A EC2 já possui `/usr/local/sbin/saldoa-backup`, instalado de `docker/backup-encrypted.sh`. Ele gera SQL, storage e configuração, verifica integridade e cifra com AES-256-GCM/RSA. A chave pública fica em `/etc/saldoa/backup-public-cert.pem`; a privada permanece no notebook e precisa de uma segunda cópia segura fora dele.
 
-```bash
-sudo bash /opt/saldoa/docker/backup-production.sh
-```
+Em 05/11/2026, uma cópia recebida pelo Gmail teve checksum e autenticação criptográfica conferidos e foi restaurada em containers isolados. Foram recuperados SQL, storage e APP_KEY; a aplicação respondeu a cadastro, autenticação, lançamento, dashboard, exportação e exclusão. O ensaio não utilizou os volumes de produção, não publicou portas e não tinha acesso à internet.
 
-Ele cria um diretório 0700 em `/var/backups/saldoa` com dump consistente do MySQL, arquivos de storage e configuração/chaves. Não passa senhas no argumento do cliente MySQL. Um marcador `INCOMPLETE` identifica tentativas interrompidas; somente backups sem esse marcador e com verificação de arquivos concluída podem ser considerados para recuperação. O snapshot do banco e a cópia dos arquivos não são uma transação conjunta; para mudanças simultâneas nos arquivos, programe uma janela breve de manutenção.
+O backup é diário por **Gmail**, com o timer `saldoa-backup.timer` habilitado às 06:30 UTC e até dez minutos de atraso aleatório. A configuração privada está em `/etc/saldoa/backup.env`; o envio usa TLS e rejeita anexos acima de 15 MiB e arquivos sem o envelope de criptografia autenticada. Cópias locais antigas só são removidas após aceitação SMTP. O titular deve acompanhar os e-mails e a capacidade da caixa; a retenção no Gmail é manual.
 
-Depois do primeiro backup validado, o administrador pode agendar no crontab de root:
+Para instalar os helpers numa reconstrução, copie `docker/send-backup.py` e `docker/verify-restored-app.py` para `/usr/local/lib/saldoa/`, os scripts Bash para `/usr/local/sbin/saldoa-backup` e `/usr/local/sbin/saldoa-verify-backup`, e os units para `/etc/systemd/system/`. Preserve a configuração privada e instale **somente o certificado público** na EC2. A chave privada de recuperação continua fora do servidor.
 
-```cron
-30 3 * * * /usr/bin/bash /opt/saldoa/docker/backup-production.sh >> /var/log/saldoa-backup.log 2>&1
-```
+O roteiro de consulta, recuperação e limitações está em [AWS_OPERACAO.md](AWS_OPERACAO.md#6-backup-e-e-mails). O ensaio usa as imagens registradas no snapshot; se elas não existirem numa nova VM, será necessário reconstruí-las a partir da versão correspondente e repetir a validação antes de publicar.
 
-Os arquivos incluem dados financeiros e segredos. Proteja a cópia externa com criptografia e guarde a chave de recuperação em outro local. Automatizar a cópia externa, definir retenção/alertas de falha/espaço e testar restauração ainda são tarefas obrigatórias antes de tratar esta instalação como confiável para dados reais. O script não remove backups antigos automaticamente.
+S3 não é necessário para a rotina adotada. A stack anterior `saldoa-automation` falhou por bloqueio SCP ao OIDC; seus recursos retidos ainda precisam de conferência no console, como manutenção separada. O script antigo `docker/backup-production.sh` gera arquivos sem criptografia; prefira o novo serviço.
 
-Para ensaiar recuperação, use uma **segunda instalação isolada**, nunca o banco ativo:
+## 7. Atualizações manuais
 
-1. Recrie os serviços a partir do commit/imagens do backup e restaure a configuração/chaves antes de iniciar o app. Ajuste só domínio e SMTP para o ambiente isolado.
-2. Inicialize o MySQL vazio com as mesmas credenciais e importe `database.sql.gz` via cliente MySQL no container. Restaure `storage.tar.gz` no volume de storage e confira usuário/permissões.
-3. Suba o app isolado e confira contagens, login e leitura dos registros. Não execute uma migração de versão nova antes de confirmar a recuperação da versão original.
-4. Só depois de um ensaio aprovado considere usar o procedimento numa falha real. Arquivos de backup apenas existentes não comprovam recuperação.
+Por decisão do titular em 05/11/2026, a conta permanece no plano gratuito atual e o deploy será manual. Não será feito upgrade ou ativação de recursos avançados para automatizar a publicação. Push no GitHub executa as verificações existentes, mas não publica código na EC2.
 
-## 7. Atualizações
+Os rascunhos de automação foram arquivados localmente em `.secrets/deferred-deploy-20261105/`, fora do Git. Não existe workflow de deploy ativo no projeto. O fluxo de releases separado não foi ativado na EC2.
 
-Faça backup e registre o commit/tag anterior. Compile imagens com uma tag nova antes da janela de manutenção. Pare scheduler/worker, ative `php artisan down`, aplique migrations na nova imagem, recrie os serviços, execute `optimize` e finalize com `php artisan up`. O arquivo de manutenção está no storage compartilhado. Valide saúde, autenticação e assets antes de liberar usuários.
+Antes de atualizar manualmente, confira o CI, preserve credenciais/ajustes locais, faça backup com cópia externa e mantenha as imagens anteriores. Compile a nova versão e atualize somente os serviços necessários; valide saúde, autenticação, assets e logs. Não execute migrations ou restauração sobre o banco ativo como parte de uma atualização de rotina.
 
-Não aplique rollback de migrations ou restauração em cima do banco ativo automaticamente. Voltar a uma imagem anterior só funciona se ela continuar compatível com o schema atual. Preserve as imagens e o backup anteriores até aprovar a nova versão.
+O checkout da EC2 contém alterações diretas e histórico anterior à reescrita publicada. A sincronização exige revisão específica, preservando esses ajustes; não usar `git pull` ou reset indiscriminadamente. O roteiro operacional está no [guia de operação](AWS_OPERACAO.md#7-deploy-manual).
 
 ## Atualização de identidade e revisão — 04/11/2026
 
-Marca Fluxo e título `Bem-vindo - Saldoa` publicados por atualização manual dos arquivos e recompilação das imagens. As imagens anteriores foram preservadas como `saldoa-app:pre-flow` e `saldoa-web:pre-flow`. A notificação de exclusão usa a fila existente; o worker permanece responsável por tentativas/erros de SMTP. Isso não substitui configurar envio real de e-mails. Nenhuma migration foi executada nesta atualização. O checkout da EC2 contém alterações diretas e precisa ser sincronizado com o próximo commit antes de uma atualização via Git; não executar `git reset --hard` para descartar essas mudanças.
+Marca Fluxo e título `Bem-vindo - Saldoa` publicados por atualização manual dos arquivos e recompilação das imagens. As imagens anteriores foram preservadas como `saldoa-app:pre-flow` e `saldoa-web:pre-flow`. A notificação de exclusão usa a fila existente; o worker permanece responsável por tentativas/erros de SMTP. O SMTP real foi configurado e teve recebimento de teste confirmado em 05/11/2026. Nenhuma migration foi executada nesta atualização. O checkout da EC2 contém alterações diretas e precisa ser sincronizado com o próximo commit antes de uma atualização via Git; não executar `git reset --hard` para descartar essas mudanças.
