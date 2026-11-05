@@ -73,6 +73,42 @@ Escopo: versão funcional web e Android para portfólio, com distribuição dire
 
 A publicação Git/Release é registrada no fechamento desta entrega. A branch `main` apresenta web e mobile; `feat/mobile-api` preserva um README voltado ao app, também em inglês.
 
+## Próxima evolução — propostas visuais (05/11/2026)
+
+- O titular aprovou preparar propostas das telas internas para web e mobile. Artefatos isolados em `docs/mockups/`: `gallery.html` reúne as imagens e `index.html` permite navegar entre dashboard, lançamentos e planejamento, alternar temas, explorar filtros e simular um lançamento apenas na memória da página.
+- Preservadas marca Fluxo, DM Sans, Space Grotesk e cores dos temas. Proposta mobile com quatro destinos principais; saldo mais compacto, histórico agrupado por dia e planejamento com limites e agenda de vencimentos.
+- Produzidas 12 capturas principais: três telas × web/mobile × claro/escuro. Capturas adicionais mostram cadastro de lançamento e busca vazia. Painéis comparativos mobile nos dois temas acompanham a galeria.
+- Dados inteiramente fictícios; sem requisições à API, gravação no banco, alteração de telas de produção ou novo APK. A agenda de contas a pagar/receber é uma proposta futura, ainda não implementada no produto.
+- Conferências do protótipo em 360, 390, 768 e 1440 px: fontes e imagens carregadas, sem overflow horizontal ou erros JavaScript. Navegação, filtros, busca, mês sem registros, ocultação de valores, formulário, abas e tema verificados no navegador. O HTML não comprova o comportamento nativo de React Native ou das barras do Android. `npm run check` aprovado, sem avisos; no formulário ilustrativo, valor zero rejeitado e valor decimal aceito.
+- O titular aprovou o visual e autorizou a implementação. Reforçou que home e telas de login/cadastro devem manter o desenho atual; pediu também mensagens claras para senhas fora dos requisitos.
+
+## Versão de teste 1.1 — implementação (05/11/2026)
+
+- Aplicado o visual aprovado ao dashboard, lançamentos e planejamento web/mobile, reutilizando os componentes existentes. Fontes, marca Fluxo e tokens de cores preservados. Home e autenticação mantêm o desenho e os arquivos atuais.
+- App com quatro destinos visíveis (Início, Lançamentos, Planejamento, Mais); categorias, recorrências e conta continuam acessíveis. Cadastro/edição de lançamentos em folha modal, histórico agrupado por dia, seleção de mês, busca por descrição, filtros por tipo, paginação e exportação da consulta atual.
+- Dashboard com saldo compacto, ocultação de valores, gráfico mensal, limites e próximos lançamentos. Planejamento reúne os limites existentes e uma agenda baseada na próxima ocorrência de cada recorrência. Não houve criação de contas pendentes/pagas nem mudança no cálculo dos saldos.
+- Campo aditivo `upcomingTransactions` no dashboard; apenas dados do usuário autenticado, até 20 próximas ocorrências, dentro do mês selecionado e da vigência da regra. Testados isolamento, datas de hoje/fim do mês e ausência de efeitos nos saldos. Usado intervalo com fim exclusivo no primeiro dia do mês seguinte para incluir corretamente o último dia também no SQLite.
+- Mensagens de senha corrigidas no backend e no app: mínimo de caracteres, maiúsculas/minúsculas, números, símbolos, vazamentos e confirmação. API antiga com chave técnica recebe uma orientação legível no cliente. Requisitos de segurança inalterados; testes cobrem web, API e PT/EN.
+- CI completo aprovado após o ajuste de fim de mês: 157 testes PHP, dois ignorados por 2FA desativada e 1.371 assertions; análise estática sem erros, formatação/lint/tipos web aprovados. Quinze testes mobile, tipos e lint mobile aprovados.
+- Builds web e Expo web aprovados. Conferência em navegador dos builds reais, com respostas inteiramente fictícias e sem pedidos à produção: 22 capturas, dois temas, desktop e celular, com conferência adicional em 360 e 768 px; sem overflow horizontal ou erros JavaScript. Verificados navegação de mês, diálogo de meta, login mobile simulado, abas, formulário, busca, estado vazio e segunda página da API. Refinamento final dos cards conferido e capturas das três telas principais renovadas nos READMEs. Cadastro simulado em PT/EN confirmou que `string.min.value` não aparece na interface.
+- APK local `1.1.0` / versionCode `2` gerado para `com.saldoa.app`, somente ARM64, com API pública HTTPS conferida no bundle. Arquivo: `mobile/android/app/build/outputs/apk/release/saldoa-android-v1.1.0.apk` (30.648.758 bytes); SHA-256: `c1532746d5120887d78b740e51c549586f5d2eb32f3df558069425a80cab8bd4`. Assinatura de depuração válida e idêntica à da 1.0, permitindo atualização no aparelho. Bundle posterior às últimas alterações do cliente. A versão 1.0 publicada permanece preservada. Esta primeira entrega de teste foi substituída pelo build 3 abaixo; ainda falta o deploy manual do backend/web para a agenda aparecer contra a API pública.
+- Nenhuma dependência adicionada, migration executada ou dado de produção alterado. Nenhum commit, push, Release ou deploy realizado nesta etapa.
+
+## Correções do APK 1.1 após teste no aparelho (05/11/2026)
+
+- Titular relatou que Categorias, Recorrências e Minha conta, acessadas por Mais, voltavam ao Início. Confirmado no código instalado do Expo Router 58: `href: null` marca o destino como oculto e redireciona sua navegação. Substituído por botão da aba nulo e item sem exibição, mantendo as rotas declaradas e acessíveis. Histórico das abas preserva o retorno ao destino anterior.
+- Controle de valores com ícone de 18 px, sem fundo; área visual de 36 px e extensão de toque de 4 px por lado. Demais botões de ícone mantêm a aparência anterior.
+- Quinze testes mobile, checagem de tipos, lint mobile e `npm run check` aprovados. Conferência no build Expo web com dados fictícios: destinos de Mais, avatar, preferências e ocultação/exibição de valores aprovados, junto às verificações anteriores (18 cenários, sem erros JavaScript). Ícone de 18 px e fundo transparente conferidos no navegador; captura do dashboard mobile renovada no README. Teste do APK corrigido no aparelho aprovado pelo titular: as opções de Mais e o controle de valores estão funcionando.
+- Novo APK `1.1.0` / versionCode `3` gerado: `mobile/android/app/build/outputs/apk/release/saldoa-android-v1.1.0-test2.apk` (30,649,018 bytes). SHA-256: `66aff1cfe454997c61c3ae4092563c080e80c7c6d8bdb4b8f00044532c1a45d5`. Somente ARM64; API pública HTTPS e assinatura de depuração conferidas, com certificado idêntico ao anterior. Atualização no aparelho e funcionamento das correções confirmados pelo titular. Sem alterações no backend, banco de dados ou site nesta correção; sem commit, push ou deploy.
+
+## Publicação da versão 1.1.0 (05/11/2026)
+
+- Fechamento autorizado pelo titular após aprovação do APK `1.1.0` / versionCode `3` no aparelho: histórico em inglês, commit/push, sincronização da branch mobile, deploy manual e Release com o arquivo aprovado.
+- `CHANGELOG.md` criado com o preview público, a versão 1.0.0 e a 1.1.0; READMEs preparados para a nova Release. O APK da Release é uma cópia binária do build 3 aprovado, sem nova compilação.
+- CI local final aprovado: 157 testes PHP, dois ignorados e 1.371 assertions; lint/formatação, tipos e PHPStan aprovados. Os dez ajustes de runtime presentes no checkout antigo da AWS coincidem com os arquivos locais e serão preservados.
+- Corrigido o contexto Docker de produção para incluir `lang/`; as traduções de validação precisam acompanhar a imagem. Nenhuma migration ou dependência alterada.
+- Publicação Git, backup anterior ao deploy, troca das imagens, conferência pública e publicação da Release em andamento. Resultados finais serão registrados após execução.
+
 ## Operação contínua e próximas versões
 
 1. Acompanhar o e-mail a cada 15 dias, o espaço da caixa Gmail e o disco da EC2. Manter cópias locais por pelo menos sete dias e retenção manual no Gmail; guardar a chave privada de recuperação em uma segunda localização segura fora do notebook.

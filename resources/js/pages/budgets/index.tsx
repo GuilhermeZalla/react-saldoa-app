@@ -1,5 +1,11 @@
 ﻿import * as React from 'react';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, router } from '@inertiajs/react';
+import {
+    FinanceHeader,
+    FinancePeriod,
+    UpcomingTransactions,
+} from '@/components/finance-layout';
+import type { UpcomingTransaction } from '@/types/dashboard';
 import { Trash2, Edit2 } from 'lucide-react';
 import BudgetController from '@/actions/App/Http/Controllers/BudgetController';
 import budgets from '@/routes/budgets';
@@ -44,10 +50,12 @@ const statusLabels: Record<Budget['status'], string> = {
 const statusClasses: Record<Budget['status'], string> = {
     ok: 'text-muted-foreground border-border',
     warning: 'text-warning border-warning/30 bg-warning/10',
-    exceeded: 'text-expense-text border-expense/30 bg-expense/10',
+    exceeded: 'text-warning border-warning/30 bg-warning/10',
 };
 
 type BudgetsIndexProps = {
+    month: string;
+    upcomingTransactions?: UpcomingTransaction[];
     budgets: Budget[];
     categoriesWithoutBudget: BudgetCategoryOption[];
 };
@@ -64,13 +72,13 @@ function ProgressBar({
     const progressClasses: Record<Budget['status'], string> = {
         ok: 'bg-muted-foreground',
         warning: 'bg-warning',
-        exceeded: 'bg-expense',
+        exceeded: 'bg-warning',
     };
 
     return (
-        <div className="h-2.5 w-full rounded-full bg-secondary">
+        <div className="h-1.5 w-full rounded-full bg-secondary">
             <div
-                className={`h-2.5 rounded-full transition-all duration-500 ${progressClasses[status]}`}
+                className={`h-1.5 rounded-full transition-all duration-500 ${progressClasses[status]}`}
                 style={{ width: `${displayPercentage}%` }}
             />
         </div>
@@ -79,6 +87,8 @@ function ProgressBar({
 
 export default function BudgetsIndex({
     budgets: userBudgets,
+    month,
+    upcomingTransactions = [],
     categoriesWithoutBudget,
 }: BudgetsIndexProps) {
     const [openCreateDialog, setOpenCreateDialog] = React.useState(false);
@@ -91,169 +101,241 @@ export default function BudgetsIndex({
         null,
     );
 
+    const [tab, setTab] = React.useState('all');
+    const totalLimit = userBudgets.reduce(
+        (sum, budget) => sum + Number(budget.amount),
+        0,
+    );
+    const totalSpent = userBudgets.reduce(
+        (sum, budget) => sum + Number(budget.spent),
+        0,
+    );
     const hasBudgets = userBudgets.length > 0;
     const hasCategoriesWithoutBudget = categoriesWithoutBudget.length > 0;
 
     return (
         <>
-            <Head title="Metas" />
+            <Head title="Planejamento" />
 
-            <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:p-8">
-                <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                    <div className="space-y-1">
-                        <h1 className="text-2xl font-semibold tracking-tight">
-                            Metas
-                        </h1>
-                        <p className="text-sm text-muted-foreground">
-                            Acompanhe seus limites mensais de gasto por
-                            categoria.
-                        </p>
-                    </div>
+            <main className="finance-page">
+                <FinanceHeader
+                    eyebrow="Seus próximos passos"
+                    title="Planejamento"
+                    subtitle="Organize o mês e enxergue o que vem depois."
+                >
+                    <FinancePeriod
+                        month={month}
+                        onChange={(selected) =>
+                            router.get(
+                                budgets.index().url,
+                                { month: selected },
+                                { preserveState: true, preserveScroll: true },
+                            )
+                        }
+                    />
                     <Button
                         onClick={() => setOpenCreateDialog(true)}
                         disabled={!hasCategoriesWithoutBudget}
                     >
                         {hasCategoriesWithoutBudget
-                            ? 'Nova meta'
-                            : 'Todas as categorias têm meta'}
+                            ? 'Novo limite'
+                            : 'Todas as categorias têm limite'}
                     </Button>
-                </header>
-
-                {hasBudgets ? (
-                    <Card className="overflow-hidden rounded-2xl shadow-sm">
-                        <CardContent className="p-0">
-                            <div className="divide-y divide-border/60">
-                                {userBudgets.map((budget) => (
-                                    <article key={budget.id} className="p-6">
-                                        <div className="flex flex-col gap-4">
-                                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <Badge
-                                                        variant="outline"
-                                                        className={
-                                                            statusClasses[
-                                                                budget.status
-                                                            ]
-                                                        }
-                                                    >
-                                                        {
-                                                            statusLabels[
-                                                                budget.status
-                                                            ]
-                                                        }
-                                                    </Badge>
-                                                    <p className="min-w-0 font-medium">
-                                                        {budget.category_name}
-                                                    </p>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => {
-                                                            setEditingBudget(
-                                                                budget,
-                                                            );
-                                                            setOpenEditDialog(
-                                                                true,
-                                                            );
-                                                        }}
-                                                    >
-                                                        <Edit2 className="size-4" />
-                                                        <span className="sr-only">
-                                                            Editar meta
-                                                        </span>
-                                                    </Button>
-                                                    <Button
-                                                        variant="destructive"
-                                                        size="sm"
-                                                        onClick={() => {
-                                                            setDeletingBudget(
-                                                                budget,
-                                                            );
-                                                            setOpenDeleteDialog(
-                                                                true,
-                                                            );
-                                                        }}
-                                                    >
-                                                        <Trash2 className="size-4" />
-                                                        <span className="sr-only">
-                                                            Excluir meta
-                                                        </span>
-                                                    </Button>
-                                                </div>
+                </FinanceHeader>
+                <section className="grid gap-3 sm:grid-cols-3">
+                    <Card className="finance-surface gap-2 py-5">
+                        <CardContent className="space-y-2">
+                            <p className="text-xs text-muted-foreground">
+                                Orçamento do mês
+                            </p>
+                            <p className="money-value text-2xl font-semibold">
+                                {currencyFormatter.format(totalLimit)}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                Limites de {userBudgets.length} categorias
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card className="finance-surface gap-2 py-5">
+                        <CardContent className="space-y-2">
+                            <p className="text-xs text-muted-foreground">
+                                Espaço no orçamento
+                            </p>
+                            <p className="money-value text-2xl font-semibold">
+                                {currencyFormatter.format(
+                                    totalLimit - totalSpent,
+                                )}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                Disponível nas categorias com limite
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card className="finance-surface gap-2 py-5">
+                        <CardContent className="space-y-2">
+                            <p className="text-xs text-muted-foreground">
+                                Próximos lançamentos
+                            </p>
+                            <p className="money-value text-2xl font-semibold">
+                                {upcomingTransactions.length}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                Até 20 próximas ocorrências previstas
+                            </p>
+                        </CardContent>
+                    </Card>
+                </section>
+                <div
+                    className="flex gap-5 border-b border-border"
+                    role="group"
+                    aria-label="Seções do planejamento"
+                >
+                    {[
+                        ['all', 'Visão geral'],
+                        ['limits', 'Limites'],
+                        ['upcoming', 'Agenda'],
+                    ].map(([value, label]) => (
+                        <button
+                            key={value}
+                            onClick={() => setTab(value)}
+                            aria-pressed={tab === value}
+                            className={`border-b-2 px-1 pb-3 text-sm ${tab === value ? 'border-primary font-medium' : 'border-transparent text-muted-foreground'}`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+                {tab !== 'upcoming' &&
+                    (hasBudgets ? (
+                        <section className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
+                            {userBudgets.map((budget) => (
+                                <Card
+                                    key={budget.id}
+                                    className="finance-surface"
+                                >
+                                    <CardContent className="space-y-5">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div>
+                                                <p className="font-heading text-base font-semibold break-words">
+                                                    {budget.category_name}
+                                                </p>
+                                                <Badge
+                                                    variant="outline"
+                                                    className={`mt-2 ${statusClasses[budget.status]}`}
+                                                >
+                                                    {
+                                                        statusLabels[
+                                                            budget.status
+                                                        ]
+                                                    }
+                                                </Badge>
                                             </div>
-
-                                            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                                                <div className="text-left">
-                                                    <p className="text-xs text-muted-foreground">
-                                                        Gasto do mês
-                                                    </p>
-                                                    <p className="font-medium tabular-nums">
-                                                        {currencyFormatter.format(
-                                                            Number(
-                                                                budget.spent,
-                                                            ),
-                                                        )}
-                                                    </p>
-                                                </div>
-
-                                                <div className="w-full sm:w-80">
-                                                    <div className="mb-1 flex items-center justify-between">
-                                                        <p className="text-xs text-muted-foreground">
-                                                            Limite:{' '}
-                                                            {currencyFormatter.format(
-                                                                Number(
-                                                                    budget.amount,
-                                                                ),
-                                                            )}
-                                                        </p>
-                                                        <p className="text-xs font-medium">
-                                                            {percentageFormatter.format(
-                                                                budget.percentage,
-                                                            )}
-                                                            % usado
-                                                        </p>
-                                                    </div>
-                                                    <ProgressBar
-                                                        percentage={
-                                                            budget.percentage
-                                                        }
-                                                        status={budget.status}
-                                                    />
-                                                </div>
+                                            <div className="flex gap-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    aria-label={`Editar limite de ${budget.category_name}`}
+                                                    onClick={() => {
+                                                        setEditingBudget(
+                                                            budget,
+                                                        );
+                                                        setOpenEditDialog(true);
+                                                    }}
+                                                >
+                                                    <Edit2 className="size-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    aria-label={`Excluir limite de ${budget.category_name}`}
+                                                    onClick={() => {
+                                                        setDeletingBudget(
+                                                            budget,
+                                                        );
+                                                        setOpenDeleteDialog(
+                                                            true,
+                                                        );
+                                                    }}
+                                                >
+                                                    <Trash2 className="size-4" />
+                                                </Button>
                                             </div>
                                         </div>
-                                    </article>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <Card className="rounded-2xl shadow-sm">
-                        <CardContent className="flex flex-col items-center gap-3 px-6 py-14 text-center">
-                            <h2 className="font-medium">Nenhuma meta ainda</h2>
-                            <p className="max-w-sm text-sm text-muted-foreground">
-                                Defina limites mensais de gasto para suas
-                                categorias de despesa e acompanhe o uso ao longo
-                                do mês.
-                            </p>
-                            {hasCategoriesWithoutBudget ? (
-                                <Button
-                                    onClick={() => setOpenCreateDialog(true)}
-                                    className="mt-2"
-                                >
-                                    Criar primeira meta
-                                </Button>
-                            ) : (
-                                <p className="mt-2 text-sm text-muted-foreground">
-                                    Todas as suas categorias de despesa já têm
-                                    uma meta.
+                                        <div>
+                                            <p className="money-value text-2xl font-semibold">
+                                                {currencyFormatter.format(
+                                                    Number(budget.spent),
+                                                )}
+                                            </p>
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                de{' '}
+                                                {currencyFormatter.format(
+                                                    Number(budget.amount),
+                                                )}{' '}
+                                                no mês
+                                            </p>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <ProgressBar
+                                                percentage={budget.percentage}
+                                                status={budget.status}
+                                            />
+                                            <div className="flex justify-between gap-2 text-xs text-muted-foreground">
+                                                <span>
+                                                    {Number(budget.amount) -
+                                                        Number(budget.spent) >=
+                                                    0
+                                                        ? 'Ainda disponível'
+                                                        : 'Acima do limite'}
+                                                </span>
+                                                <span>
+                                                    {currencyFormatter.format(
+                                                        Math.abs(
+                                                            Number(
+                                                                budget.amount,
+                                                            ) -
+                                                                Number(
+                                                                    budget.spent,
+                                                                ),
+                                                        ),
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">
+                                                {percentageFormatter.format(
+                                                    budget.percentage,
+                                                )}
+                                                % utilizado
+                                            </p>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </section>
+                    ) : (
+                        <Card className="finance-surface">
+                            <CardContent className="space-y-3 py-6 text-center">
+                                <h2 className="font-medium">
+                                    Nenhum limite definido
+                                </h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Crie uma categoria de despesa e defina
+                                    quanto pretende gastar por mês.
                                 </p>
-                            )}
-                        </CardContent>
-                    </Card>
+                                {hasCategoriesWithoutBudget && (
+                                    <Button
+                                        onClick={() =>
+                                            setOpenCreateDialog(true)
+                                        }
+                                    >
+                                        Criar primeiro limite
+                                    </Button>
+                                )}
+                            </CardContent>
+                        </Card>
+                    ))}
+                {tab !== 'limits' && (
+                    <UpcomingTransactions items={upcomingTransactions} />
                 )}
 
                 {/* Create Dialog */}
@@ -490,7 +572,7 @@ export default function BudgetsIndex({
 BudgetsIndex.layout = {
     breadcrumbs: [
         {
-            title: 'Metas',
+            title: 'Planejamento',
             href: budgets.index(),
         },
     ],

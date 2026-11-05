@@ -53,3 +53,12 @@ export type BudgetAlert = {
     percentage: number;
     status: 'warning' | 'exceeded';
 };
+
+export type UpcomingTransaction = {
+    id: number;
+    description: string;
+    amount: string;
+    type: 'income' | 'expense';
+    date: string;
+    category: string;
+};

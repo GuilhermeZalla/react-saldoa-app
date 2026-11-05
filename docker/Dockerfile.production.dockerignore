@@ -16,6 +16,8 @@ bootstrap/cache/**
 bootstrap/ssr/**
 !config/
 !config/**
+!lang/
+!lang/**
 !database/
 !database/**
 database/*.sqlite*

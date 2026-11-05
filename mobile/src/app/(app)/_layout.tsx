@@ -11,6 +11,12 @@ import { useSession } from '../../SessionContext';
 import { usePreferences } from '../../PreferencesContext';
 import { AppIcon, type IconName } from '../../icons';
 
+// Keep secondary routes navigable: href: null also redirects them in Expo Router 58.
+const secondaryScreenOptions = {
+    tabBarButton: () => null,
+    tabBarItemStyle: { display: 'none' as const },
+};
+
 export default function MainTabsLayout() {
     const { session, loading } = useSession();
     const { colors, t } = usePreferences();
@@ -35,6 +41,7 @@ export default function MainTabsLayout() {
 
     return (
         <Tabs
+            backBehavior="history"
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: colors.primary,
@@ -70,7 +77,7 @@ export default function MainTabsLayout() {
                 name="transactions"
                 options={{
                     title: t('Lançamentos'),
-                    tabBarLabel: t('Lanç.'),
+                    tabBarLabel: t('Lançamentos'),
                     tabBarAccessibilityLabel: t('Lançamentos'),
                     tabBarIcon: ({ color, size, focused }) => (
                         <TabIcon
@@ -83,27 +90,13 @@ export default function MainTabsLayout() {
                 }}
             />
             <Tabs.Screen
-                name="categories"
-                options={{
-                    title: t('Categorias'),
-                    tabBarIcon: ({ color, size, focused }) => (
-                        <TabIcon
-                            focused={focused}
-                            name="categories"
-                            color={color}
-                            size={size}
-                        />
-                    ),
-                }}
-            />
-            <Tabs.Screen
                 name="budgets"
                 options={{
-                    title: t('Metas'),
+                    title: t('Planejamento'),
                     tabBarIcon: ({ color, size, focused }) => (
                         <TabIcon
                             focused={focused}
-                            name="target"
+                            name="calendar"
                             color={color}
                             size={size}
                         />
@@ -111,35 +104,22 @@ export default function MainTabsLayout() {
                 }}
             />
             <Tabs.Screen
-                name="recurring"
+                name="more"
                 options={{
-                    title: t('Recorrências'),
-                    tabBarLabel: t('Recorr.'),
-                    tabBarAccessibilityLabel: t('Recorrências'),
+                    title: t('Mais'),
                     tabBarIcon: ({ color, size, focused }) => (
                         <TabIcon
                             focused={focused}
-                            name="repeat"
+                            name="more"
                             color={color}
                             size={size}
                         />
                     ),
                 }}
             />
-            <Tabs.Screen
-                name="account"
-                options={{
-                    title: t('Conta'),
-                    tabBarIcon: ({ color, size, focused }) => (
-                        <TabIcon
-                            focused={focused}
-                            name="user"
-                            color={color}
-                            size={size}
-                        />
-                    ),
-                }}
-            />
+            <Tabs.Screen name="categories" options={secondaryScreenOptions} />
+            <Tabs.Screen name="recurring" options={secondaryScreenOptions} />
+            <Tabs.Screen name="account" options={secondaryScreenOptions} />
         </Tabs>
     );
 }

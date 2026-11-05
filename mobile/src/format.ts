@@ -73,3 +73,11 @@ export function currentDate(): string {
 export function amountForApi(amount: string): string {
     return amount.trim().replace(/\s/g, '').replace(',', '.');
 }
+
+export function shiftMonth(month: string, offset: number): string {
+    const [year, number] = month.split('-').map(Number);
+    const index = year * 12 + number - 1 + offset;
+    const nextYear = Math.floor(index / 12);
+    if (nextYear < 1 || nextYear > 9999) return month;
+    return `${String(nextYear).padStart(4, '0')}-${String((index % 12) + 1).padStart(2, '0')}`;
+}

@@ -164,6 +164,51 @@ export function apiErrorMessage(
     }
     if (status === 422) {
         const details = payload?.error?.details ?? {};
+        const firstMessage = Object.values(details)[0]?.[0];
+        if (details.password?.length || details.password_confirmation?.length) {
+            const passwordMessage =
+                details.password?.[0] ??
+                details.password_confirmation?.[0] ??
+                '';
+            const minimum = passwordMessage.match(
+                /pelo menos (\d+) caracteres|at least (\d+) characters/i,
+            );
+            if (minimum) {
+                return t('A senha deve ter pelo menos {min} caracteres.', {
+                    min: minimum[1] ?? minimum[2],
+                });
+            }
+            const passwordMessages: Record<string, string> = {
+                'A confirmação de senha não confere.':
+                    'A confirmação de senha não confere.',
+                'A senha deve conter letras maiúsculas e minúsculas.':
+                    'A senha deve conter letras maiúsculas e minúsculas.',
+                'A senha deve conter pelo menos uma letra.':
+                    'A senha deve conter pelo menos uma letra.',
+                'A senha deve conter pelo menos um número.':
+                    'A senha deve conter pelo menos um número.',
+                'A senha deve conter pelo menos um símbolo.':
+                    'A senha deve conter pelo menos um símbolo.',
+                'Esta senha apareceu em um vazamento de dados. Escolha outra senha.':
+                    'Esta senha apareceu em um vazamento de dados. Escolha outra senha.',
+            };
+            if (
+                Object.keys(details)[0]?.startsWith('password') &&
+                passwordMessages[passwordMessage]
+            ) {
+                return t(passwordMessages[passwordMessage]);
+            }
+        }
+        if (
+            firstMessage &&
+            /^(?:validation\.)?[a-z_]+(?:\.[a-z_]+){1,}$/i.test(firstMessage)
+        ) {
+            return Object.keys(details)[0]?.startsWith('password')
+                ? t(
+                      'Use pelo menos 12 caracteres, com maiúsculas, minúsculas, números e símbolos.',
+                  )
+                : t('Verifique os dados informados.');
+        }
         if (getLocale() === 'pt-BR') {
             return (
                 Object.values(details)[0]?.[0] ??

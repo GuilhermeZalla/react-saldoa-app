@@ -100,3 +100,12 @@ test('registration rate limit treats email casing variations as the same address
         'email' => 'CASELIMIT@EXAMPLE.COM',
     ])->assertStatus(429);
 });
+
+test('short passwords show a minimum length message instead of a translation key', function () {
+    $this->post(route('register.store'), [
+        'name' => 'Test User',
+        'email' => 'short-password@example.com',
+        'password' => '123',
+        'password_confirmation' => '123',
+    ])->assertSessionHasErrors(['password' => 'O campo senha deve ter pelo menos 8 caracteres.']);
+});

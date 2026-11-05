@@ -1,5 +1,11 @@
 ﻿import { Link } from '@inertiajs/react';
-import { ArrowLeftRight, LayoutGrid, Repeat, Tags, Target } from 'lucide-react';
+import {
+    ArrowLeftRight,
+    CalendarDays,
+    LayoutGrid,
+    Repeat,
+    Tags,
+} from 'lucide-react';
 import BudgetController from '@/actions/App/Http/Controllers/BudgetController';
 import CategoryController from '@/actions/App/Http/Controllers/CategoryController';
 import RecurringTransactionController from '@/actions/App/Http/Controllers/RecurringTransactionController';
@@ -41,9 +47,9 @@ const mainNavItems: NavItem[] = [
         icon: Tags,
     },
     {
-        title: 'Metas',
+        title: 'Planejamento',
         href: BudgetController.index(),
-        icon: Target,
+        icon: CalendarDays,
     },
 ];
 

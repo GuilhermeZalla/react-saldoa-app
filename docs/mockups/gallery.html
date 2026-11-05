@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Saldoa · Galeria das propostas</title>
+        <style>
+            @font-face {
+                font-family: DM;
+                src: url(assets/dm-sans.woff2);
+            }
+            @font-face {
+                font-family: Space;
+                src: url(assets/space-grotesk.woff2);
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                background: #14171b;
+                color: #fff;
+                font:
+                    14px/1.6 DM,
+                    sans-serif;
+            }
+            html[data-theme='light'] body {
+                background: #eef0f3;
+                color: #171a1f;
+            }
+            main {
+                max-width: 1440px;
+                margin: auto;
+                padding: 36px 28px 56px;
+            }
+            header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 24px;
+                margin-bottom: 28px;
+            }
+            .brand {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
+            .brand img {
+                width: 36px;
+                height: 40px;
+            }
+            h1 {
+                font:
+                    600 30px Space,
+                    sans-serif;
+                margin: 0 0 6px;
+                letter-spacing: -1px;
+            }
+            p {
+                margin: 0;
+                color: #a5aeb9;
+                font-size: 13px;
+            }
+            html[data-theme='light'] p {
+                color: #535d68;
+            }
+            a {
+                color: #ff8500;
+            }
+            html[data-theme='light'] a {
+                color: #a94c00;
+            }
+            .toolbar {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                margin-bottom: 28px;
+            }
+            button,
+            .open {
+                border: 1px solid #414853;
+                background: #232830;
+                color: #fff;
+                padding: 10px 14px;
+                border-radius: 10px;
+                font: 500 12px DM;
+                cursor: pointer;
+                text-decoration: none;
+            }
+            html[data-theme='light'] button,
+            html[data-theme='light'] .open {
+                background: white;
+                color: #171a1f;
+                border-color: #d9dee5;
+            }
+            button.active {
+                border-color: #ff8500;
+                color: #ff8500;
+            }
+            button:focus-visible,
+            a:focus-visible {
+                outline: 2px solid #ff8500;
+                outline-offset: 3px;
+            }
+            .screens {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 24px;
+                align-items: start;
+            }
+            .screens.web {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            figure {
+                margin: 0;
+            }
+            figcaption {
+                margin-bottom: 10px;
+                font-weight: 600;
+                font-size: 13px;
+            }
+            figure img {
+                width: 100%;
+                max-width: 390px;
+                border-radius: 18px;
+                border: 1px solid #414853;
+                display: block;
+            }
+            figure a {
+                display: block;
+                width: fit-content;
+            }
+            .screens.web figure img {
+                max-width: none;
+                border-radius: 10px;
+            }
+            .screens.web figure a {
+                width: 100%;
+            }
+            .note {
+                margin: 30px 0;
+                padding-top: 20px;
+                border-top: 1px solid #414853;
+            }
+            .extra {
+                display: flex;
+                gap: 22px;
+                flex-wrap: wrap;
+                font-size: 12px;
+            }
+            @media (max-width: 760px) {
+                main {
+                    padding: 24px 18px;
+                }
+                header {
+                    flex-direction: column;
+                    gap: 16px;
+                }
+                h1 {
+                    font-size: 24px;
+                }
+                .screens,
+                .screens.web {
+                    grid-template-columns: 1fr;
+                }
+                figure img {
+                    margin: auto;
+                }
+                figure a {
+                    margin: auto;
+                }
+                .toolbar {
+                    gap: 6px;
+                }
+                button,
+                .open {
+                    padding: 9px 11px;
+                    font-size: 11px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <header>
+                <div class="brand">
+                    <img src="assets/fluxo.svg" alt="Saldoa" />
+                    <div>
+                        <h1>O próximo passo do Saldoa</h1>
+                        <p>
+                            Dashboard, lançamentos e planejamento · proposta
+                            para avaliação
+                        </p>
+                    </div>
+                </div>
+                <a class="open" href="index.html" id="prototype"
+                    >Abrir protótipo navegável ↗</a
+                >
+            </header>
+            <div class="toolbar">
+                <button data-device="mobile" class="active">Mobile</button
+                ><button data-device="web">Web</button
+                ><button data-theme="dark" class="active">Tema escuro</button
+                ><button data-theme="light">Tema claro</button>
+            </div>
+            <div class="screens" id="screens"></div>
+            <div class="note">
+                <p>
+                    Estas imagens representam uma proposta. O site e o APK
+                    atuais não foram alterados. A agenda de vencimentos ilustra
+                    uma função futura; valores e contas são fictícios.
+                </p>
+            </div>
+            <div class="extra">
+                <a href="new-transaction-mobile-dark.png"
+                    >Cadastro de lançamento</a
+                ><a href="transactions-empty-mobile-dark.png"
+                    >Busca sem resultados</a
+                ><a href="verification.json"
+                    >Conferências de navegação e responsividade</a
+                >
+            </div>
+        </main>
+        <script>
+            let device = 'mobile';
+            let theme = 'dark';
+            function render() {
+                document.documentElement.dataset.theme = theme;
+                document.getElementById('screens').className =
+                    'screens ' + device;
+                document.getElementById('screens').innerHTML = [
+                    ['dashboard', '01 · Dashboard'],
+                    ['transactions', '02 · Lançamentos'],
+                    ['planning', '03 · Planejamento'],
+                ]
+                    .map(
+                        ([screen, title]) =>
+                            '<figure><figcaption>' +
+                            title +
+                            '</figcaption><a href="' +
+                            screen +
+                            '-' +
+                            device +
+                            '-' +
+                            theme +
+                            '.png"><img src="' +
+                            screen +
+                            '-' +
+                            device +
+                            '-' +
+                            theme +
+                            '.png" alt="' +
+                            title +
+                            ' — ' +
+                            device +
+                            ', tema ' +
+                            (theme === 'dark' ? 'escuro' : 'claro') +
+                            '"></a></figure>',
+                    )
+                    .join('');
+                document.querySelectorAll('[data-device]').forEach((button) => {
+                    button.classList.toggle(
+                        'active',
+                        button.dataset.device === device,
+                    );
+                    button.setAttribute(
+                        'aria-pressed',
+                        String(button.dataset.device === device),
+                    );
+                });
+                document
+                    .querySelectorAll('button[data-theme]')
+                    .forEach((button) => {
+                        button.classList.toggle(
+                            'active',
+                            button.dataset.theme === theme,
+                        );
+                        button.setAttribute(
+                            'aria-pressed',
+                            String(button.dataset.theme === theme),
+                        );
+                    });
+                document.getElementById('prototype').href =
+                    'index.html?theme=' + theme;
+            }
+            document.addEventListener('click', (event) => {
+                const button = event.target.closest('button');
+                if (!button) return;
+                if (button.dataset.device) device = button.dataset.device;
+                if (button.dataset.theme) theme = button.dataset.theme;
+                render();
+            });
+            render();
+        </script>
+    </body>
+</html>

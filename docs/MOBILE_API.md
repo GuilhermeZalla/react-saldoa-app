@@ -100,3 +100,12 @@ O script aceita `--public-api` para compilar localmente sem a exceção de HTTP 
 ## Robustez do cliente — 04/11/2026
 
 Falhas temporárias de rede/servidor ao restaurar a sessão preservam o token salvo; uma resposta 401 ainda invalida a sessão local. O limite de 15 segundos inclui leitura do corpo JSON/texto, e o temporizador é limpo em todos os caminhos. JSON inválido e interrupção da resposta resultam em erros locais traduzidos. A exportação mensal usa o calendário local, sem alterar endpoints ou contratos de API. A notificação pública de exclusão é processada pela fila existente; o Gmail teve envio e recebimento de teste confirmados. O titular confirmou os dois fluxos completos no site com uma conta descartável em 05/11/2026.
+
+## Evolução das telas internas — versão de teste 1.1
+
+- `/api/v1/dashboard?month=AAAA-MM` preserva os campos existentes e acrescenta `data.upcomingTransactions`: até 20 próximas ocorrências de regras recorrentes do próprio usuário, ordenadas por data e ID. Cada item contém `id` da recorrência, `description`, `amount`, `type`, `date` e `category`. O APK antigo ignora o campo adicional.
+- A agenda considera a próxima ocorrência de cada regra a partir de hoje, dentro do mês selecionado e respeitando `end_date`. Não cria lançamentos, não altera saldos e não representa um controle novo de contas pendentes/pagas. Esse controle completo permanece uma evolução futura.
+- O cliente 1.1 trata o campo como opcional para continuar abrindo com a API 1.0. Para exibir a agenda, o backend atualizado precisa ser publicado junto ao web; sem o campo, a seção fica sem previsões.
+- Histórico mobile usa os filtros e a paginação já existentes (`month`, `type`, `search`, `page`). Busca é por descrição; exportação mantém os mesmos filtros da consulta. Datas e valores continuam nos formatos já documentados.
+- Corrigidas as traduções de complexidade de senha em `lang/pt_BR/validation.php`. A política de produção permanece com mínimo de 12 caracteres, maiúsculas/minúsculas, números, símbolos e verificação de vazamentos. O mobile traduz os detalhes conhecidos e usa uma orientação legível se uma API antiga devolver uma chave técnica como `string.min.value`.
+- O teste local usa versão Android `1.1.0`, código `3`, mesma identificação `com.saldoa.app`, arquitetura ARM64 e assinatura de depuração. Publicação na loja e promoção a Release dependem de uma etapa posterior; teste em aparelho ainda necessário.

@@ -1,22 +1,37 @@
 import { useThemeStyles } from './PreferencesContext';
-import { t } from './i18n';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getLocale, t } from './i18n';
+import { useCallback, useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { ApiError, sessionRequest } from './api';
 import {
     ActionButton,
-    Card,
     ChoiceChips,
     Page,
-    PageTitle,
     ProgressBar,
     SectionTitle,
     TextField,
     useCommonStyles,
 } from './components';
-import { amountForApi, formatCurrency } from './format';
+import { amountForApi, currentMonth, formatCurrency } from './format';
+import {
+    EmptyFinance,
+    FinanceError,
+    FinanceHeader,
+    FinanceSheet,
+    InlineAction,
+    MonthPicker,
+    UpcomingList,
+    FinanceCard as Card,
+} from './finance-components';
 import type { ThemeColors } from './theme';
-import type { Budget, Category, Session } from './types';
+import type {
+    Budget,
+    Category,
+    Dashboard,
+    Session,
+    UpcomingTransaction,
+} from './types';
 
 type Props = { session: Session };
 type BudgetIndex = {
@@ -29,6 +44,9 @@ type Collection<T> = { data: T[] };
 export default function BudgetsScreen({ session }: Props) {
     const { styles } = useThemeStyles(createStyles);
     const commonStyles = useCommonStyles();
+    const [month, setMonth] = useState(currentMonth());
+    const [upcoming, setUpcoming] = useState<UpcomingTransaction[]>([]);
+    const [tab, setTab] = useState('all');
     const [budgets, setBudgets] = useState<Budget[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [categoryId, setCategoryId] = useState<number | null>(null);
@@ -52,20 +70,27 @@ export default function BudgetsScreen({ session }: Props) {
     );
 
     const fetchBudgets = useCallback(async () => {
-        const [budgetResponse, categoryResponse] = await Promise.all([
-            sessionRequest<BudgetIndex>(session, '/budgets'),
-            sessionRequest<Collection<Category>>(session, '/categories'),
-        ]);
+        const [budgetResponse, categoryResponse, dashboardResponse] =
+            await Promise.all([
+                sessionRequest<BudgetIndex>(session, `/budgets?month=${month}`),
+                sessionRequest<Collection<Category>>(session, '/categories'),
+                sessionRequest<{ data: Dashboard }>(
+                    session,
+                    `/dashboard?month=${month}`,
+                ),
+            ]);
 
-        return { budgetResponse, categoryResponse };
-    }, [session]);
+        return { budgetResponse, categoryResponse, dashboardResponse };
+    }, [session, month]);
 
     const loadBudgets = useCallback(async () => {
         setErrorMessage('');
 
         try {
-            const { budgetResponse, categoryResponse } = await fetchBudgets();
+            const { budgetResponse, categoryResponse, dashboardResponse } =
+                await fetchBudgets();
             setBudgets(budgetResponse.data);
+            setUpcoming(dashboardResponse.data.upcomingTransactions ?? []);
             setCategories(categoryResponse.data);
             setCategoryId(
                 (currentId) =>
@@ -80,42 +105,55 @@ export default function BudgetsScreen({ session }: Props) {
         }
     }, [fetchBudgets]);
 
-    useEffect(() => {
-        let isCurrent = true;
+    useFocusEffect(
+        useCallback(() => {
+            setLoading(true);
+            setBudgets([]);
+            setUpcoming([]);
+            setErrorMessage('');
+            let isCurrent = true;
 
-        async function loadInitialBudgets(): Promise<void> {
-            try {
-                const { budgetResponse, categoryResponse } =
-                    await fetchBudgets();
+            async function loadInitialBudgets(): Promise<void> {
+                try {
+                    const {
+                        budgetResponse,
+                        categoryResponse,
+                        dashboardResponse,
+                    } = await fetchBudgets();
 
-                if (isCurrent) {
-                    setBudgets(budgetResponse.data);
-                    setCategories(categoryResponse.data);
-                    setCategoryId(
-                        (currentId) =>
-                            currentId ??
-                            budgetResponse.categories_without_budget[0]?.id ??
-                            null,
-                    );
-                    setErrorMessage('');
-                }
-            } catch (error) {
-                if (isCurrent) {
-                    setErrorMessage(errorMessageFor(error));
-                }
-            } finally {
-                if (isCurrent) {
-                    setLoading(false);
+                    if (isCurrent) {
+                        setBudgets(budgetResponse.data);
+                        setUpcoming(
+                            dashboardResponse.data.upcomingTransactions ?? [],
+                        );
+                        setCategories(categoryResponse.data);
+                        setCategoryId(
+                            (currentId) =>
+                                currentId ??
+                                budgetResponse.categories_without_budget[0]
+                                    ?.id ??
+                                null,
+                        );
+                        setErrorMessage('');
+                    }
+                } catch (error) {
+                    if (isCurrent) {
+                        setErrorMessage(errorMessageFor(error));
+                    }
+                } finally {
+                    if (isCurrent) {
+                        setLoading(false);
+                    }
                 }
             }
-        }
 
-        void loadInitialBudgets();
+            void loadInitialBudgets();
 
-        return () => {
-            isCurrent = false;
-        };
-    }, [fetchBudgets]);
+            return () => {
+                isCurrent = false;
+            };
+        }, [fetchBudgets]),
+    );
 
     function editBudget(budget: Budget): void {
         setFormOpen(true);
@@ -192,101 +230,161 @@ export default function BudgetsScreen({ session }: Props) {
         }
     }
 
+    const totalLimit = budgets.reduce(
+        (total, budget) => total + Number(budget.amount),
+        0,
+    );
+    const totalSpent = budgets.reduce(
+        (total, budget) => total + Number(budget.spent),
+        0,
+    );
     return (
-        <Page>
-            <PageTitle
-                title={t('Metas')}
-                subtitle={t('Acompanhe seus limites de gastos do mês.')}
+        <Page contentStyle={{ padding: 18, gap: 16 }}>
+            <FinanceHeader
+                title={t('Planejamento')}
+                subtitle={t('Organize o mês e enxergue o que vem depois.')}
+                name={session.user.name}
+                eyebrow={t('Seus próximos passos')}
             />
-            {errorMessage ? (
-                <Text accessibilityRole="alert" style={styles.error}>
-                    {errorMessage}
-                </Text>
-            ) : null}
-
-            {!session.isDemo && availableCategories.length > 0 && !formOpen ? (
-                <ActionButton
+            <View style={styles.toolbar}>
+                <MonthPicker month={month} onChange={setMonth} />
+                <InlineAction
+                    label={t('Novo limite')}
+                    disabled={
+                        session.isDemo || availableCategories.length === 0
+                    }
                     onPress={() => {
+                        setEditingId(null);
+                        setCategoryId(availableCategories[0]?.id ?? null);
+                        setAmount('');
                         setFormOpen(true);
                         setErrorMessage('');
                     }}
-                    variant="secondary"
-                >
-                    {t('Nova meta')}
-                </ActionButton>
-            ) : null}
-            {!session.isDemo &&
-            formOpen &&
-            (editingId !== null || availableCategories.length > 0) ? (
-                <Card>
-                    <SectionTitle
-                        title={
-                            editingId === null
-                                ? t('Nova meta')
-                                : t('Editar meta')
-                        }
-                    />
-                    {editingId === null ? (
-                        <>
-                            <Text style={styles.fieldLabel}>
-                                {t('Categoria')}
-                            </Text>
-                            <ChoiceChips
-                                selected={categoryId?.toString() ?? ''}
-                                onSelect={(value) =>
-                                    setCategoryId(Number(value))
-                                }
-                                options={availableCategories.map(
-                                    (category) => ({
-                                        value: category.id.toString(),
-                                        label: category.name,
-                                    }),
-                                )}
-                            />
-                        </>
-                    ) : null}
-                    <TextField
-                        label={t('Limite mensal')}
-                        value={amount}
-                        onChangeText={setAmount}
-                        keyboardType="decimal-pad"
-                        placeholder="0,00"
-                    />
-                    <ActionButton
-                        onPress={() => void saveBudget()}
-                        disabled={saving}
-                        loading={saving}
+                />
+            </View>
+            {!formOpen && <FinanceError message={errorMessage} />}
+            <View style={styles.summaryRow}>
+                <Card style={styles.summaryCard}>
+                    <Text style={styles.summaryLabel}>
+                        {t('Orçamento do mês')}
+                    </Text>
+                    <Text
+                        adjustsFontSizeToFit
+                        numberOfLines={1}
+                        style={styles.summaryAmount}
                     >
-                        {t('Salvar meta')}
-                    </ActionButton>
-                    <ActionButton onPress={cancelEdit} variant="quiet">
-                        {t('Cancelar')}
-                    </ActionButton>
+                        {loading ? '—' : formatCurrency(totalLimit)}
+                    </Text>
+                    <Text style={styles.summaryLabel}>
+                        {t('Limites das categorias')}
+                    </Text>
                 </Card>
-            ) : null}
-
-            <Card>
-                <SectionTitle title={t('Metas deste mês')} />
-                {loading ? (
+                <Card style={styles.summaryCard}>
+                    <Text style={styles.summaryLabel}>
+                        {t('Espaço no orçamento')}
+                    </Text>
+                    <Text
+                        adjustsFontSizeToFit
+                        numberOfLines={1}
+                        style={styles.summaryAmount}
+                    >
+                        {loading
+                            ? '—'
+                            : formatCurrency(totalLimit - totalSpent)}
+                    </Text>
+                    <Text style={styles.summaryLabel}>
+                        {t('Nas categorias com limite')}
+                    </Text>
+                </Card>
+            </View>
+            <ChoiceChips
+                selected={tab}
+                onSelect={setTab}
+                options={[
+                    { value: 'all', label: t('Visão geral') },
+                    { value: 'limits', label: t('Limites') },
+                    { value: 'upcoming', label: t('Agenda') },
+                ]}
+            />
+            {tab !== 'upcoming' &&
+                (loading ? (
                     <Text style={commonStyles.muted}>
                         {t('Carregando metas…')}
                     </Text>
                 ) : budgets.length ? (
                     budgets.map((budget) => (
-                        <BudgetRow
-                            key={budget.id}
-                            budget={budget}
-                            readOnly={session.isDemo}
-                            onEdit={() => editBudget(budget)}
-                            onDelete={() => askToDelete(budget)}
-                        />
+                        <Card key={budget.id}>
+                            <BudgetRow
+                                budget={budget}
+                                readOnly={session.isDemo}
+                                onEdit={() => editBudget(budget)}
+                                onDelete={() => askToDelete(budget)}
+                            />
+                        </Card>
                     ))
                 ) : (
+                    <Card>
+                        <EmptyFinance>
+                            {t('Nenhuma meta cadastrada para este mês.')}
+                        </EmptyFinance>
+                    </Card>
+                ))}
+            {tab !== 'limits' && (
+                <Card>
+                    <SectionTitle title={t('Agenda do mês')} />
                     <Text style={commonStyles.muted}>
-                        {t('Nenhuma meta cadastrada para este mês.')}
+                        {t(
+                            'Próxima ocorrência de cada recorrência. Valores previstos, fora do saldo realizado.',
+                        )}
                     </Text>
-                )}
-            </Card>
+                    <UpcomingList items={upcoming} />
+                    <ActionButton
+                        variant="quiet"
+                        compact
+                        onPress={() => router.navigate('/recurring')}
+                    >
+                        {t('Gerenciar recorrências')}
+                    </ActionButton>
+                </Card>
+            )}
+            <FinanceSheet
+                visible={formOpen && !session.isDemo}
+                title={editingId === null ? t('Novo limite') : t('Editar meta')}
+                onClose={cancelEdit}
+                busy={saving}
+            >
+                <FinanceError message={errorMessage} />
+                {editingId === null ? (
+                    <>
+                        <Text style={styles.fieldLabel}>{t('Categoria')}</Text>
+                        <ChoiceChips
+                            selected={categoryId?.toString() ?? ''}
+                            onSelect={(value) => setCategoryId(Number(value))}
+                            options={availableCategories.map((category) => ({
+                                value: category.id.toString(),
+                                label: category.name,
+                            }))}
+                        />
+                    </>
+                ) : null}
+                <TextField
+                    label={t('Limite mensal')}
+                    value={amount}
+                    onChangeText={setAmount}
+                    keyboardType="decimal-pad"
+                    placeholder="0,00"
+                />
+                <ActionButton
+                    onPress={() => void saveBudget()}
+                    disabled={saving}
+                    loading={saving}
+                >
+                    {t('Salvar meta')}
+                </ActionButton>
+                <ActionButton onPress={cancelEdit} variant="quiet">
+                    {t('Cancelar')}
+                </ActionButton>
+            </FinanceSheet>
         </Page>
     );
 }
@@ -305,7 +403,7 @@ function BudgetRow({
     const { colors, styles } = useThemeStyles(createStyles);
     const statusColor =
         budget.status === 'exceeded'
-            ? colors.expense
+            ? colors.warning
             : budget.status === 'warning'
               ? colors.warning
               : colors.primary;
@@ -316,7 +414,9 @@ function BudgetRow({
             <View style={styles.budgetHeading}>
                 <Text style={styles.categoryName}>{budget.category_name}</Text>
                 <Text style={[styles.status, { color: statusColor }]}>
-                    {Math.round(budget.percentage)}
+                    {budget.percentage.toLocaleString(getLocale(), {
+                        maximumFractionDigits: 1,
+                    })}
                     {t('% utilizado')}
                 </Text>
             </View>
@@ -372,13 +472,25 @@ function errorMessageFor(error: unknown): string {
 
 const createStyles = (colors: ThemeColors) =>
     StyleSheet.create({
-        error: {
+        toolbar: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 8,
+            flexWrap: 'wrap',
+        },
+        summaryRow: { flexDirection: 'row', gap: 10 },
+        summaryCard: { flex: 1, padding: 14, gap: 9 },
+        summaryLabel: {
             fontFamily: 'DMSans',
-            backgroundColor: colors.expenseSoft,
-            borderRadius: 10,
-            color: colors.expense,
-            fontSize: 13,
-            padding: 12,
+            fontSize: 11,
+            color: colors.muted,
+        },
+        summaryAmount: {
+            fontFamily: 'SpaceGrotesk',
+            fontSize: 22,
+            fontWeight: '600',
+            color: colors.text,
         },
         fieldLabel: {
             fontFamily: 'DMSans',
@@ -386,12 +498,7 @@ const createStyles = (colors: ThemeColors) =>
             fontSize: 13,
             fontWeight: '600',
         },
-        budgetRow: {
-            backgroundColor: colors.background,
-            borderRadius: 20,
-            gap: 12,
-            padding: 16,
-        },
+        budgetRow: { gap: 10 },
         budgetHeading: {
             alignItems: 'center',
             flexDirection: 'row',
@@ -414,7 +521,7 @@ const createStyles = (colors: ThemeColors) =>
         spent: {
             fontFamily: 'SpaceGrotesk',
             color: colors.text,
-            fontSize: 28,
+            fontSize: 24,
             fontWeight: '700',
         },
         remainingCopy: { gap: 4 },
