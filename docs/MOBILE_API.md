@@ -87,7 +87,7 @@ Antes de publicar ou iniciar teste fechado na Play Store:
 
 ## Deploy e operação
 
-- Caminho escolhido pelo usuário: VM Oracle Always Free administrada pelo próprio usuário. O fluxo separado de produção usa Docker Compose, PHP 8.4, MySQL 8.4, Caddy/HTTPS, fila e scheduler; consulte [deploy na Oracle](ORACLE_DEPLOY.md) para conta/VM, domínio gratuito opcional, configuração, validação e backups. Nenhum recurso externo foi criado; conta e domínio ainda precisam ser configurados.
+- Caminho escolhido pelo usuário: VM AWS EC2 administrada pelo próprio usuário. O fluxo separado de produção usa Docker Compose, PHP 8.4, MySQL 8.4, Caddy/HTTPS, fila e scheduler; consulte [deploy na AWS](AWS_DEPLOY.md) para conta/VM, domínio gratuito opcional, configuração, validação e backups. Nenhum recurso externo foi criado; conta e domínio ainda precisam ser configurados. O plano gratuito AWS é temporário e depende de créditos/eligibilidade; planejar custos e continuidade antes da distribuição pública.
 - A configuração local versionada usa SQLite, sessões/cache/filas no banco e e-mail em `log`. Em produção, configurar um banco persistente (MySQL já é suportado), `APP_KEY` exclusiva, `APP_DEBUG=false`, `APP_URL` HTTPS, sessão/cache/fila conforme os serviços provisionados e um provedor de e-mail real. Nunca reutilizar o `.env` local.
 - Configurar a execução do Scheduler para lançamentos recorrentes e expiração de solicitações de exclusão. Validar a configuração de proxies confiáveis com a documentação da plataforma antes de ativá-la, preservando a identificação correta do IP para limites de requisição.
 - Configure `APP_ENV=production`, `APP_DEBUG=false`, `APP_KEY` e segredos exclusivos do ambiente.

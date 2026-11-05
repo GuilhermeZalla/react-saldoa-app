@@ -2,6 +2,8 @@
 
 Projeto de estudo independente e portfólio para controle financeiro pessoal.
 
+**Site:** [Acessar o Saldoa](https://saldoa-app.duckdns.org)
+
 Desenvolvido como uma aplicação web completa com **Laravel 13**, **React 19**, **Inertia.js 3** e **Tailwind CSS 4**, acompanhada por um cliente mobile complementar construído com **Expo (React Native)** e **TypeScript**.
 
 O Saldoa ajuda a acompanhar de perto o fluxo financeiro. O usuário registra receitas e despesas com categorias personalizadas, estipula metas mensais de gastos com indicadores visuais de progresso, agenda lançamentos recorrentes automáticos e visualiza a evolução do patrimônio por meio de gráficos e comparativos em um dashboard interativo. A aplicação conta com separação estrita por usuário, exportação de lançamentos em CSV com sanitização de fórmulas, suporte a exclusão lógica com ação de desfazer e ambiente de demonstração seguro com acesso em um clique.
@@ -243,7 +245,7 @@ npx expo-doctor
 
 ## Limites do projeto
 
-- A aplicação ainda não possui implantação pública ativa. A preparação para uma VM Oracle Always Free, com HTTPS, MySQL persistente, fila, scheduler e backups, está descrita em [Deploy na Oracle](docs/ORACLE_DEPLOY.md); a conta, a VM e o domínio ainda precisam ser configurados.
+- A aplicação ainda não possui implantação pública ativa. A preparação para uma VM AWS EC2, com HTTPS, MySQL persistente, fila, scheduler e backups, está descrita em [Deploy na AWS](docs/AWS_DEPLOY.md); a conta, a VM e o domínio ainda precisam ser configurados. A avaliação gratuita AWS tem prazo/créditos limitados; o serviço não é gratuito permanentemente.
 - O aplicativo móvel foi validado no modo desenvolvimento com Expo Go e exportado para Android. O APK local de teste pode ser gerado com `cd mobile; npm run apk:local`; ele inclui somente `arm64-v8a`, usa uma chave de depuração e o endereço HTTP privado da API, e não serve para a Play Store. Builds EAS/AAB de distribuição ainda dependem de configurar URLs públicas HTTPS, assinatura própria, identificador e ícones finais, política de privacidade e página pública de exclusão de conta.
 - A recuperação de senha utiliza o fluxo web com envio de e-mails em fila; para envio em produção é necessário configurar um serviço de transporte SMTP transacional.
 

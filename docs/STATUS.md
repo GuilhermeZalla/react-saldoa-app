@@ -2,16 +2,24 @@
 
 Projeto: app de controle financeiro pessoal (portfólio). Laravel + React (Inertia, TypeScript), SQLite, Tailwind e shadcn/ui, toasts com Sonner. Interface web em português e mobile em português/inglês; código em inglês.
 
+## Correção da página inicial — 04/11/2026
+
+- Removido de `resources/js/pages/welcome.tsx` o bloco de rodapé de solicitação de exclusão que estava inserido dentro do cabeçalho e desorganizava o layout. O fluxo privado e a rota pública `/account-deletion` foram preservados.
+- Lint/formatação do arquivo e TypeScript passaram. `npm run check` completo encontrou uma pendência de formatação em `mobile/package.json`, fora desta correção. Nenhuma lógica de backend foi alterada.
+- A correção foi enviada diretamente à EC2 para recompilar as imagens; o checkout remoto terá essa alteração sem commit até sincronizar o próximo commit do usuário.
+
 ## Preparação para implantação pública — 04/11/2026
+
+- Validação pública em 04/11/2026: `/up` e `/login` responderam 200 via HTTPS, HTTP redirecionou com 308, `/api/v1/auth/me` sem token respondeu 401 e `/.env` respondeu 404. O APK existente continua com a URL local; não houve novo build mobile. SMTP real ainda não foi configurado, portanto recuperação de senha e confirmação de exclusão por e-mail não estão prontas para uso público.
 
 - O usuário confirmou que o APK funciona; a falha de login ocorreu porque o celular estava na rede errada. Não foi necessária uma alteração no app para corrigir esse problema.
 - O APK local continua usando uma URL HTTP de rede privada e serve apenas para testes. Para funcionar fora da rede doméstica, o próximo marco é publicar o Laravel em HTTPS e gerar outro build com a URL pública.
-- A configuração local usa SQLite e drivers `database` para sessão, cache e fila. Na VM Oracle, a configuração separada de produção usa MySQL 8.4 em volume persistente; proteção contra perda da VM depende de backup externo e restauração testada.
-- O envio de e-mail está configurado para `log`; a solicitação pública de exclusão já existe, mas a confirmação por e-mail depende de um provedor real configurado e testado.
+- A configuração local usa SQLite e drivers `database` para sessão, cache e fila. Na VM AWS, a configuração separada de produção usa MySQL 8.4 em volume persistente; proteção contra perda da VM depende de backup externo e restauração testada.
+- Localmente, o envio de e-mail está configurado para `log`; na EC2, SMTP permanece sem provedor real configurado; a solicitação pública de exclusão já existe, mas a confirmação por e-mail depende de um provedor real configurado e testado.
 - O projeto contém um endpoint `/up`, Scheduler para lançamentos recorrentes e limpeza de solicitações expiradas, e documentação das proteções necessárias para a instância demo. Não habilitar a demo na produção principal.
-- Após comparar custos, o usuário escolheu Oracle Always Free e aceitou administrar a VM. Ainda não criou conta nem domínio. Arquivos de produção foram preparados em `docker-compose.production.yml` e `docker/`, com instruções em `docs/ORACLE_DEPLOY.md`. Conta/VM/DNS/SMTP, deploy real, HTTPS público e cópia externa/restauração de backups continuam pendentes; nenhum recurso Oracle foi criado.
+- O destino atual é AWS EC2. Verificado por SSH: `t3.small`, região `us-east-2` (Ohio), Ubuntu 26.04.1 LTS, x86_64, 1,9 GiB RAM e disco raiz de 28 GiB. Docker 29.9.3/Compose 5.7.0; Docker habilitado no boot. Swap de 4 GiB ativo e persistência configurada em `/etc/fstab`, sem reboot de validação. Commit `242f69f` clonado em `/opt/saldoa`; imagens compiladas na EC2, MySQL saudável, migrations aplicadas e app/scheduler/worker iniciados sem portas publicadas. Credenciais geradas somente no servidor. Web publicado em `https://saldoa-app.duckdns.org`, com certificado HTTPS validado e redirecionamento HTTP. Apenas o web publica portas 80/443; banco e PHP permanecem internos. Usuário confirmou Mailtrap Email Sandbox; envio real ainda não configurado. Plano/saldo AWS e backup externo pendentes. Guia: `docs/AWS_DEPLOY.md`.
 
-- Verificação local da preparação Oracle: Compose, configuração Caddy e sintaxe Bash passaram; imagens PHP/Vite/Caddy compilaram em Linux AMD64. Cinco serviços foram iniciados num projeto descartável: `/up`, login web e exclusão pública responderam 200, API sem token e login inválido responderam 401, e `/.env` respondeu 404. Requisitos PHP de produção passaram. O script de backup foi executado e seu SQL restaurado em um segundo banco descartável (15 tabelas); containers/volumes de teste removidos. ARM64 na Oracle, HTTPS público, e-mail real e backup externo ainda não foram validados.
+- Verificação local anterior da preparação genérica (commit `242f69f`): Compose, configuração Caddy e sintaxe Bash passaram; imagens PHP/Vite/Caddy compilaram em Linux AMD64. Cinco serviços foram iniciados num projeto descartável: `/up`, login web e exclusão pública responderam 200, API sem token e login inválido responderam 401, e `/.env` respondeu 404. Requisitos PHP de produção passaram. O script de backup foi executado e seu SQL restaurado em um segundo banco descartável (15 tabelas); containers/volumes de teste removidos. Build e inicialização interna na AWS passaram; dimensionamento sob carga, e-mail real e backup externo ainda não foram validados. A troca desta etapa alterou somente a documentação; os arquivos Docker e o app permanecem iguais.
 
 ## Redesign mobile — 04/11/2026
 
@@ -88,6 +96,10 @@ Projeto: app de controle financeiro pessoal (portfólio). Laravel + React (Inert
 
 - Validação manual do cliente Expo contra emulador/dispositivo e API; depende de endpoints configurados em `mobile/.env` e não substitui testes de um build assinado.
 - Revisão do app publicado: depende de uma URL de produção e deve ser feita depois do deploy.
+
+## Melhorias futuras
+
+- Deploy automático com GitHub Actions: adiado por decisão do usuário. Por enquanto, enviar ao GitHub não atualiza a EC2; a publicação continua manual, com atualização do código, build e reinício dos serviços. Definir branch de publicação, acesso restrito ao servidor e recuperação da versão anterior quando esta melhoria for retomada.
 
 ## Próximos passos
 

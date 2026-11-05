@@ -73,14 +73,6 @@ export default function Welcome() {
                                 </>
                             )}
                         </nav>
-                        <footer className="mx-auto w-full max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
-                            <Link
-                                href="/account-deletion"
-                                className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-                            >
-                                Solicitar exclusão de conta
-                            </Link>
-                        </footer>
                     </div>
                 </header>
 
