@@ -1,6 +1,6 @@
 # Estado do projeto
 
-Atualizado em 04/11/2026. Projeto de controle financeiro pessoal e portfólio. **Web iniciado em 2025; mobile criado em 2026**, conforme informação do autor.
+Atualizado em 05/11/2026. Projeto de controle financeiro pessoal e portfólio. **Web iniciado em 2025; mobile criado em 2026**, conforme informação do autor.
 
 ## Produto e publicação
 
@@ -40,6 +40,8 @@ Atualizado em 04/11/2026. Projeto de controle financeiro pessoal e portfólio. *
 - Criado `AWS_OPERACAO.md` com acesso, logs, banco, backup e custos. Criada apresentação de entrevista em PDF, com fonte HTML editável, em quatro páginas.
 - Validação desta etapa: 29 capturas renovadas, sem erros JavaScript durante a captura; links locais conferidos; zero GIFs; PDF com quatro páginas, texto selecionável e três links; 13 testes mobile e `npm run check` sem erros/avisos. Descrição da Release atualizada para leitores externos. Documentação e imagens incorporadas ao repositório.
 - Esta etapa altera documentação e imagens; não executa migrations, seeders nem alterações de banco. Não instala dependências novas no projeto.
+- Capa do Preview recomposta em **1920 × 1320 (16:11)**, na proporção do cartão do portfólio. SVG e PNG atualizados com as capturas existentes, as fontes da marca e margem para o enquadramento. Conferência visual em um cartão de 1072 × 737 e outro de 350 × 280, sem erros de carregamento nem rolagem horizontal.
+- Branch `feat/mobile-api` sincronizada com a `main`, incluindo o README principal atualizado, a documentação mobile, a remoção do link de entrevista e a nova capa. As duas branches passam a compartilhar o mesmo commit nesta entrega.
 
 ## Próximos passos
 
