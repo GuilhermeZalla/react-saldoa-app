@@ -25,8 +25,9 @@ Atualizado em 04/11/2026. Projeto de controle financeiro pessoal e portfólio. *
 - Conferência atual por SSH: cinco serviços ativos; banco saudável; aproximadamente 1,9 GiB de RAM, swap de 4 GiB e 17 GiB livres no disco raiz de 28 GiB.
 - Projeto em `/opt/saldoa`. Credenciais somente no servidor; banco em volume persistente, sem porta 3306 publicada. Apenas web publica 80/443.
 - O checkout da EC2 recebeu alterações diretas nas publicações e precisa de sincronização cuidadosa antes de atualizações via Git. Imagens anteriores foram preservadas como `pre-flow` e `pre-favicon`.
-- O deploy continua manual. Enviar ao GitHub não atualiza a EC2. Deploy automático foi adiado por decisão do usuário.
+- O deploy continua manual. Enviar ao GitHub não atualiza a EC2. A configuração do deploy automático foi reservada para a retomada em 05/11/2026, depois da prioridade de publicação na Play Store.
 - O titular informou US$ 100 em créditos; plano, saldo efetivo, prazo e modo de créditos CPU não foram conferidos no Billing.
+- O titular decidiu manter a instância ligada por sete dias, com pouco tráfego, para observar o consumo real. Comparar custos e saldo de créditos ao final do período; a estimativa discutida não substitui os valores do Billing.
 
 ## Revisão de documentação e imagens
 
@@ -35,17 +36,19 @@ Atualizado em 04/11/2026. Projeto de controle financeiro pessoal e portfólio. *
 - Removidos GIFs, alternativas de logo descartadas e capturas duplicadas sem referência. Mantidos o SVG aprovado e a capa PNG/SVG. Instruções de agentes e licenças das fontes foram preservadas.
 - `AWS_DEPLOY.md` foi mantido: serve para reconstruir a implantação. `MOBILE_API.md` foi mantido: registra contratos e segurança da API. Trechos desatualizados corrigidos.
 - Criado `AWS_OPERACAO.md` com acesso, logs, banco, backup e custos. Criada apresentação de entrevista em PDF, com fonte HTML editável, em quatro páginas.
-- Validação desta etapa: 29 capturas renovadas, sem erros JavaScript durante a captura; links locais conferidos; zero GIFs; PDF com quatro páginas, texto selecionável e três links; 13 testes mobile e `npm run check` sem erros/avisos. Descrição da Release atualizada para leitores externos. Alterações locais de documentação/imagens aguardam commit do usuário.
+- Validação desta etapa: 29 capturas renovadas, sem erros JavaScript durante a captura; links locais conferidos; zero GIFs; PDF com quatro páginas, texto selecionável e três links; 13 testes mobile e `npm run check` sem erros/avisos. Descrição da Release atualizada para leitores externos. Documentação e imagens incorporadas ao repositório.
 - Esta etapa altera documentação e imagens; não executa migrations, seeders nem alterações de banco. Não instala dependências novas no projeto.
 
 ## Próximos passos
 
-1. Receber o retorno do APK com a marca Fluxo no aparelho.
-2. Configurar e testar envio real de e-mails.
-3. Concluir backup externo protegido, retenção e restauração em instalação isolada.
-4. Confirmar plano/saldo/prazo AWS e acompanhar custos.
-5. Preparar política de privacidade, assinatura de distribuição e AAB antes da Play Store.
-6. Futuramente, configurar deploy automático com branch de publicação e recuperação da versão anterior.
+Retomada planejada para **05/11/2026**, por decisão do usuário. As pendências abaixo ficam para a retomada; hoje foi atualizado somente o planejamento.
+
+1. **Prioridade: publicação na Play Store.** Começar pela situação da conta no Play Console e pelos requisitos aplicáveis; preparar política de privacidade, assinatura de distribuição, AAB e materiais da loja. Conferir as pendências de e-mail, backup e validação no aparelho antes de considerar o app pronto para publicação. A conclusão depende dos requisitos de teste e análise da loja.
+2. Configurar deploy automático com GitHub Actions a partir de push na branch de publicação, com sincronização cuidadosa do checkout da EC2 e recuperação da versão anterior.
+3. Configurar e testar envio real de e-mails para recuperação de senha e confirmação de exclusão.
+4. Concluir backup externo protegido, retenção e restauração em instalação isolada.
+5. Receber o retorno do APK com a marca Fluxo no aparelho, incluindo login, navegação, temas e idiomas.
+6. Confirmar plano/saldo/prazo AWS, avaliar alerta de orçamento e acompanhar o consumo durante os sete dias com a instância ligada.
 
 ## Referências
 

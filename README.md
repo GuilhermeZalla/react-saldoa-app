@@ -4,7 +4,7 @@ Controle financeiro pessoal para acompanhar receitas, despesas e metas na web e 
 
 **[Acessar o site](https://saldoa-app.duckdns.org)** · **[Baixar o APK Android](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/mobile-v1.0.0-preview.1/saldoa-android-public-preview.apk)** · [Notas da versão](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/mobile-v1.0.0-preview.1)
 
-A versão **web começou em 2025**. Em **2026**, o projeto ganhou um aplicativo mobile que utiliza o mesmo backend. O Saldoa é um projeto de estudo e portfólio, com publicação web na AWS e uma versão Android disponível para testes.
+A versão **web foi finalizada em 2025**. Em **2026**, o projeto ganhou um aplicativo mobile que utiliza o mesmo backend. O Saldoa é um projeto de estudo e portfólio, com publicação web na AWS e uma versão Android disponível para testes.
 
 ## Preview
 
