@@ -43,7 +43,7 @@ First stable portfolio release, bringing together the web application created in
 - The Saldoa Flow brand across the website and Android app.
 - Public HTTPS website and API hosted on AWS with Docker.
 - Gmail delivery for password recovery and email-based account deletion.
-- Encrypted off-server backups by email every 15 days, with recovery verified in isolated containers.
+- Encrypted off-server backups by email, with recovery verified in isolated containers.
 - Android ARM64 APK for direct installation, signed with a debug key.
 
 ## [mobile-v1.0.0-preview.1] - 2026-11-05

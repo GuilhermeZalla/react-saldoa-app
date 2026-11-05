@@ -107,7 +107,11 @@ A publicação Git/Release é registrada no fechamento desta entrega. A branch `
 - `CHANGELOG.md` criado com o preview público, a versão 1.0.0 e a 1.1.0; READMEs preparados para a nova Release. O APK da Release é uma cópia binária do build 3 aprovado, sem nova compilação.
 - CI local final aprovado: 157 testes PHP, dois ignorados e 1.371 assertions; lint/formatação, tipos e PHPStan aprovados. Os dez ajustes de runtime presentes no checkout antigo da AWS coincidem com os arquivos locais e serão preservados.
 - Corrigido o contexto Docker de produção para incluir `lang/`; as traduções de validação precisam acompanhar a imagem. Nenhuma migration ou dependência alterada.
-- Publicação Git, backup anterior ao deploy, troca das imagens, conferência pública e publicação da Release em andamento. Resultados finais serão registrados após execução.
+- Código publicado na `main` em `05fd8c1`; CI do GitHub aprovado. Branch `feat/mobile-api` sincronizada preservando seu README exclusivo do app. As branches diferem apenas no README principal.
+- Backup anterior ao deploy gerado e aceito pelo Gmail; cópia criptografada fora da EC2 em `.secrets/backups/pre-v1.1.0.cms`, com checksum e manifesto conferidos após descriptografia. Imagens anteriores, código e ambiente preservados em `/var/backups/saldoa-deploy/pre-1.1.0` e nas tags Docker `rollback-pre-1.1.0`.
+- Web/backend implantados com imagens `saldoa-app:1.1.0-05fd8c1` e `saldoa-web:1.1.0-05fd8c1`. Banco e volumes preservados; nenhuma migration executada, sem pendências de schema. Timer de backup continua ativo, com prazo de 15 dias preservado.
+- Sondagem da API e de dashboard/lançamentos/planejamento aprovada no container ativo, com transação MySQL somente de leitura e campo da agenda presente. Seis conferências públicas em desktop/celular aprovadas, sem overflow nem erros JavaScript; `/up` 200, API sem token 401 e cadastro inválido 422 com requisitos de senha em português. Nenhuma conta criada nessa validação; nenhum erro de runtime detectado nos logs após a troca.
+- [Release v1.1.0](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0) publicada com o APK aprovado (versionCode 3) e `SHA256SUMS`. Download público conferido: SHA-256 `66aff1cfe454997c61c3ae4092563c080e80c7c6d8bdb4b8f00044532c1a45d5`, idêntico ao arquivo testado pelo titular. Release 1.0.0 preservada. Escopo 1.1.0 concluído; Play Store e automação de deploy permanecem fora desta entrega.
 
 ## Operação contínua e próximas versões
 
