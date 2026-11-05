@@ -1,6 +1,6 @@
 # API móvel
 
-Esta API fornece o backend JSON autenticado por tokens Sanctum para o aplicativo Expo/React Native em `mobile/`. A interface nativa cobre autenticação, leitura do dashboard e gestão de lançamentos, categorias, metas e recorrências, além de exportação e gestão da conta. Há um APK de teste publicado com a API pública HTTPS. O usuário confirmou o primeiro build público por dados móveis; a versão seguinte com a marca Fluxo ainda aguarda confirmação no aparelho. Para instalação e uso, consulte [mobile/README.md](../mobile/README.md).
+Esta API fornece o backend JSON autenticado por tokens Sanctum para o aplicativo Expo/React Native em `mobile/`. A interface nativa cobre autenticação, leitura do dashboard e gestão de lançamentos, categorias, metas e recorrências, além de exportação e gestão da conta. Há um APK de teste publicado com a API pública HTTPS. O titular confirmou o APK com a marca Fluxo no aparelho, sem problemas nos fluxos funcionais, temas e idiomas. Para instalação e uso, consulte [mobile/README.md](../mobile/README.md).
 
 ## Endereços e instâncias
 
@@ -80,7 +80,7 @@ O pedido público de exclusão responde de forma igual para e-mails existentes e
 Antes de publicar ou iniciar teste fechado na Play Store:
 
 - publique a API principal e a página pública de exclusão em HTTPS;
-- configure e teste o envio real de e-mail, necessário para confirmação da exclusão;
+- mantenha a exclusão por e-mail validada: ensaio com conta descartável confirmado pelo titular em 05/11/2026;
 - publique uma política de privacidade acessível por URL pública e use a mesma URL nos metadados da Play Store;
 - confirme o conteúdo da política com os dados reais coletados, finalidades, retenção, fornecedores e procedimentos de exclusão. Este repositório não contém uma política publicada e não substitui essa confirmação;
 - informe a URL da página `/account-deletion` como mecanismo de solicitação de exclusão disponível fora do app.
@@ -91,12 +91,12 @@ A API está publicada em `https://saldoa-app.duckdns.org`, numa EC2 com Docker C
 
 A instalação e reconstrução do servidor estão em [AWS_DEPLOY.md](AWS_DEPLOY.md); o acesso diário, logs e banco estão em [AWS_OPERACAO.md](AWS_OPERACAO.md). As instruções de instalação e build do aplicativo estão em [mobile/README.md](../mobile/README.md), evitando repetir procedimentos operacionais neste contrato da API.
 
-O identificador de teste é `com.saldoa.app`, com a marca Fluxo. Ainda não foi gerado um AAB de distribuição nem concluídos assinatura de produção, política de privacidade e requisitos de publicação na Play Store. SMTP real e backup externo continuam pendentes.
+A versão funcional 1.0 usa `com.saldoa.app`, com a marca Fluxo. A distribuição direta pelo GitHub mantém a assinatura de depuração e a arquitetura ARM64; isso não representa assinatura de distribuição para a loja. Ainda não foi gerado um AAB de distribuição nem concluídos assinatura de produção, política de privacidade e requisitos de publicação na Play Store. SMTP Gmail validado em 05/11/2026, com recebimento confirmado. Backup criptografado copiado para o notebook e SQL restaurado em container isolado; backup diário por Gmail habilitado, com cópia recebida e recuperação completa em containers isolados validadas.
 
 ## APK de teste com HTTPS público — 04/11/2026
 
-O script aceita `--public-api` para compilar localmente sem a exceção de HTTP privado. Informe `EXPO_PUBLIC_API_URL` e `EXPO_PUBLIC_WEB_URL` como `https://saldoa-app.duckdns.org` no ambiente do processo e mantenha a URL demo vazia. O modo exige HTTPS; assinatura de depuração e arquitetura ARM64 permanecem. Consulte o comando completo no README. O banco da AWS é independente do banco local e SMTP real ainda está pendente.
+O script aceita `--public-api` para compilar localmente sem a exceção de HTTP privado. Informe `EXPO_PUBLIC_API_URL` e `EXPO_PUBLIC_WEB_URL` como `https://saldoa-app.duckdns.org` no ambiente do processo e mantenha a URL demo vazia. O modo exige HTTPS; assinatura de depuração e arquitetura ARM64 permanecem. Consulte o comando completo no README. O banco da AWS é independente do banco local. O Gmail teve envio e recebimento de teste confirmados em 05/11/2026.
 
 ## Robustez do cliente — 04/11/2026
 
-Falhas temporárias de rede/servidor ao restaurar a sessão preservam o token salvo; uma resposta 401 ainda invalida a sessão local. O limite de 15 segundos inclui leitura do corpo JSON/texto, e o temporizador é limpo em todos os caminhos. JSON inválido e interrupção da resposta resultam em erros locais traduzidos. A exportação mensal usa o calendário local, sem alterar endpoints ou contratos de API. A notificação pública de exclusão é processada pela fila existente; SMTP real ainda precisa ser configurado e testado.
+Falhas temporárias de rede/servidor ao restaurar a sessão preservam o token salvo; uma resposta 401 ainda invalida a sessão local. O limite de 15 segundos inclui leitura do corpo JSON/texto, e o temporizador é limpo em todos os caminhos. JSON inválido e interrupção da resposta resultam em erros locais traduzidos. A exportação mensal usa o calendário local, sem alterar endpoints ou contratos de API. A notificação pública de exclusão é processada pela fila existente; o Gmail teve envio e recebimento de teste confirmados. O titular confirmou os dois fluxos completos no site com uma conta descartável em 05/11/2026.

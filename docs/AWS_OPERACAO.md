@@ -148,31 +148,80 @@ Os valores entre `<...>` são marcadores, não SQL pronto para copiar. Faça inc
 
 Não abra a porta 3306 no Security Group. Para usar uma ferramenta visual como DBeaver, o caminho apropriado é um túnel SSH; a implantação atual não publica o MySQL nem em localhost do host. Isso exige preparar o acesso local com cuidado, não simplesmente liberar o banco na internet.
 
-## 6. Backup
+## 6. Backup e e-mails
 
-O projeto contém um script para gerar backup no próprio servidor:
+O Gmail pessoal está configurado no Laravel usando uma senha de app, com TLS na porta 465. O titular confirmou o recebimento do teste em 05/11/2026. A senha não é a senha normal da conta Google e não deve ser copiada para o Git, chat ou logs. Se for revogada no Google, atualize a configuração privada no servidor e recrie app/worker/scheduler.
+
+O backup criptografado já foi instalado na EC2:
 
 ```bash
-sudo bash /opt/saldoa/docker/backup-production.sh
+sudo /usr/local/sbin/saldoa-backup
 ```
 
-Ele salva banco, arquivos e configuração em `/var/backups/saldoa`. Backups com o marcador `INCOMPLETE` não devem ser usados como cópias concluídas. O arquivo de configuração contém segredos; a cópia externa precisa de proteção e criptografia.
+Ele inclui SQL consistente do MySQL, arquivos de storage e configuração. Os arquivos `.cms` ficam em `/var/backups/saldoa`, protegidos com AES-256-GCM e uma chave pública RSA. A chave privada fica somente no notebook, em `.secrets/backup-private-key.pem`; guarde uma segunda cópia segura fora do notebook. Sem essa chave, os backups não podem ser recuperados. Nunca a envie à EC2 ou ao repositório.
 
-Um backup no mesmo disco não protege contra perda da EC2. A cópia externa, a retenção e a restauração em uma segunda instalação ainda estão pendentes. O script não elimina backups antigos automaticamente; acompanhe o espaço em disco.
+Há uma cópia criptografada fora da EC2 em `.secrets/backups/saldoa-current.cms`. A restauração SQL foi conferida num MySQL temporário sem rede, sem usar os volumes de produção. O teste também verificou checksums e integridade dos arquivos de storage/configuração. O container temporário e seu volume foram removidos. Isso ainda não substitui ensaiar a recuperação completa da aplicação em uma segunda VM.
 
-## 7. Atualizações e reinícios
+O backup diário agora usa **Gmail**, por decisão do titular, sem S3, permissões IAM adicionais ou upgrade da AWS. O timer `saldoa-backup.timer` está habilitado para 06:30 UTC (03:30 em São Paulo), com atraso aleatório de até dez minutos. O primeiro envio pelo serviço systemd terminou com `Result=success` e `ExecMainStatus=0`; o titular confirmou recebimento.
 
-Enviar código ao GitHub **não atualiza o servidor**. O deploy é manual. Antes de atualizar:
+O Gmail pode agrupar os anexos `.cms` e `.sha256` em um ZIP ao baixar. A cópia recebida teve seu SHA256 comparado com o arquivo da EC2, passou pela autenticação criptográfica e foi usada em uma recuperação completa isolada: SQL, storage, APP_KEY, aplicação web e API. Cadastro, autenticação, lançamento, dashboard, exportação e exclusão de uma conta temporária passaram. A rede do ensaio era interna, sem portas publicadas, SMTP externo, worker ou scheduler; banco e volumes reais não foram utilizados.
 
-1. Confira o estado do Git no servidor e o commit que está em execução.
-2. Preserve mudanças locais; a EC2 recebeu alterações diretas nas últimas publicações. Não use `git reset --hard` para descartá-las.
-3. Faça backup e preserve a imagem anterior.
-4. Prepare e revise a nova versão, compile as imagens e recrie os serviços afetados.
-5. Confira `/up`, login, assets e logs.
+Para consultar o agendamento, executar uma cópia manual ou conferir os registros:
 
-O procedimento de reconstrução está em [AWS_DEPLOY.md](AWS_DEPLOY.md). Não execute setup, seeders, migrations, remoção de volumes ou comandos de limpeza como parte de uma simples consulta de status.
+```bash
+sudo systemctl list-timers saldoa-backup.timer
+sudo systemctl start saldoa-backup.service
+sudo systemctl show saldoa-backup.service --property=Result --property=ExecMainStatus
+sudo journalctl -u saldoa-backup.service --since today --no-pager
+sudo cat /var/backups/saldoa/last-success
+```
 
-Reiniciar um container pode interromper requisições. Para uma intervenção planejada, use o nome específico do serviço e verifique os logs depois. Evite reiniciar o banco para tentar corrigir um problema de interface.
+A configuração fica em `/etc/saldoa/backup.env`, com permissão 0600 e os campos `SALDOA_ROOT`, `SALDOA_BACKUP_DELIVERY=gmail`, `SALDOA_BACKUP_EMAIL` e `SALDOA_BACKUP_MAIL_SCRIPT`. O helper instalado em `/usr/local/lib/saldoa/send-backup.py` lê o SMTP da configuração Compose privada, sem imprimir credenciais. Envia somente um envelope CMS autenticado e seu checksum; arquivos sem criptografia e anexos acima de **15 MiB** são rejeitados. Esse teto deixa margem para a codificação do e-mail sob o [limite pessoal do Gmail](https://support.google.com/mail/answer/6584?hl=en).
+
+As cópias locais com mais de sete dias só são removidas se houver o marcador `.emailed`, criado após aceitação SMTP. Cópias com envio falho são preservadas. Na caixa Gmail, mantenha pelo menos os últimos 30 dias e uma cópia mensal; a limpeza da caixa é manual. Acompanhe o espaço disponível. Se o backup ultrapassar 15 MiB, será necessário outro destino antes de retomar o envio; o script não troca o arquivo por um link público.
+
+Falhas geram registro no journal e uma tentativa de aviso pelo mesmo SMTP. Se o próprio SMTP ou a EC2 estiver indisponível, esse aviso também pode não chegar: a ausência do e-mail diário exige verificação. O arquivo `last-success` registra a última execução concluída, não a confirmação humana de recebimento.
+
+### Repetir a recuperação
+
+O verificador `docker/verify-backup.sh` aceita um tar previamente descriptografado por `--stdin`; adicione `--application` para conferir também web/API. A descriptografia acontece no notebook com a chave privada; envie somente os bytes do tar por SSH, nunca a chave. Não use o pipeline de texto do PowerShell para esse arquivo binário.
+
+Exemplo conceitual no Git Bash, a partir de uma pasta privada com a cópia e suas chaves:
+
+```bash
+if openssl cms -decrypt -binary -inform DER -in backup.cms \
+  -recip backup-public-cert.pem -inkey backup-private-key.pem -out recovery.tar; then
+  ssh -i /c/Users/zalla/Documents/AWS/saldoa-aws.pem ubuntu@18.188.208.120 \
+    'sudo env SALDOA_RECOVERY_APP_SCRIPT=/usr/local/lib/saldoa/verify-restored-app.py /usr/local/sbin/saldoa-verify-backup --stdin --application' < recovery.tar
+fi
+rm -f -- recovery.tar
+```
+
+Substitua os nomes pelos arquivos corretos e use a identidade SSH previamente conferida. Prossiga para o SSH somente se a descriptografia terminar com código 0; descarte qualquer saída de uma tentativa que falhe. O verificador não executa migrations, não publica portas e remove os containers, o volume MySQL temporário, a rede e o tar de trabalho ao terminar.
+
+As imagens usadas são registradas no backup. Se precisar reconstruí-las após perder a VM, use o código e os arquivos de dependências da mesma versão e confira o ensaio antes de publicar. Os overrides `SALDOA_RESTORE_APP_IMAGE`, `SALDOA_RESTORE_WEB_IMAGE` e `SALDOA_RESTORE_DATABASE_IMAGE` permitem indicar as imagens reconstruídas; app/web usam IDs Docker `sha256:...`. A reconstrução da VM inteira e a emissão de novos certificados continuam sendo procedimentos de operação, não são simuladas pelo verificador de containers.
+
+O script anterior `docker/backup-production.sh` continua disponível para compatibilidade, mas gera arquivos sem criptografia. Prefira o novo comando. SQL e storage são capturados em momentos diferentes: para arquivos que mudem durante o backup, use uma janela planejada sem alterações.
+
+## 7. Deploy manual
+
+Em 05/11/2026, o titular decidiu manter o plano gratuito atual e dispensar a automação do deploy. **Fazer push no GitHub não atualiza o site nem a API.** O CI continua verificando o código; publicar na EC2 é uma operação separada, feita pelo administrador ou com ajuda do assistente.
+
+A conta usa a experiência simplificada da AWS baseada em projetos. O backup diário por Gmail não depende dessa integração GitHub/OIDC. A stack `saldoa-automation` falhou ao criar o provedor GitHub OIDC: `iam:CreateOpenIDConnectProvider` foi negado explicitamente por uma SCP da organização. O CloudShell também apresentou verificação de conta pendente. O titular não autorizou upgrade nem ativação dos recursos avançados.
+
+Os rascunhos de workflow, template e scripts de automação foram retirados dos arquivos candidatos a commit e arquivados localmente em `.secrets/deferred-deploy-20261105/`. O helper instalado anteriormente na EC2 permanece sem acionamento configurado; não houve deploy pelo novo fluxo. Não reutilize o ZIP antigo de preparação para repetir a stack.
+
+Antes de cada publicação manual:
+
+1. Escolha o commit revisado e confira o CI no GitHub.
+2. Confira o estado do checkout na EC2 e preserve os ajustes locais e as credenciais. O histórico foi reescrito; o checkout antigo não deve receber um `git pull` ou reset sem reconciliação.
+3. Gere um backup criptografado, copie-o para fora da EC2 e preserve as imagens da versão anterior.
+4. Prepare o código e compile novas imagens antes de substituir app/web/worker/scheduler, mantendo os volumes existentes.
+5. Confira `/up`, login, assets e logs; se houver falha, recupere a versão anterior compatível com o banco.
+
+Não há migração automática do banco. Qualquer alteração de schema precisa de análise específica antes da publicação. O procedimento de reconstrução está em [AWS_DEPLOY.md](AWS_DEPLOY.md).
+
+As consultas de operação continuam usando `/opt/saldoa` e o Compose original, como nas primeiras seções deste guia. A estrutura de releases com `/opt/saldoa/current` não foi ativada. Backups, e-mail e a futura publicação na Play Store são tratados separadamente da decisão sobre deploy.
 
 ## 8. Como a AWS cobra
 
@@ -195,7 +244,9 @@ Uma instância ligada e sem visitas ainda consome recursos. Parar a EC2 interrom
 
 Os créditos abatem consumo elegível; não tornam a hospedagem gratuita para sempre. O valor informado pelo titular não foi conferido diretamente no Billing. No plano Free atual, o prazo é de até seis meses ou até acabar o crédito, o que ocorrer primeiro. O plano Paid tem regras de cobrança próprias, inclusive depois dos créditos.
 
-No console, consulte:
+Na experiência simplificada atual, comece por **AWS Settings → Billing** para conferir créditos, prazo e custos por projeto. Algumas ferramentas do console convencional podem exigir recursos avançados; o titular decidiu manter a modalidade atual.
+
+Quando disponíveis na conta, consulte:
 
 1. **Billing and Cost Management → Home/Free Tier:** plano, saldo e validade.
 2. **Bills:** consumo por serviço e região.
