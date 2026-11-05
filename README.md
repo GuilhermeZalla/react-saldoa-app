@@ -1,111 +1,79 @@
-# Saldoa
+# Saldoa Mobile
 
-Controle financeiro pessoal para acompanhar receitas, despesas e metas na web e no celular.
+Aplicativo de controle financeiro pessoal criado em **2026**, como extensão do Saldoa web, iniciado em **2025**.
 
-**[Acessar o site](https://saldoa-app.duckdns.org)** · **[Baixar o APK Android](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/mobile-v1.0.0-preview.1/saldoa-android-public-preview.apk)** · [Notas da versão](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/mobile-v1.0.0-preview.1)
-
-A versão **web foi finalizada em 2025**. Em **2026**, o projeto ganhou um aplicativo mobile que utiliza o mesmo backend. O Saldoa é um projeto de estudo e portfólio, com publicação web na AWS e uma versão Android disponível para testes.
+**[Baixar APK Android](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/mobile-v1.0.0-preview.1/saldoa-android-public-preview.apk)** · [Notas da versão](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/mobile-v1.0.0-preview.1) · [Conhecer a versão web](https://saldoa-app.duckdns.org)
 
 ## Preview
 
-![Saldoa na web e no celular](docs/images/saldoa-portfolio-cover.png)
-
-## O que é possível fazer
-
-- Registrar receitas e despesas e organizar tudo por categorias.
-- Consultar saldo, gráficos e movimentações do mês.
-- Definir limites de gastos por categoria e acompanhar o progresso.
-- Programar lançamentos recorrentes e exportar os dados.
-- Gerenciar o perfil e solicitar a exclusão da conta.
-- No mobile, escolher português ou inglês e tema claro, escuro ou do sistema.
-
-## Aplicação web
-
-![Dashboard do Saldoa](docs/screenshots/dashboard-desktop.png)
-
-| Tela         | Desktop                                                 | Celular                                                |
-| ------------ | ------------------------------------------------------- | ------------------------------------------------------ |
-| Início       | [Ver imagem](docs/screenshots/home-desktop.png)         | [Ver imagem](docs/screenshots/home-mobile.png)         |
-| Login        | [Ver imagem](docs/screenshots/login-desktop.png)        | [Ver imagem](docs/screenshots/login-mobile.png)        |
-| Cadastro     | [Ver imagem](docs/screenshots/register-desktop.png)     | [Ver imagem](docs/screenshots/register-mobile.png)     |
-| Dashboard    | [Ver imagem](docs/screenshots/dashboard-desktop.png)    | [Ver imagem](docs/screenshots/dashboard-mobile.png)    |
-| Lançamentos  | [Ver imagem](docs/screenshots/transactions-desktop.png) | [Ver imagem](docs/screenshots/transactions-mobile.png) |
-| Categorias   | [Ver imagem](docs/screenshots/categories-desktop.png)   | [Ver imagem](docs/screenshots/categories-mobile.png)   |
-| Metas        | [Ver imagem](docs/screenshots/budgets-desktop.png)      | [Ver imagem](docs/screenshots/budgets-mobile.png)      |
-| Recorrências | [Ver imagem](docs/screenshots/recurring-desktop.png)    | [Ver imagem](docs/screenshots/recurring-mobile.png)    |
-| Perfil       | [Ver imagem](docs/screenshots/account-desktop.png)      | [Ver imagem](docs/screenshots/account-mobile.png)      |
-
-## Aplicativo mobile
-
 <p>
-  <img src="docs/screenshots/mobile-login-expo.png" alt="Login do Saldoa mobile" width="240">
-  <img src="docs/screenshots/mobile-dashboard-expo.png" alt="Dashboard do Saldoa mobile" width="240">
-  <img src="docs/screenshots/mobile-budgets-expo.png" alt="Metas no Saldoa mobile" width="240">
+  <img src="docs/screenshots/mobile-login-expo.png" alt="Login do aplicativo" width="240">
+  <img src="docs/screenshots/mobile-dashboard-expo.png" alt="Resumo financeiro" width="240">
+  <img src="docs/screenshots/mobile-budgets-expo.png" alt="Metas de gastos" width="240">
 </p>
 
-O APK acessa a API pública e pode ser usado pelo Wi-Fi ou 4G/5G, sem depender do notebook. A versão disponível é de teste para Android ARM64 e ainda não foi publicada na Play Store. Veja como instalar, executar e compilar em [mobile/README.md](mobile/README.md).
+Imagens da prévia web do aplicativo, com dados de exemplo.
 
-As imagens foram atualizadas com a interface atual. Telas privadas usam dados de exemplo; as imagens mobile foram capturadas na prévia web do aplicativo.
+## Funcionalidades
 
-## Tecnologias
+Dashboard, receitas e despesas, categorias, metas, recorrências, exportação e gerenciamento da conta. Português e inglês, com temas claro, escuro e do sistema.
 
-| Parte      | Tecnologias atuais                                            |
-| ---------- | ------------------------------------------------------------- |
-| Backend    | Laravel 13, PHP 8.4 e Sanctum                                 |
-| Web        | React 19, Inertia, TypeScript e Tailwind CSS                  |
-| Mobile     | Expo, React Native e TypeScript                               |
-| Banco      | SQLite no desenvolvimento e MySQL na AWS                      |
-| Hospedagem | AWS EC2 com Docker Compose e HTTPS                            |
-| Qualidade  | Pest, análise de tipos, lint e verificações no GitHub Actions |
+Outras telas: [Cadastro](docs/screenshots/mobile-register-expo.png) · [Lançamentos](docs/screenshots/mobile-transactions-expo.png) · [Formulário](docs/screenshots/mobile-transaction-form-expo.png) · [Categorias](docs/screenshots/mobile-categories-expo.png) · [Recorrências](docs/screenshots/mobile-recurring-expo.png) · [Conta](docs/screenshots/mobile-account-expo.png) · [Preferências em inglês](docs/screenshots/mobile-preferences-en.png) · [Dashboard em inglês](docs/screenshots/mobile-dashboard-en.png).
 
-## Executar no computador
+## Instalar e testar
 
-Requisitos: PHP 8.4, Composer, Node.js 22.13 ou superior e npm. O PHP deve ter SQLite, OpenSSL, mbstring, intl e as extensões exigidas pelo Composer.
+1. Baixe o APK da Release no celular Android.
+2. Autorize a instalação por esse navegador ou gerenciador de arquivos, caso o Android solicite.
+3. Abra o Saldoa e crie uma conta ou entre com uma conta do site hospedado.
+4. Teste no Wi-Fi e também pelo 4G/5G.
 
-Para a primeira instalação, em uma cópia nova do repositório, use o PowerShell:
+O APK utiliza a API pública; não precisa que o Laravel esteja rodando no notebook. Contas e dados do ambiente local não são transferidos para a AWS.
+
+A versão atual é para testes, compatível com Android ARM64 e assinada com chave de depuração. Ainda não está na Play Store. A recuperação de senha e a confirmação de exclusão por e-mail dependem do envio real de e-mails, que continua pendente.
+
+## Executar o código
+
+A partir da raiz do repositório, no PowerShell:
 
 ```powershell
-composer install
+if (!(Test-Path mobile/.env)) {
+    Copy-Item mobile/.env.example mobile/.env
+}
+cd mobile
 npm ci
-if (!(Test-Path .env)) {
-    Copy-Item .env.example .env
-}
-if (!(Test-Path database/database.sqlite)) {
-    New-Item database/database.sqlite -ItemType File
-}
-php artisan key:generate
-php artisan migrate --seed
-composer run dev
 ```
 
-Abra `http://localhost:8000`. Esses passos criam um **ambiente local**; não devem ser usados sobre o banco de produção. Não sobrescreva um `.env` que já esteja configurado.
+Não sobrescreva um arquivo de ambiente que já esteja configurado. Para usar o servidor público, informe em `mobile/.env`:
 
-O seeder local inclui a conta `demo@exemplo.com`, senha `demo1234`. Essa conta serve apenas para demonstração local ou para uma instância demo separada; ela não deve existir na produção principal.
+```dotenv
+EXPO_PUBLIC_API_URL=https://saldoa-app.duckdns.org
+EXPO_PUBLIC_WEB_URL=https://saldoa-app.duckdns.org
+EXPO_PUBLIC_API_URL_DEMO=
+```
 
-Para iniciar o aplicativo mobile e configurar o endereço da API, consulte o [guia mobile](mobile/README.md).
+Inicie com `npm start`. Use o Expo Go compatível com o projeto para testar no celular ou `npm run web` para abrir a prévia no navegador.
 
-## Verificações
+Para usar uma API local, informe o IP LAN do computador nas duas URLs, com a porta 8000. Inicie o Laravel na raiz com `php artisan serve --host=0.0.0.0 --port=8000` e conecte o celular ao mesmo Wi-Fi.
+
+## Gerar um APK de teste
+
+Requer Android Studio, Android SDK e Java. Na pasta `mobile`, para acessar a API pública:
 
 ```powershell
-npm --prefix mobile ci
-npm run check
-npm run types:check
-php artisan test --compact
+$env:EXPO_PUBLIC_API_URL = 'https://saldoa-app.duckdns.org'
+$env:EXPO_PUBLIC_WEB_URL = 'https://saldoa-app.duckdns.org'
+$env:EXPO_PUBLIC_API_URL_DEMO = ''
+npm run apk:local -- --public-api
 ```
 
-Os testes Laravel devem usar o ambiente de testes, separado dos dados reais. Comandos específicos do mobile estão no seu [README](mobile/README.md).
+O arquivo é gerado em `android/app/build/outputs/apk/release/app-release.apk`. Para testes com uma API HTTP privada, configure o IP em `.env` e use `npm run apk:local` sem a opção pública. Alterar a URL depois da instalação exige um novo build.
 
-## Situação atual
+## Verificar
 
-O site está publicado em HTTPS e há um APK de teste com acesso à API pública. O envio real de e-mails, o backup externo com restauração validada e a distribuição na Play Store continuam pendentes. O deploy ainda é manual.
+```powershell
+npm test
+npm run types:check
+npm run lint
+```
 
-## Documentação
-
-- [Guia de operação da AWS](docs/AWS_OPERACAO.md): acesso à máquina, logs, banco, backup e custos.
-- [Implantação na AWS](docs/AWS_DEPLOY.md): configuração e reconstrução do ambiente.
-- [API mobile](docs/MOBILE_API.md): contratos e orientações para integração.
-- [Status do projeto](docs/STATUS.md): entregas, validações e próximos passos.
-
-## Apoio de IA
-
-Ferramentas de IA apoiaram o desenvolvimento, a revisão e a documentação. As decisões e a validação do projeto permanecem sob responsabilidade do autor.
+Para contratos da API e informações de segurança, consulte [MOBILE_API.md](docs/MOBILE_API.md). A [visão geral do projeto](https://github.com/GuilhermeZalla/react-saldoa-app/blob/main/README.md) apresenta também a versão web.
