@@ -1,5 +1,5 @@
 [Unit]
-Description=Daily Saldoa backup
+Description=Daily check for Saldoa backup every 15 days
 
 [Timer]
 OnCalendar=*-*-* 06:30:00 UTC

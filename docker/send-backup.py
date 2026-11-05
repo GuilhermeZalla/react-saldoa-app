@@ -59,11 +59,11 @@ def main():
     message['Date'] = formatdate(localtime=False)
     message['Message-ID'] = make_msgid()
     if arguments.failure:
-        message['Subject'] = 'Saldoa: FALHA no backup diario'
+        message['Subject'] = 'Saldoa: FALHA no backup'
         message.set_content(
-            'O backup diario do Saldoa falhou. Confira no servidor: '
+            'O backup do Saldoa falhou. Confira no servidor: '
             'sudo journalctl -u saldoa-backup.service --since today --no-pager\n'
-            'A ausencia de uma mensagem diaria de backup tambem exige verificacao.\n'
+            'A ausencia do backup esperado a cada 15 dias tambem exige verificacao.\n'
         )
     else:
         checksum = hashlib.sha256(payload).hexdigest()

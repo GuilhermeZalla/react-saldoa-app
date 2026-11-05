@@ -45,7 +45,7 @@ jobs:
           python3 - <<'PY'
           import ast
           from pathlib import Path
-          for filename in ('send-backup.py', 'verify-restored-app.py'):
+          for filename in ('backup-due.py', 'send-backup.py', 'verify-restored-app.py'):
               ast.parse((Path('docker') / filename).read_text())
           PY
 
