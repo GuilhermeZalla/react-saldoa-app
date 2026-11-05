@@ -105,7 +105,6 @@ O site está publicado em HTTPS e há um APK de teste com acesso à API pública
 - [Implantação na AWS](docs/AWS_DEPLOY.md): configuração e reconstrução do ambiente.
 - [API mobile](docs/MOBILE_API.md): contratos e orientações para integração.
 - [Status do projeto](docs/STATUS.md): entregas, validações e próximos passos.
-- [Apresentação para entrevistas — PDF](docs/apresentacao-entrevista-saldoa.pdf).
 
 ## Apoio de IA
 
