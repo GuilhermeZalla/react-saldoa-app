@@ -2,7 +2,7 @@
 
 Release notes for the Saldoa website and Android app. Dates below follow the published release date in UTC.
 
-## [1.1.0] - 2026-11-05
+## [1.1.0] - 2026-11-02
 
 ### Added
 
@@ -33,7 +33,7 @@ Release notes for the Saldoa website and Android app. Dates below follow the pub
 - The APK supports ARM64 and uses the existing debug signing key. It is distributed directly through GitHub Releases.
 - The agenda previews the next occurrence of each recurring rule; it does not introduce paid/unpaid bill tracking.
 
-## [1.0.0] - 2026-11-05
+## [1.0.0] - 2026-09-12
 
 First stable portfolio release, bringing together the web application created in 2025 and the mobile app created in 2026.
 
@@ -46,7 +46,7 @@ First stable portfolio release, bringing together the web application created in
 - Encrypted off-server backups by email, with recovery verified in isolated containers.
 - Android ARM64 APK for direct installation, signed with a debug key.
 
-## [mobile-v1.0.0-preview.1] - 2026-11-05
+## [mobile-v1.0.0-preview.1] - 2026-08-27
 
 First public Android preview, using the hosted HTTPS API and supporting direct APK installation. Superseded by version 1.0.0.
 

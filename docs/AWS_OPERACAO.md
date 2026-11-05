@@ -97,7 +97,7 @@ Para listar trabalhos que falharam, sem reexecutá-los:
 dc exec --user www-data app php artisan queue:failed --no-interaction
 ```
 
-O envio real de e-mails ainda precisa ser configurado. Uma falha de SMTP no worker não significa necessariamente que o site ou o login deixaram de funcionar.
+O envio real de e-mails está configurado pelo Gmail, conforme a seção de backup e e-mails. Uma falha de SMTP no worker não significa necessariamente que o site ou o login deixaram de funcionar.
 
 ## 5. Acessar o banco
 
