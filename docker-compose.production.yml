@@ -28,7 +28,7 @@ x-app: &app
         FILESYSTEM_DISK: local
         DEMO_INSTANCE: 'false'
         DEMO_LOGIN_ENABLED: 'false'
-        SANCTUM_TOKEN_EXPIRATION: '43200'
+        SANCTUM_TOKEN_EXPIRATION: '14400'
         MAIL_MAILER: smtp
         MAIL_HOST: ${MAIL_HOST:?Set the SMTP host}
         MAIL_PORT: ${MAIL_PORT:-587}
