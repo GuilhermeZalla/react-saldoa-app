@@ -109,6 +109,13 @@ The Android APK currently uses a debug signing key and supports ARM64 devices. G
 
 ## Documentation
 
+User guides are available for the desktop website and Android app:
+
+| Platform        | Português                                        | English                                           |
+| --------------- | ------------------------------------------------ | ------------------------------------------------- |
+| Desktop website | [PDF guide](docs/guia-de-uso-saldoa-desktop.pdf) | [PDF guide](docs/use-guide-saldoa-desktop-en.pdf) |
+| Android app     | [PDF guide](docs/guia-de-uso-saldoa.pdf)         | [PDF guide](docs/use-guide-saldoa-en.pdf)         |
+
 The operational guides below are currently written in Portuguese:
 
 - [AWS operations](docs/AWS_OPERACAO.md): server access, logs, database, backups, and costs.

@@ -1,5 +1,6 @@
 ﻿import * as React from 'react';
-import { Form, Head, router } from '@inertiajs/react';
+import { Form, Head, Link, router } from '@inertiajs/react';
+import CategoryController from '@/actions/App/Http/Controllers/CategoryController';
 import {
     FinanceHeader,
     FinancePeriod,
@@ -19,7 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { MoneyInput } from '@/components/money-input';
 import { Label } from '@/components/ui/label';
 import {
     Select,
@@ -142,6 +143,10 @@ export default function BudgetsIndex({
                             : 'Todas as categorias têm limite'}
                     </Button>
                 </FinanceHeader>
+                <p className="text-sm text-muted-foreground">
+                    O limite continua nos próximos meses até ser alterado ou
+                    excluído. O gasto considera apenas o mês selecionado.
+                </p>
                 <section className="grid gap-3 sm:grid-cols-3">
                     <Card className="finance-surface gap-2 py-5">
                         <CardContent className="space-y-2">
@@ -322,13 +327,21 @@ export default function BudgetsIndex({
                                     Crie uma categoria de despesa e defina
                                     quanto pretende gastar por mês.
                                 </p>
-                                {hasCategoriesWithoutBudget && (
+                                {hasCategoriesWithoutBudget ? (
                                     <Button
                                         onClick={() =>
                                             setOpenCreateDialog(true)
                                         }
                                     >
                                         Criar primeiro limite
+                                    </Button>
+                                ) : (
+                                    <Button asChild>
+                                        <Link
+                                            href={CategoryController.create()}
+                                        >
+                                            Criar categoria de despesa
+                                        </Link>
                                     </Button>
                                 )}
                             </CardContent>
@@ -393,12 +406,9 @@ export default function BudgetsIndex({
                                             <Label htmlFor="amount">
                                                 Valor limite (R$)
                                             </Label>
-                                            <Input
+                                            <MoneyInput
                                                 id="amount"
                                                 name="amount"
-                                                type="number"
-                                                step="0.01"
-                                                min="0.01"
                                                 placeholder="0,00"
                                                 required
                                             />
@@ -464,12 +474,9 @@ export default function BudgetsIndex({
                                                 <Label htmlFor="edit-amount">
                                                     Valor limite (R$)
                                                 </Label>
-                                                <Input
+                                                <MoneyInput
                                                     id="edit-amount"
                                                     name="amount"
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0.01"
                                                     placeholder="0,00"
                                                     defaultValue={
                                                         editingBudget.amount

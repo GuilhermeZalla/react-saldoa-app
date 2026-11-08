@@ -1,9 +1,16 @@
+import { decimalToMoneyInput, formatMoneyInput } from './money';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { ApiError, apiTextRequest, sessionRequest } from './api';
 import { useThemeStyles } from './PreferencesContext';
-import { ActionButton, ChoiceChips, Page, TextField } from './components';
+import {
+    LoadingState,
+    ActionButton,
+    ChoiceChips,
+    Page,
+    TextField,
+} from './components';
 import {
     EmptyFinance,
     FinanceError,
@@ -149,7 +156,7 @@ export default function TransactionsScreen({ session }: { session: Session }) {
         if (session.isDemo) return;
         setEditingId(transaction.id);
         setDescription(transaction.description);
-        setAmount(transaction.amount);
+        setAmount(decimalToMoneyInput(transaction.amount));
         setType(transaction.type);
         setCategoryId(transaction.category.id);
         setDate(transaction.date);
@@ -331,7 +338,7 @@ export default function TransactionsScreen({ session }: { session: Session }) {
             </View>
             {!formOpen && <FinanceError message={error} />}
             {loading ? (
-                <EmptyFinance>{t('Carregando lançamentos…')}</EmptyFinance>
+                <LoadingState label={t('Carregando lançamentos…')} />
             ) : (
                 <>
                     <View style={styles.toolbar}>
@@ -435,6 +442,14 @@ export default function TransactionsScreen({ session }: { session: Session }) {
                                           'Nenhum lançamento encontrado. Experimente outro mês ou filtro.',
                                       )}
                             </EmptyFinance>
+                            {!error && !session.isDemo && (
+                                <ActionButton
+                                    variant="secondary"
+                                    onPress={newTransaction}
+                                >
+                                    {t('Registrar movimentação')}
+                                </ActionButton>
+                            )}
                             {!error && (
                                 <ActionButton
                                     variant="quiet"
@@ -494,8 +509,8 @@ export default function TransactionsScreen({ session }: { session: Session }) {
                 <TextField
                     label={t('Valor (R$)')}
                     value={amount}
-                    onChangeText={setAmount}
-                    keyboardType="decimal-pad"
+                    onChangeText={(value) => setAmount(formatMoneyInput(value))}
+                    keyboardType="number-pad"
                     placeholder="0,00"
                 />
                 <TextField
@@ -568,13 +583,13 @@ const createStyles = (colors: ThemeColors) =>
         filters: { flex: 1, minWidth: 220 },
         meta: {
             fontFamily: 'DMSans',
-            fontSize: 11,
-            lineHeight: 17,
+            fontSize: 14,
+            lineHeight: 20,
             color: colors.muted,
         },
         groupLabel: {
             fontFamily: 'DMSans',
-            fontSize: 11,
+            fontSize: 14,
             color: colors.muted,
             marginTop: 10,
             marginBottom: 5,
@@ -605,13 +620,13 @@ const createStyles = (colors: ThemeColors) =>
         copy: { flex: 1, gap: 3 },
         description: {
             fontFamily: 'DMSans',
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: '600',
             color: colors.text,
         },
         amount: {
             fontFamily: 'SpaceGrotesk',
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: '600',
             flexShrink: 0,
         },
@@ -623,7 +638,7 @@ const createStyles = (colors: ThemeColors) =>
         },
         fieldLabel: {
             fontFamily: 'DMSans',
-            fontSize: 13,
+            fontSize: 14,
             color: colors.text,
             fontWeight: '600',
         },

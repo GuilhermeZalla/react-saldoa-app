@@ -34,6 +34,20 @@ const { setLocale, t } = loadUtility('i18n');
 const { formatCurrency, formatDate, dateForApi } = loadUtility('format');
 const { apiErrorMessage } = loadUtility('api');
 
+void test('getting started and contextual help are translated in English', () => {
+    const { helpSteps, helpTopics } = loadUtility('help');
+    setLocale('en');
+    for (const item of [...helpSteps, ...helpTopics]) {
+        assert.notEqual(t(item.title), item.title);
+        assert.notEqual(t(item.description), item.description);
+    }
+    assert.equal(
+        t('Conta criada com sucesso!'),
+        'Account created successfully!',
+    );
+    assert.equal(t('Como usar o Saldoa'), 'How to use Saldoa');
+});
+
 void test('language changes translate navigation and interpolate names without translating user data', () => {
     setLocale('pt-BR');
     assert.equal(t('Conta'), 'Conta');

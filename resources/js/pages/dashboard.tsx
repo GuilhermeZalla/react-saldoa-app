@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { GettingStarted } from '@/components/getting-started';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowDownLeft,
@@ -56,6 +57,7 @@ export default function Dashboard({
     hasTransactionsInChartRange,
     budgetAlerts,
     hasBudgets,
+    hasTransactionsInMonth,
     upcomingTransactions = [],
 }: DashboardProps) {
     const { auth } = usePage().props;
@@ -66,7 +68,8 @@ export default function Dashboard({
         {
             label: 'Saldo geral',
             amount: summary.overallBalance,
-            description: 'Todos os períodos',
+            description:
+                'Receitas menos despesas de todos os períodos, sem previsões da agenda.',
             kind: 'balance',
             comparison: null,
         },
@@ -139,6 +142,11 @@ export default function Dashboard({
                         </Link>
                     </Button>
                 </FinanceHeader>
+                <GettingStarted
+                    empty={
+                        !hasTransactionsInMonth && !hasTransactionsInChartRange
+                    }
+                />
                 <section
                     className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
                     aria-label="Resumo financeiro"

@@ -45,6 +45,27 @@ test('a user can log in and invalid credentials receive a standardized 401', fun
         ->assertJsonPath('error.code', 'unauthenticated');
 });
 
+test('mobile tokens expire after ten days even when an environment still requests thirty', function () {
+    $this->travelTo(Carbon::parse('2026-11-07T12:00:00Z'));
+    config()->set('sanctum.expiration', 43200);
+    $user = User::factory()->create(['password' => 'correct-password']);
+
+    $response = $this->postJson('/api/v1/auth/login', [
+        'email' => $user->email,
+        'password' => 'correct-password',
+        'device_name' => 'Android phone',
+    ])->assertOk()->assertJsonPath('expires_at', '2026-11-17T12:00:00.000000Z');
+
+    expect($user->tokens()->firstOrFail()->expires_at->toISOString())->toBe('2026-11-17T12:00:00.000000Z');
+    $token = $response->json('access_token');
+    $this->travelTo(Carbon::parse('2026-11-17T11:59:59Z'));
+    $this->withToken($token)->getJson('/api/v1/auth/me')->assertOk();
+
+    Auth::forgetGuards();
+    $this->travelTo(Carbon::parse('2026-11-17T12:00:01Z'));
+    $this->withToken($token)->getJson('/api/v1/auth/me')->assertUnauthorized();
+});
+
 test('API authentication rejects expired and revoked tokens', function () {
     $user = User::factory()->create();
     $expiredToken = $user->createToken('expired', ['*'], now()->subMinute())->plainTextToken;

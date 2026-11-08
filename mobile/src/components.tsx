@@ -1,7 +1,7 @@
 import { usePreferences, useThemeStyles } from './PreferencesContext';
 import { useSegments } from 'expo-router';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
-import type { PropsWithChildren, ReactElement, ReactNode } from 'react';
+import type { PropsWithChildren, ReactElement, ReactNode, Ref } from 'react';
 import {
     ActivityIndicator,
     Modal,
@@ -12,11 +12,27 @@ import {
     TextInput,
     View,
     type TextInputProps,
+    type TextInputInstance,
     type StyleProp,
     type ViewStyle,
 } from 'react-native';
 import { spacing, type ThemeColors } from './theme';
 import { AppIcon, type IconName } from './icons';
+
+export function LoadingState({ label }: { label: string }) {
+    const { colors, styles } = useThemeStyles(createStyles);
+    return (
+        <View
+            accessibilityRole="progressbar"
+            accessibilityLabel={label}
+            accessibilityState={{ busy: true }}
+            style={{ alignItems: 'center', gap: 12, paddingVertical: 24 }}
+        >
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.subtitle}>{label}</Text>
+        </View>
+    );
+}
 
 export function Page({
     children,
@@ -337,14 +353,20 @@ export function TextField({
     label,
     error,
     style,
+    inputRef,
     ...inputProps
-}: TextInputProps & { label: string; error?: string }) {
+}: TextInputProps & {
+    label: string;
+    error?: string;
+    inputRef?: Ref<TextInputInstance>;
+}) {
     const { colors, styles } = useThemeStyles(createStyles);
     return (
         <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>{label}</Text>
             <TextInput
                 {...inputProps}
+                ref={inputRef}
                 accessibilityLabel={inputProps.accessibilityLabel ?? label}
                 placeholderTextColor={colors.muted}
                 selectionColor={colors.primary}
@@ -415,8 +437,8 @@ const createCommonStyles = (colors: ThemeColors) =>
         muted: {
             fontFamily: 'DMSans',
             color: colors.muted,
-            fontSize: 13,
-            lineHeight: 19,
+            fontSize: 14,
+            lineHeight: 20,
         },
         row: {
             alignItems: 'center',
@@ -508,7 +530,7 @@ const createStyles = (colors: ThemeColors) =>
         fieldLabel: {
             fontFamily: 'DMSans',
             color: colors.text,
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: '600',
         },
         input: {
@@ -525,7 +547,7 @@ const createStyles = (colors: ThemeColors) =>
         fieldError: {
             fontFamily: 'DMSans',
             color: colors.expense,
-            fontSize: 12,
+            fontSize: 14,
         },
         chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
         chip: {
@@ -545,7 +567,7 @@ const createStyles = (colors: ThemeColors) =>
         chipText: {
             fontFamily: 'DMSans',
             color: colors.muted,
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: '600',
         },
         chipTextSelected: { color: colors.primary },
@@ -600,8 +622,8 @@ const createStyles = (colors: ThemeColors) =>
         rowSubtitle: {
             fontFamily: 'DMSans',
             color: colors.muted,
-            fontSize: 12,
-            lineHeight: 18,
+            fontSize: 14,
+            lineHeight: 20,
         },
         avatar: {
             width: 68,

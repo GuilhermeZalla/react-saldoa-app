@@ -1,9 +1,11 @@
+import { formatMoneyInput } from './money';
 import { useThemeStyles } from './PreferencesContext';
 import { t } from './i18n';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { ApiError, sessionRequest } from './api';
 import {
+    LoadingState,
     ActionButton,
     Card,
     ChoiceChips,
@@ -203,6 +205,11 @@ export default function RecurringScreen({ session }: Props) {
                 title={t('Recorrências')}
                 subtitle={t('Acompanhe lançamentos que se repetem.')}
             />
+            <Text style={commonStyles.muted}>
+                {t(
+                    'A agenda mostra previsões. O valor só entra no saldo quando o lançamento da recorrência é gerado.',
+                )}
+            </Text>
             {errorMessage ? (
                 <Text accessibilityRole="alert" style={styles.error}>
                     {errorMessage}
@@ -222,8 +229,10 @@ export default function RecurringScreen({ session }: Props) {
                     <TextField
                         label={t('Valor')}
                         value={amount}
-                        onChangeText={setAmount}
-                        keyboardType="decimal-pad"
+                        onChangeText={(value) =>
+                            setAmount(formatMoneyInput(value))
+                        }
+                        keyboardType="number-pad"
                         placeholder="0,00"
                     />
                     <ChoiceChips
@@ -289,9 +298,7 @@ export default function RecurringScreen({ session }: Props) {
             <Card>
                 <SectionTitle title={t('Regras cadastradas')} />
                 {loading ? (
-                    <Text style={commonStyles.muted}>
-                        {t('Carregando recorrências…')}
-                    </Text>
+                    <LoadingState label={t('Carregando recorrências…')} />
                 ) : items.length ? (
                     items.map((item) => (
                         <View key={item.id} style={styles.row}>
@@ -363,7 +370,7 @@ const createStyles = (colors: ThemeColors) =>
             backgroundColor: colors.expenseSoft,
             borderRadius: 10,
             color: colors.expense,
-            fontSize: 13,
+            fontSize: 14,
             padding: 12,
         },
         fieldLabel: {
@@ -389,9 +396,9 @@ const createStyles = (colors: ThemeColors) =>
             fontSize: 15,
             fontWeight: '600',
         },
-        meta: { fontFamily: 'DMSans', color: colors.muted, fontSize: 11 },
+        meta: { fontFamily: 'DMSans', color: colors.muted, fontSize: 14 },
         itemActions: { alignItems: 'flex-end' },
-        amount: { fontFamily: 'DMSans', fontSize: 12, fontWeight: '700' },
+        amount: { fontFamily: 'DMSans', fontSize: 14, fontWeight: '700' },
         income: { color: colors.income },
         expense: { color: colors.expense },
     });

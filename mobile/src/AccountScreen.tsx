@@ -1,6 +1,7 @@
 import { usePreferences, useThemeStyles } from './PreferencesContext';
 import { getLocale, t } from './i18n';
 import { useState } from 'react';
+import * as Linking from 'expo-linking';
 import { Alert, Share, StyleSheet, Text, View } from 'react-native';
 import { ApiError, apiTextRequest, sessionRequest } from './api';
 import { currentMonth } from './format';
@@ -36,6 +37,28 @@ export default function AccountScreen({
     const [password, setPassword] = useState('');
     const [busy, setBusy] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.trim().replace(/\/+$/, '');
+
+    async function openPrivacyPolicy(): Promise<void> {
+        if (!webUrl) {
+            Alert.alert(
+                t('Não foi possível abrir o site'),
+                t('Tente novamente mais tarde.'),
+            );
+            return;
+        }
+
+        try {
+            await Linking.openURL(
+                `${webUrl}/privacy-policy${language === 'en' ? '?lang=en' : ''}`,
+            );
+        } catch {
+            Alert.alert(
+                t('Não foi possível abrir o site'),
+                t('Tente novamente mais tarde.'),
+            );
+        }
+    }
 
     async function shareExport(path: string, title: string): Promise<void> {
         setBusy(true);
@@ -134,6 +157,12 @@ export default function AccountScreen({
                     title={t('Idioma e aparência')}
                     subtitle={`${language === 'en' ? 'English' : 'Português'} · ${t(theme === 'light' ? 'Claro' : theme === 'dark' ? 'Escuro' : 'Sistema')}`}
                     onPress={() => setPreferencesOpen(true)}
+                />
+                <SettingsRow
+                    icon="help"
+                    title={t('Política de Privacidade')}
+                    subtitle={t('Leia como seus dados são tratados.')}
+                    onPress={() => void openPrivacyPolicy()}
                 />
             </Card>
             {!session.isDemo ? (
@@ -281,7 +310,7 @@ const createStyles = (colors: ThemeColors) =>
         demoBannerText: {
             fontFamily: 'DMSans',
             color: colors.primary,
-            fontSize: 12,
+            fontSize: 14,
             fontWeight: '700',
             textAlign: 'center',
         },
@@ -297,21 +326,21 @@ const createStyles = (colors: ThemeColors) =>
         email: {
             fontFamily: 'DMSans',
             color: colors.muted,
-            fontSize: 13,
+            fontSize: 14,
             textAlign: 'center',
         },
         description: {
             fontFamily: 'DMSans',
             color: colors.muted,
-            fontSize: 12,
-            lineHeight: 19,
+            fontSize: 14,
+            lineHeight: 20,
         },
         error: {
             fontFamily: 'DMSans',
             backgroundColor: colors.surfaceMuted,
             borderRadius: 14,
             color: colors.text,
-            fontSize: 13,
+            fontSize: 14,
             padding: 14,
         },
         dangerCard: { borderColor: colors.border },

@@ -1,4 +1,5 @@
 import { getLocale } from './i18n';
+import { moneyInputToDecimal } from './money';
 
 export function formatCurrency(amount: string | number): string {
     const numericAmount = typeof amount === 'number' ? amount : Number(amount);
@@ -71,7 +72,7 @@ export function currentDate(): string {
 }
 
 export function amountForApi(amount: string): string {
-    return amount.trim().replace(/\s/g, '').replace(',', '.');
+    return moneyInputToDecimal(amount);
 }
 
 export function shiftMonth(month: string, offset: number): string {

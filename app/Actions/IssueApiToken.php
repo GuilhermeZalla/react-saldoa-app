@@ -18,7 +18,7 @@ class IssueApiToken
             && $user->email === config('demo.email');
         $expirationMinutes = $isDemoAccount
             ? (int) config('demo.token_expiration')
-            : (int) config('sanctum.expiration');
+            : min(14400, (int) config('sanctum.expiration'));
         $expiresAt = Carbon::now()->addMinutes($expirationMinutes);
         $abilities = $isDemoAccount ? ['demo:read'] : ['*'];
 

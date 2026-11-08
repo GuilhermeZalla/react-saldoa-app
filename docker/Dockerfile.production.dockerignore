@@ -33,6 +33,11 @@ resources/js/routes/**
 resources/js/wayfinder/**
 !routes/
 !routes/**
+!docs/
+!docs/guia-de-uso-saldoa.pdf
+!docs/use-guide-saldoa-en.pdf
+!docs/guia-de-uso-saldoa-desktop.pdf
+!docs/use-guide-saldoa-desktop-en.pdf
 !docker/
 docker/**
 !docker/php.production.ini

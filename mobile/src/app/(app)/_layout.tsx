@@ -120,6 +120,7 @@ export default function MainTabsLayout() {
             <Tabs.Screen name="categories" options={secondaryScreenOptions} />
             <Tabs.Screen name="recurring" options={secondaryScreenOptions} />
             <Tabs.Screen name="account" options={secondaryScreenOptions} />
+            <Tabs.Screen name="help" options={secondaryScreenOptions} />
         </Tabs>
     );
 }
@@ -145,9 +146,9 @@ const styles = StyleSheet.create({
     },
     tabLabel: {
         fontFamily: 'DMSans',
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: '600',
-        lineHeight: 14,
+        lineHeight: 18,
     },
 });
 

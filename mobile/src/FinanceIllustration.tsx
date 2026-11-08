@@ -13,7 +13,7 @@ export function FinanceIllustration({
             width="100%"
             height={compact ? 76 : 150}
             viewBox="0 0 320 180"
-            accessible={false}
+            aria-hidden
         >
             <Ellipse
                 cx={160}
@@ -23,7 +23,7 @@ export function FinanceIllustration({
                 fill={colors.surfaceMuted}
             />
             <Circle cx={165} cy={86} r={72} fill={colors.primarySoft} />
-            <G rotation={-8} origin="160,90">
+            <G transform="rotate(-8 160 90)">
                 <Rect
                     x={91}
                     y={38}

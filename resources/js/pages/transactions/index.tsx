@@ -338,8 +338,17 @@ export default function TransactionsIndex({
                             <p className="max-w-sm text-sm text-muted-foreground">
                                 Não encontramos lançamentos para este período e
                                 estes filtros. Experimente ajustar a busca ou
-                                limpar os filtros.
+                                registrar uma receita ou despesa para começar.
                             </p>
+                            <Button asChild>
+                                <Link
+                                    href={TransactionController.create({
+                                        query: { month: filters.month },
+                                    })}
+                                >
+                                    Registrar movimentação
+                                </Link>
+                            </Button>
                             <Button variant="outline" asChild className="mt-2">
                                 <Link
                                     href={transactionsRoute.index({

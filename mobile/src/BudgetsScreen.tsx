@@ -1,3 +1,4 @@
+import { decimalToMoneyInput, formatMoneyInput } from './money';
 import { useThemeStyles } from './PreferencesContext';
 import { getLocale, t } from './i18n';
 import { useCallback, useMemo, useState } from 'react';
@@ -5,6 +6,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { ApiError, sessionRequest } from './api';
 import {
+    LoadingState,
     ActionButton,
     ChoiceChips,
     Page,
@@ -158,7 +160,7 @@ export default function BudgetsScreen({ session }: Props) {
     function editBudget(budget: Budget): void {
         setFormOpen(true);
         setEditingId(budget.id);
-        setAmount(budget.amount);
+        setAmount(decimalToMoneyInput(budget.amount));
     }
 
     function cancelEdit(): void {
@@ -297,6 +299,11 @@ export default function BudgetsScreen({ session }: Props) {
                     </Text>
                 </Card>
             </View>
+            <Text style={commonStyles.muted}>
+                {t(
+                    'O limite continua nos próximos meses até ser alterado ou excluído. O gasto considera apenas o mês selecionado.',
+                )}
+            </Text>
             <ChoiceChips
                 selected={tab}
                 onSelect={setTab}
@@ -308,9 +315,7 @@ export default function BudgetsScreen({ session }: Props) {
             />
             {tab !== 'upcoming' &&
                 (loading ? (
-                    <Text style={commonStyles.muted}>
-                        {t('Carregando metas…')}
-                    </Text>
+                    <LoadingState label={t('Carregando metas…')} />
                 ) : budgets.length ? (
                     budgets.map((budget) => (
                         <Card key={budget.id}>
@@ -325,8 +330,25 @@ export default function BudgetsScreen({ session }: Props) {
                 ) : (
                     <Card>
                         <EmptyFinance>
-                            {t('Nenhuma meta cadastrada para este mês.')}
+                            {t(
+                                'Defina um limite mensal para acompanhar os gastos de uma categoria de despesa.',
+                            )}
                         </EmptyFinance>
+                        {!session.isDemo && !errorMessage && (
+                            <ActionButton
+                                variant="secondary"
+                                onPress={() => {
+                                    if (availableCategories.length) {
+                                        cancelEdit();
+                                        setFormOpen(true);
+                                    } else router.navigate('/categories');
+                                }}
+                            >
+                                {availableCategories.length
+                                    ? t('Criar primeiro limite')
+                                    : t('Criar categoria de despesa')}
+                            </ActionButton>
+                        )}
                     </Card>
                 ))}
             {tab !== 'limits' && (
@@ -337,7 +359,11 @@ export default function BudgetsScreen({ session }: Props) {
                             'Próxima ocorrência de cada recorrência. Valores previstos, fora do saldo realizado.',
                         )}
                     </Text>
-                    <UpcomingList items={upcoming} />
+                    {loading ? (
+                        <LoadingState label={t('Carregando metas…')} />
+                    ) : (
+                        <UpcomingList items={upcoming} />
+                    )}
                     <ActionButton
                         variant="quiet"
                         compact
@@ -370,8 +396,8 @@ export default function BudgetsScreen({ session }: Props) {
                 <TextField
                     label={t('Limite mensal')}
                     value={amount}
-                    onChangeText={setAmount}
-                    keyboardType="decimal-pad"
+                    onChangeText={(value) => setAmount(formatMoneyInput(value))}
+                    keyboardType="number-pad"
                     placeholder="0,00"
                 />
                 <ActionButton
@@ -483,7 +509,7 @@ const createStyles = (colors: ThemeColors) =>
         summaryCard: { flex: 1, padding: 14, gap: 9 },
         summaryLabel: {
             fontFamily: 'DMSans',
-            fontSize: 11,
+            fontSize: 14,
             color: colors.muted,
         },
         summaryAmount: {
@@ -495,7 +521,7 @@ const createStyles = (colors: ThemeColors) =>
         fieldLabel: {
             fontFamily: 'DMSans',
             color: colors.text,
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: '600',
         },
         budgetRow: { gap: 10 },
@@ -516,7 +542,7 @@ const createStyles = (colors: ThemeColors) =>
         budgetAmount: {
             fontFamily: 'DMSans',
             color: colors.muted,
-            fontSize: 11,
+            fontSize: 14,
         },
         spent: {
             fontFamily: 'SpaceGrotesk',
@@ -528,7 +554,7 @@ const createStyles = (colors: ThemeColors) =>
         remainingLabel: {
             fontFamily: 'DMSans',
             color: colors.muted,
-            fontSize: 11,
+            fontSize: 14,
         },
         remainingValue: {
             fontFamily: 'DMSans',
@@ -536,6 +562,6 @@ const createStyles = (colors: ThemeColors) =>
             fontSize: 14,
             fontWeight: '600',
         },
-        status: { fontFamily: 'DMSans', fontSize: 11, fontWeight: '600' },
+        status: { fontFamily: 'DMSans', fontSize: 14, fontWeight: '600' },
         actions: { flexDirection: 'row' },
     });

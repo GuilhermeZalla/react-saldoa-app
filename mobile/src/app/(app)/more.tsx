@@ -41,6 +41,12 @@ export default function MoreRoute() {
                     subtitle={t('Perfil, exportação e segurança.')}
                     onPress={() => router.navigate('/account')}
                 />
+                <SettingsRow
+                    icon="help"
+                    title={t('Como usar o Saldoa')}
+                    subtitle={t('Primeiros passos e guia de uso.')}
+                    onPress={() => router.navigate('/help')}
+                />
             </Card>
             <PreferencesSheet
                 visible={preferencesOpen}

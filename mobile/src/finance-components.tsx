@@ -371,7 +371,7 @@ export const createStyles = (colors: ThemeColors) =>
         headerCopy: { flex: 1, gap: 5 },
         eyebrow: {
             fontFamily: 'DMSans',
-            fontSize: 10,
+            fontSize: 14,
             letterSpacing: 1.1,
             color: colors.muted,
             textTransform: 'uppercase',
@@ -387,8 +387,8 @@ export const createStyles = (colors: ThemeColors) =>
         },
         subtitle: {
             fontFamily: 'DMSans',
-            fontSize: 12,
-            lineHeight: 18,
+            fontSize: 14,
+            lineHeight: 20,
             color: colors.muted,
         },
         monthPicker: {
@@ -408,7 +408,7 @@ export const createStyles = (colors: ThemeColors) =>
         arrow: { fontFamily: 'DMSans', fontSize: 23, color: colors.muted },
         monthLabel: {
             fontFamily: 'DMSans',
-            fontSize: 12,
+            fontSize: 14,
             color: colors.text,
             minWidth: 82,
             textAlign: 'center',
@@ -423,7 +423,7 @@ export const createStyles = (colors: ThemeColors) =>
         inlineActionText: {
             fontFamily: 'DMSans',
             color: colors.primary,
-            fontSize: 12,
+            fontSize: 14,
             fontWeight: '600',
         },
         modal: {
@@ -459,8 +459,8 @@ export const createStyles = (colors: ThemeColors) =>
         sheetBody: { padding: 20, paddingTop: 8, gap: 16 },
         error: {
             fontFamily: 'DMSans',
-            fontSize: 13,
-            lineHeight: 19,
+            fontSize: 14,
+            lineHeight: 20,
             color: colors.expense,
             backgroundColor: colors.expenseSoft,
             borderRadius: 10,
@@ -489,26 +489,26 @@ export const createStyles = (colors: ThemeColors) =>
             fontWeight: '600',
             color: colors.text,
         },
-        dateMonth: { fontFamily: 'DMSans', fontSize: 9, color: colors.muted },
+        dateMonth: { fontFamily: 'DMSans', fontSize: 14, color: colors.muted },
         upcomingCopy: { flex: 1, gap: 3 },
         rowTitle: {
             fontFamily: 'DMSans',
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: '600',
             color: colors.text,
         },
-        rowMeta: { fontFamily: 'DMSans', fontSize: 11, color: colors.muted },
+        rowMeta: { fontFamily: 'DMSans', fontSize: 14, color: colors.muted },
         rowAmount: {
             fontFamily: 'SpaceGrotesk',
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: '600',
             flexShrink: 0,
         },
         legend: { flexDirection: 'row', gap: 14, justifyContent: 'flex-end' },
-        legendText: { fontFamily: 'DMSans', fontSize: 10 },
+        legendText: { fontFamily: 'DMSans', fontSize: 14 },
         chartScale: {
             fontFamily: 'DMSans',
-            fontSize: 10,
+            fontSize: 14,
             color: colors.muted,
             textAlign: 'right',
         },

@@ -2,6 +2,7 @@ import { t } from './i18n';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import type { Session } from './types';
+import { isSessionExpired } from './sessionLifetime';
 
 const SESSION_KEY = 'saldoa.mobile.session';
 let webSession: string | null = null;
@@ -17,7 +18,12 @@ export async function readSession(): Promise<Session | null> {
     }
 
     try {
-        return JSON.parse(storedSession) as Session;
+        const session = JSON.parse(storedSession) as Session;
+        if (isSessionExpired(session)) {
+            await deleteStoredSession();
+            return null;
+        }
+        return session;
     } catch (error) {
         await deleteStoredSession();
         throw new Error(t('Não foi possível ler a sessão salva.'), {

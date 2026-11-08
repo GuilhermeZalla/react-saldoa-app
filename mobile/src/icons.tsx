@@ -2,6 +2,8 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import type { ColorValue } from 'react-native';
 
 export type IconName =
+    | 'check'
+    | 'help'
     | 'brand'
     | 'wallet'
     | 'home'
@@ -45,8 +47,15 @@ export function AppIcon({
             strokeWidth={1.8}
             strokeLinecap="round"
             strokeLinejoin="round"
-            accessible={false}
+            aria-hidden
         >
+            {name === 'check' && <Path d="m5 12 4 4L19 6" />}
+            {name === 'help' && (
+                <>
+                    <Circle cx={12} cy={12} r={9} />
+                    <Path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .6-1.5 1-1.5 2M12 16h.01" />
+                </>
+            )}
             {name === 'calendar' && (
                 <>
                     <Rect x={3} y={5} width={18} height={16} rx={2} />

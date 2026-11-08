@@ -5,6 +5,7 @@ import {
     LayoutGrid,
     Repeat,
     Tags,
+    CircleHelp,
 } from 'lucide-react';
 import BudgetController from '@/actions/App/Http/Controllers/BudgetController';
 import CategoryController from '@/actions/App/Http/Controllers/CategoryController';
@@ -22,7 +23,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { dashboard, help } from '@/routes';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -51,6 +52,7 @@ const mainNavItems: NavItem[] = [
         href: BudgetController.index(),
         icon: CalendarDays,
     },
+    { title: 'Como usar o Saldoa', href: help(), icon: CircleHelp },
 ];
 
 export function AppSidebar() {

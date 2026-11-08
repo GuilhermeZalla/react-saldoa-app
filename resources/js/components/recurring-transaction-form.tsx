@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { MoneyInput } from '@/components/money-input';
 import { Label } from '@/components/ui/label';
 import {
     Select,
@@ -99,14 +100,9 @@ export function RecurringTransactionForm({
             <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-2">
                     <Label htmlFor="amount">Valor</Label>
-                    <Input
+                    <MoneyInput
                         id="amount"
                         name="amount"
-                        type="number"
-                        inputMode="decimal"
-                        min="0.01"
-                        max="9999999999.99"
-                        step="0.01"
                         defaultValue={amount}
                         required
                         aria-invalid={Boolean(errors.amount)}

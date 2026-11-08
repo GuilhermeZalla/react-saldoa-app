@@ -2,6 +2,64 @@ export type Locale = 'pt-BR' | 'en';
 let currentLocale: Locale = 'pt-BR';
 
 export const english: Record<string, string> = {
+    'Conta criada com sucesso!': 'Account created successfully!',
+    'Seu Saldoa está pronto. Vamos organizar suas finanças, um passo de cada vez.':
+        'Your Saldoa is ready. Let’s organize your finances, one step at a time.',
+    'Começar a usar': 'Get started',
+    'Não foi possível salvar a sessão. Tente novamente.':
+        'Unable to save your session. Please try again.',
+    'Como usar o Saldoa': 'How to use Saldoa',
+    'Política de Privacidade': 'Privacy Policy',
+    'Leia como seus dados são tratados.': 'Read how your data is handled.',
+    'Primeiros passos e guia de uso.': 'Getting started and user guide.',
+    'Seus primeiros passos': 'Your first steps',
+    'Dispensar primeiros passos': 'Dismiss first steps',
+    'Você pode dispensar estas dicas e consultar a ajuda na aba Mais.':
+        'You can dismiss these tips and find help in the More tab.',
+    'Comece com três passos. Consulte esta ajuda sempre que precisar.':
+        'Start with three steps. Return to this help whenever you need it.',
+    '1. Confira suas categorias': '1. Check your categories',
+    '2. Registre uma movimentação': '2. Record a transaction',
+    '3. Acompanhe seu saldo': '3. Track your balance',
+    'Categorias organizam receitas e despesas. Confira as existentes ou crie uma que faça sentido para você.':
+        'Categories organize income and expenses. Check the existing ones or create one that works for you.',
+    'Escolha receita ou despesa, informe valor, descrição, categoria e data. Para R$ 50,00, digite 5000 no campo de valor.':
+        'Choose income or expense, then enter the amount, description, category and date. For R$ 50,00, type 5000 in the amount field.',
+    'Volte ao início para ver o resultado e escolha o mês que deseja acompanhar.':
+        'Return to Home to see the result and choose the month you want to track.',
+    'Receitas menos despesas registradas de todos os períodos. O saldo do mês considera apenas o mês selecionado. Previsões da agenda ficam fora desses saldos.':
+        'Recorded income minus expenses across all periods. The monthly balance includes only the selected month. Schedule forecasts are excluded from both balances.',
+    'Receitas menos despesas de todos os períodos, sem previsões da agenda.':
+        'Income minus expenses across all periods, excluding schedule forecasts.',
+    'Defina quanto pretende gastar por categoria de despesa. O limite continua nos próximos meses até ser alterado ou excluído; o gasto é calculado para cada mês.':
+        'Set how much you plan to spend per expense category. The limit continues in future months until changed or deleted; spending is calculated for each month.',
+    'Limites mensais': 'Monthly limits',
+    'Recorrências e agenda': 'Recurring transactions and schedule',
+    'Recorrências geram lançamentos nas datas previstas. A agenda mostra a próxima ocorrência de cada regra no mês selecionado. O valor só entra no saldo quando o lançamento é gerado.':
+        'Recurring rules create transactions on their scheduled dates. The schedule shows the next occurrence of each rule in the selected month. Amounts affect your balance only when the transaction is generated.',
+    'O limite continua nos próximos meses até ser alterado ou excluído. O gasto considera apenas o mês selecionado.':
+        'The limit continues in future months until changed or deleted. Spending includes only the selected month.',
+    'A agenda mostra previsões. O valor só entra no saldo quando o lançamento da recorrência é gerado.':
+        'The schedule shows forecasts. An amount affects your balance only when its recurring transaction is generated.',
+    'Defina um limite mensal para acompanhar os gastos de uma categoria de despesa.':
+        'Set a monthly limit to track spending in an expense category.',
+    'Crie uma categoria, como Moradia ou Salário, e escolha se ela organiza receitas ou despesas.':
+        'Create a category, such as Housing or Salary, and choose whether it organizes income or expenses.',
+    'Criar primeiro limite': 'Create your first limit',
+    'Criar categoria de despesa': 'Create an expense category',
+    'Criar primeira categoria': 'Create your first category',
+    'Registrar movimentação': 'Record a transaction',
+    'Guia completo em PDF': 'Complete PDF guide',
+    'Guia no idioma do aplicativo, com capturas em português. Escolha uma pasta para salvar o PDF. É preciso internet para baixar; depois você pode ler offline.':
+        'Guide in the app language, with screenshots in Portuguese. Choose a folder to save the PDF. Internet is needed to download; then you can read offline.',
+    'Baixar guia em PDF': 'Download PDF guide',
+    'Guia salvo com sucesso!': 'Guide saved successfully!',
+    'O PDF está na pasta que você escolheu. Você pode abri-lo mesmo sem internet.':
+        'The PDF is in the folder you chose. You can open it even without internet access.',
+    'Não foi possível baixar o guia': 'Unable to download the guide',
+    'Confira sua conexão e tente novamente. Se o problema continuar, tente mais tarde.':
+        'Check your connection and try again. If the problem continues, try again later.',
+    Abrir: 'Open',
     Despesas: 'Expenses',
     'Excluir lançamento': 'Delete transaction',
     Exportar: 'Export',

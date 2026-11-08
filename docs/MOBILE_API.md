@@ -39,7 +39,7 @@ Envie os tokens Sanctum como `Authorization: Bearer <access_token>`. Login web e
 | POST   | `/api/v1/auth/logout-all` | Token                         | Revoga todos os tokens do usuário.                                                     |
 | POST   | `/api/v1/auth/refresh`    | Token                         | Revoga o token atual e retorna outro para o mesmo dispositivo.                         |
 
-Tokens comuns expiram em 30 dias por padrão (`SANCTUM_TOKEN_EXPIRATION`, em minutos). Tokens demo expiram em 60 minutos por padrão (`DEMO_TOKEN_EXPIRATION`). Ambos devem ser configurados por ambiente. A rotação exige o token atual ainda válido; não há refresh token separado.
+Tokens comuns expiram em até 10 dias (`SANCTUM_TOKEN_EXPIRATION`, em minutos; padrão e teto de 14400). Valores menores continuam permitidos; configurações antigas de 30 dias são limitadas a 10 dias. Tokens demo expiram em 60 minutos por padrão (`DEMO_TOKEN_EXPIRATION`). A rotação exige o token atual ainda válido; não há refresh token separado. O app não renova automaticamente a sessão: pede novo login após o prazo, incluindo ao voltar do segundo plano. Sessões antigas sem registro do início da autenticação são removidas localmente na atualização, exigindo um novo login.
 
 O cadastro usa as mesmas regras de senha do Fortify e requer confirmação de senha. A verificação de e-mail não está habilitada para a API. Para ativá-la futuramente, habilite `Features::emailVerification()` em `config/fortify.php` e aplique o middleware `verified` ao grupo autenticado de `routes/api.php`; antes disso, decida como o cliente tratará a confirmação por link.
 

@@ -6,6 +6,7 @@ export type User = {
 };
 
 export type Session = {
+    authenticatedAt?: string;
     accessToken: string;
     apiUrl: string;
     expiresAt: string;

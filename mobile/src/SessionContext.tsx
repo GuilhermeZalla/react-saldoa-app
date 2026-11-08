@@ -7,10 +7,11 @@ import {
     useState,
     type PropsWithChildren,
 } from 'react';
-import { Alert } from 'react-native';
+import { Alert, AppState } from 'react-native';
 import { ApiError, sessionRequest } from './api';
 import { clearSession, readSession, saveSession } from './sessionStorage';
 import type { Session, User } from './types';
+import { isSessionExpired, sessionExpiresAt } from './sessionLifetime';
 
 type SessionContextValue = {
     session: Session | null;
@@ -35,30 +36,20 @@ export function SessionProvider({ children }: PropsWithChildren) {
                 return;
             }
 
-            currentSession = storedSession;
-            const expirationTime = Date.parse(storedSession.expiresAt);
-
-            if (
-                !storedSession.isDemo &&
-                Number.isFinite(expirationTime) &&
-                expirationTime - Date.now() < 7 * 24 * 60 * 60 * 1000
-            ) {
-                const refreshedToken = await sessionRequest<{
-                    access_token: string;
-                    expires_at: string;
-                }>(storedSession, '/auth/refresh', { method: 'POST' });
-                currentSession = {
-                    ...storedSession,
-                    accessToken: refreshedToken.access_token,
-                    expiresAt: refreshedToken.expires_at,
-                };
-                await saveSession(currentSession);
+            if (isSessionExpired(storedSession)) {
+                await clearSession();
+                return;
             }
+            currentSession = storedSession;
 
             const response = await sessionRequest<{ data: User }>(
                 currentSession,
                 '/auth/me',
             );
+            if (isSessionExpired(currentSession)) {
+                await clearSession();
+                return;
+            }
             const restoredSession = { ...currentSession, user: response.data };
             await saveSession(restoredSession);
             if (isCurrent()) {
@@ -67,7 +58,11 @@ export function SessionProvider({ children }: PropsWithChildren) {
         } catch (error) {
             if (error instanceof ApiError && error.status === 401) {
                 await clearSession();
-            } else if (isCurrent() && currentSession !== null) {
+            } else if (
+                isCurrent() &&
+                currentSession !== null &&
+                !isSessionExpired(currentSession)
+            ) {
                 setSession(currentSession);
             }
 
@@ -102,6 +97,28 @@ export function SessionProvider({ children }: PropsWithChildren) {
         await saveSession(nextSession);
         setSession(nextSession);
     }, []);
+
+    useEffect(() => {
+        if (session === null) return;
+        function expireSession(): void {
+            if (session !== null && isSessionExpired(session)) {
+                setSession(null);
+                void clearSession();
+                Alert.alert(t('Sua sessão expirou. Entre novamente.'));
+            }
+        }
+        const timeout = setTimeout(
+            expireSession,
+            Math.max(0, sessionExpiresAt(session) - Date.now()),
+        );
+        const subscription = AppState.addEventListener('change', (state) => {
+            if (state === 'active') expireSession();
+        });
+        return () => {
+            clearTimeout(timeout);
+            subscription.remove();
+        };
+    }, [session]);
 
     const logout = useCallback(async () => {
         if (session !== null) {

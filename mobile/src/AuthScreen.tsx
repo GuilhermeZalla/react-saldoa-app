@@ -1,11 +1,11 @@
-import { useThemeStyles } from './PreferencesContext';
+import * as Linking from 'expo-linking';
+import { usePreferences, useThemeStyles } from './PreferencesContext';
 import { t } from './i18n';
 import { useEffect, useState } from 'react';
 import {
     KeyboardAvoidingView,
     Keyboard,
     useWindowDimensions,
-    Linking,
     Platform,
     StyleSheet,
     Text,
@@ -25,6 +25,8 @@ import { AppIcon } from './icons';
 import { FinanceIllustration } from './FinanceIllustration';
 import type { ThemeColors } from './theme';
 import type { Session, User } from './types';
+import { RegistrationSuccess } from './RegistrationSuccess';
+import { SESSION_LIFETIME_MS } from './sessionLifetime';
 
 type Props = {
     onAuthenticated: (session: Session) => Promise<void>;
@@ -38,6 +40,7 @@ type AuthResponse = {
 
 export default function AuthScreen({ onAuthenticated }: Props) {
     const { colors, styles } = useThemeStyles(createStyles);
+    const { language } = usePreferences();
     const [mode, setMode] = useState<'login' | 'register'>('login');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -45,6 +48,7 @@ export default function AuthScreen({ onAuthenticated }: Props) {
     const [passwordConfirmation, setPasswordConfirmation] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [busy, setBusy] = useState(false);
+    const [createdSession, setCreatedSession] = useState<Session | null>(null);
     const [preferencesOpen, setPreferencesOpen] = useState(false);
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const { height } = useWindowDimensions();
@@ -129,13 +133,27 @@ export default function AuthScreen({ onAuthenticated }: Props) {
                 },
             );
 
-            await onAuthenticated({
+            const authenticatedAt = new Date();
+            const nextSession: Session = {
+                authenticatedAt: authenticatedAt.toISOString(),
                 accessToken: response.access_token,
                 apiUrl: targetApiUrl,
-                expiresAt: response.expires_at,
+                expiresAt: new Date(
+                    Math.min(
+                        Date.parse(response.expires_at),
+                        authenticatedAt.getTime() + SESSION_LIFETIME_MS,
+                    ),
+                ).toISOString(),
                 isDemo,
                 user: response.user,
-            });
+            };
+            setPassword('');
+            setPasswordConfirmation('');
+            if (!isDemo && mode === 'register') {
+                setCreatedSession(nextSession);
+            } else {
+                await onAuthenticated(nextSession);
+            }
         } catch (error) {
             setErrorMessage(
                 error instanceof ApiError
@@ -145,6 +163,30 @@ export default function AuthScreen({ onAuthenticated }: Props) {
         } finally {
             setBusy(false);
         }
+    }
+
+    if (createdSession !== null) {
+        return (
+            <RegistrationSuccess
+                busy={busy}
+                error={errorMessage}
+                onContinue={async () => {
+                    setBusy(true);
+                    setErrorMessage('');
+                    try {
+                        await onAuthenticated(createdSession);
+                    } catch {
+                        setErrorMessage(
+                            t(
+                                'Não foi possível salvar a sessão. Tente novamente.',
+                            ),
+                        );
+                    } finally {
+                        setBusy(false);
+                    }
+                }}
+            />
+        );
     }
 
     return (
@@ -291,6 +333,13 @@ export default function AuthScreen({ onAuthenticated }: Props) {
                         {t('Experimentar sem criar conta')}
                     </ActionButton>
                 ) : null}
+                <ActionButton
+                    onPress={() => void openPrivacyPolicy()}
+                    variant="quiet"
+                    compact
+                >
+                    {t('Política de Privacidade')}
+                </ActionButton>
             </Page>
             <PreferencesSheet
                 visible={preferencesOpen}
@@ -298,6 +347,27 @@ export default function AuthScreen({ onAuthenticated }: Props) {
             />
         </KeyboardAvoidingView>
     );
+
+    async function openPrivacyPolicy(): Promise<void> {
+        if (!webUrl) {
+            Alert.alert(
+                t('Não foi possível abrir o site'),
+                t('Tente novamente mais tarde.'),
+            );
+            return;
+        }
+
+        try {
+            await Linking.openURL(
+                `${webUrl}/privacy-policy${language === 'en' ? '?lang=en' : ''}`,
+            );
+        } catch {
+            Alert.alert(
+                t('Não foi possível abrir o site'),
+                t('Tente novamente mais tarde.'),
+            );
+        }
+    }
 }
 
 const createStyles = (colors: ThemeColors) =>
@@ -347,8 +417,8 @@ const createStyles = (colors: ThemeColors) =>
             backgroundColor: colors.surfaceMuted,
             borderRadius: 12,
             color: colors.text,
-            fontSize: 13,
-            lineHeight: 19,
+            fontSize: 14,
+            lineHeight: 20,
             padding: 12,
         },
     });

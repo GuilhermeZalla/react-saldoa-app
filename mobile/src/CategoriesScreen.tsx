@@ -1,9 +1,11 @@
 import { useThemeStyles } from './PreferencesContext';
 import { t } from './i18n';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
+import type { TextInputInstance } from 'react-native';
 import { ApiError, sessionRequest } from './api';
 import {
+    LoadingState,
     ActionButton,
     Card,
     ChoiceChips,
@@ -24,6 +26,7 @@ export default function CategoriesScreen({ session }: Props) {
     const commonStyles = useCommonStyles();
     const [categories, setCategories] = useState<Category[]>([]);
     const [name, setName] = useState('');
+    const nameInput = useRef<TextInputInstance>(null);
     const [type, setType] = useState<'income' | 'expense'>('expense');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -150,6 +153,7 @@ export default function CategoriesScreen({ session }: Props) {
                     <SectionTitle title={t('Nova categoria')} />
                     <TextField
                         label={t('Nome')}
+                        inputRef={nameInput}
                         value={name}
                         onChangeText={setName}
                         maxLength={255}
@@ -178,9 +182,7 @@ export default function CategoriesScreen({ session }: Props) {
             <Card>
                 <SectionTitle title={t('Suas categorias')} />
                 {loading ? (
-                    <Text style={commonStyles.muted}>
-                        {t('Carregando categorias…')}
-                    </Text>
+                    <LoadingState label={t('Carregando categorias…')} />
                 ) : categories.length ? (
                     categories.map((category) => (
                         <View key={category.id} style={styles.row}>
@@ -207,9 +209,21 @@ export default function CategoriesScreen({ session }: Props) {
                         </View>
                     ))
                 ) : (
-                    <Text style={commonStyles.muted}>
-                        {t('Nenhuma categoria cadastrada.')}
-                    </Text>
+                    <View style={{ gap: 12 }}>
+                        <Text style={commonStyles.muted}>
+                            {t(
+                                'Crie uma categoria, como Moradia ou Salário, e escolha se ela organiza receitas ou despesas.',
+                            )}
+                        </Text>
+                        {!session.isDemo && !errorMessage && (
+                            <ActionButton
+                                variant="secondary"
+                                onPress={() => nameInput.current?.focus()}
+                            >
+                                {t('Criar primeira categoria')}
+                            </ActionButton>
+                        )}
+                    </View>
                 )}
             </Card>
         </Page>
@@ -235,7 +249,7 @@ const createStyles = (colors: ThemeColors) =>
             backgroundColor: colors.expenseSoft,
             borderRadius: 10,
             color: colors.expense,
-            fontSize: 13,
+            fontSize: 14,
             padding: 12,
         },
         row: {
@@ -254,5 +268,5 @@ const createStyles = (colors: ThemeColors) =>
             fontSize: 16,
             fontWeight: '600',
         },
-        meta: { fontFamily: 'DMSans', color: colors.muted, fontSize: 11 },
+        meta: { fontFamily: 'DMSans', color: colors.muted, fontSize: 14 },
     });

@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import AppLogoIcon from '@/components/app-logo-icon';
-import { dashboard, login, register } from '@/routes';
+import { dashboard, login, privacyPolicy, register } from '@/routes';
 
 export default function Welcome() {
     const { auth } = usePage().props;
@@ -327,6 +327,12 @@ export default function Welcome() {
                         <p className="text-sm text-muted-foreground">
                             Feito por Guilherme Zalla
                         </p>
+                        <a
+                            href={privacyPolicy().url}
+                            className="inline-flex w-fit items-center text-sm text-muted-foreground underline decoration-border underline-offset-4 transition-colors duration-200 hover:text-foreground hover:decoration-current focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background focus-visible:outline-none"
+                        >
+                            Política de Privacidade
+                        </a>
                         <a
                             href="https://github.com/GuilhermeZalla/react-saldoa-app"
                             target="_blank"

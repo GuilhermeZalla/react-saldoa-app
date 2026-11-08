@@ -7,12 +7,37 @@ use App\Http\Controllers\DemoAuthController;
 use App\Http\Controllers\PublicAccountDeletionController;
 use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\TransactionController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Inertia\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 Route::get('/', fn () => Inertia::render('welcome', [
     'canRegister' => ! config('demo.instance'),
 ]))->name('home');
+
+Route::get('guide', function (Request $request): BinaryFileResponse {
+    $isEnglish = $request->query('lang') === 'en';
+    $isDesktop = $request->query('platform') === 'desktop';
+    $filename = match (true) {
+        $isDesktop && $isEnglish => 'use-guide-saldoa-desktop-en.pdf',
+        $isDesktop => 'guia-de-uso-saldoa-desktop.pdf',
+        $isEnglish => 'use-guide-saldoa-en.pdf',
+        default => 'guia-de-uso-saldoa.pdf',
+    };
+
+    return response()->download(base_path('docs/'.$filename), $filename, [
+        'Content-Type' => 'application/pdf',
+        'Content-Language' => $isEnglish ? 'en' : 'pt-BR',
+    ]);
+})->name('guide');
+
+Route::get('privacy-policy', function (Request $request): Response {
+    return Inertia::render('privacy-policy', [
+        'language' => $request->query('lang') === 'en' ? 'en' : 'pt-BR',
+    ]);
+})->name('privacy-policy');
 
 Route::post('demo-login', [DemoAuthController::class, 'login'])
     ->middleware('guest')
@@ -36,6 +61,7 @@ Route::get('account-deletion/complete', [PublicAccountDeletionController::class,
     ->name('account-deletion.complete');
 
 Route::middleware(['auth', 'verified', 'demo-instance-read-only'])->group(function () {
+    Route::get('help', fn () => Inertia::render('help'))->name('help');
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('categories', CategoryController::class)->except(['show']);

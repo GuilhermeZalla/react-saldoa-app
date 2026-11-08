@@ -166,7 +166,16 @@ export function UpcomingTransactions({
                 ) : (
                     <div className="flex flex-col items-center gap-2 py-6 text-center text-sm text-muted-foreground">
                         <CalendarDays className="size-6" />
-                        <p>Nenhuma recorrência prevista neste período.</p>
+                        <p>
+                            Nenhuma recorrência prevista neste período. Crie uma
+                            regra para acompanhar os próximos valores na agenda.
+                        </p>
+                        <Link
+                            href={RecurringTransactionController.create()}
+                            className="font-medium text-primary hover:underline"
+                        >
+                            Criar recorrência
+                        </Link>
                     </div>
                 )}
             </CardContent>

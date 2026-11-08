@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { GettingStarted } from './GettingStarted';
 import {
     Pressable,
     RefreshControl,
@@ -11,6 +12,7 @@ import { useThemeStyles } from './PreferencesContext';
 import { ApiError, sessionRequest } from './api';
 import { AppIcon } from './icons';
 import {
+    LoadingState,
     ActionButton,
     IconButton,
     Page,
@@ -158,7 +160,17 @@ export default function DashboardScreen({ session }: { session: Session }) {
                 />
             </View>
             <FinanceError message={error} />
-            {error && (
+            <GettingStarted
+                session={session}
+                empty={
+                    !loading &&
+                    !error &&
+                    data !== null &&
+                    !data.hasTransactionsInMonth &&
+                    !data.hasTransactionsInChartRange
+                }
+            />
+            {!!error && (
                 <ActionButton
                     variant="secondary"
                     compact
@@ -178,6 +190,11 @@ export default function DashboardScreen({ session }: { session: Session }) {
                     style={styles.balanceValue}
                 >
                     {value(data?.summary.overallBalance)}
+                </Text>
+                <Text style={styles.small}>
+                    {t(
+                        'Receitas menos despesas de todos os períodos, sem previsões da agenda.',
+                    )}
                 </Text>
                 <View style={styles.row}>
                     <Text style={styles.caption}>{t('Todos os períodos')}</Text>
@@ -247,9 +264,7 @@ export default function DashboardScreen({ session }: { session: Session }) {
             <Card>
                 <SectionTitle title={t('Seu dinheiro ao longo do tempo')} />
                 {loading ? (
-                    <Text style={styles.caption}>
-                        {t('Carregando resumo…')}
-                    </Text>
+                    <LoadingState label={t('Carregando resumo…')} />
                 ) : data?.hasTransactionsInChartRange ? (
                     <MonthlyFlowChart
                         data={data.monthlyTrend}
@@ -278,10 +293,14 @@ export default function DashboardScreen({ session }: { session: Session }) {
                         'Próxima ocorrência de cada recorrência. Valores previstos, fora do saldo realizado.',
                     )}
                 </Text>
-                <UpcomingList
-                    items={(data?.upcomingTransactions ?? []).slice(0, 3)}
-                    hidden={hidden}
-                />
+                {loading ? (
+                    <LoadingState label={t('Carregando resumo…')} />
+                ) : (
+                    <UpcomingList
+                        items={(data?.upcomingTransactions ?? []).slice(0, 3)}
+                        hidden={hidden}
+                    />
+                )}
             </Card>
             <Card>
                 <SectionTitle
@@ -407,12 +426,12 @@ const createStyles = (colors: ThemeColors) =>
             justifyContent: 'space-between',
             gap: 10,
         },
-        caption: { fontFamily: 'DMSans', fontSize: 11, color: colors.muted },
+        caption: { fontFamily: 'DMSans', fontSize: 14, color: colors.muted },
         right: { textAlign: 'right' },
         small: {
             fontFamily: 'DMSans',
-            fontSize: 10,
-            lineHeight: 16,
+            fontSize: 14,
+            lineHeight: 20,
             color: colors.muted,
         },
         balance: {
@@ -430,7 +449,7 @@ const createStyles = (colors: ThemeColors) =>
         },
         monthBalance: {
             fontFamily: 'SpaceGrotesk',
-            fontSize: 13,
+            fontSize: 14,
             color: colors.text,
             textAlign: 'right',
             fontWeight: '600',
@@ -451,14 +470,14 @@ const createStyles = (colors: ThemeColors) =>
         },
         link: {
             fontFamily: 'DMSans',
-            fontSize: 11,
+            fontSize: 14,
             fontWeight: '600',
             color: colors.primary,
         },
         budgetRow: { gap: 10, paddingVertical: 12 },
         rowTitle: {
             fontFamily: 'DMSans',
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: '600',
             color: colors.text,
         },
@@ -473,7 +492,7 @@ const createStyles = (colors: ThemeColors) =>
         transactionCopy: { flex: 1, gap: 3 },
         rowAmount: {
             fontFamily: 'SpaceGrotesk',
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: '600',
         },
     });
