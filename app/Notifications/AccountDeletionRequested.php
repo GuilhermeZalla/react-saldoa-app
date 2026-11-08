@@ -2,9 +2,9 @@
 
 namespace App\Notifications;
 
+use App\Mail\AccountDeletionConfirmation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class AccountDeletionRequested extends Notification implements ShouldQueue
@@ -23,13 +23,12 @@ class AccountDeletionRequested extends Notification implements ShouldQueue
         return ['mail'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(object $notifiable): AccountDeletionConfirmation
     {
-        return (new MailMessage)
-            ->subject('Confirme a exclusão da sua conta Saldoa')
-            ->greeting('Olá!')
-            ->line('Recebemos uma solicitação para excluir sua conta e os dados financeiros associados.')
-            ->line('A solicitação expira em uma hora. Se você não fez este pedido, ignore esta mensagem.')
-            ->action('Confirmar exclusão da conta', $this->confirmationUrl);
+        return new AccountDeletionConfirmation(
+            name: $notifiable->name ?? '',
+            email: $notifiable->email ?? '',
+            confirmationUrl: $this->confirmationUrl,
+        );
     }
 }

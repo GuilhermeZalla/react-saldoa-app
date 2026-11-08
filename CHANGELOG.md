@@ -2,6 +2,23 @@
 
 Release notes for the Saldoa website and Android app. Dates below follow the published release date in UTC.
 
+## [1.1.1-preview] - 2026-11-08
+
+### Added
+
+- Templates customizados de e-mail transacional para recuperação de senha e confirmação de exclusão de conta, seguindo a identidade visual da Saldoa (logo Fluxo, laranja de destaque, DM Sans no corpo, Space Grotesk nos títulos).
+- Classes Mailable `PasswordResetLink` e `AccountDeletionConfirmation` em `app/Mail/`, com views Blade em `resources/views/emails/`.
+- Override de `sendPasswordResetNotification` no modelo `User` para enviar o e-mail de redefinição com o novo template.
+
+### Improved
+
+- E-mails de recuperação de senha e exclusão de conta agora usam layout próprio com botões de ação, avisos de expiração e rodapé da marca, em vez do template padrão do Laravel.
+
+### Compatibility and validation
+
+- 176 testes PHP aprovados (174 passaram, 2 ignorados por 2FA desabilitada), 1.472 assertions.
+- Pint, PHPStan e builds aprovados.
+
 ## [1.1.0] - 2026-11-02
 
 ### Added

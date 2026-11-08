@@ -1,8 +1,8 @@
 <?php
 
+use App\Mail\PasswordResetLink;
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Fortify\Features;
 
 beforeEach(function () {
@@ -16,24 +16,24 @@ test('reset password link screen can be rendered', function () {
 });
 
 test('reset password link can be requested', function () {
-    Notification::fake();
+    Mail::fake();
 
     $user = User::factory()->create();
 
     $this->post(route('password.email'), ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class);
+    Mail::assertQueued(PasswordResetLink::class);
 });
 
 test('reset password screen can be rendered', function () {
-    Notification::fake();
+    Mail::fake();
 
     $user = User::factory()->create();
 
     $this->post(route('password.email'), ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
-        $response = $this->get(route('password.reset', $notification->token));
+    Mail::assertQueued(PasswordResetLink::class, function ($mailable) {
+        $response = $this->get(route('password.reset', $mailable->token));
 
         $response->assertOk();
 
@@ -42,15 +42,15 @@ test('reset password screen can be rendered', function () {
 });
 
 test('password can be reset with valid token', function () {
-    Notification::fake();
+    Mail::fake();
 
     $user = User::factory()->create();
 
     $this->post(route('password.email'), ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
+    Mail::assertQueued(PasswordResetLink::class, function ($mailable) use ($user) {
         $response = $this->post(route('password.update'), [
-            'token' => $notification->token,
+            'token' => $mailable->token,
             'email' => $user->email,
             'password' => 'password',
             'password_confirmation' => 'password',
