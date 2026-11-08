@@ -566,7 +566,7 @@ export default function TransactionsScreen({ session }: { session: Session }) {
 }
 const createStyles = (colors: ThemeColors) =>
     StyleSheet.create({
-        page: { padding: 18, gap: 16 },
+        page: { padding: 18, gap: 16, maxWidth: 1000 },
         toolbar: {
             flexDirection: 'row',
             alignItems: 'center',

@@ -16,6 +16,7 @@ import {
     ActionButton,
     IconButton,
     Page,
+    ResponsiveGrid,
     ProgressBar,
     SectionTitle,
 } from './components';
@@ -179,234 +180,252 @@ export default function DashboardScreen({ session }: { session: Session }) {
                     {t('Tentar novamente')}
                 </ActionButton>
             )}
-            <Card style={styles.balance}>
-                <View style={styles.row}>
-                    <Text style={styles.caption}>{t('Saldo geral')}</Text>
-                    <AppIcon name="wallet" size={21} color={colors.primary} />
-                </View>
-                <Text
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    style={styles.balanceValue}
-                >
-                    {value(data?.summary.overallBalance)}
-                </Text>
-                <Text style={styles.small}>
-                    {t(
-                        'Receitas menos despesas de todos os períodos, sem previsões da agenda.',
-                    )}
-                </Text>
-                <View style={styles.row}>
-                    <Text style={styles.caption}>{t('Todos os períodos')}</Text>
-                    <View>
-                        <Text style={[styles.caption, styles.right]}>
-                            {t('Saldo do mês')}
-                        </Text>
-                        <Text style={styles.monthBalance}>
-                            {value(data?.summary.monthlyBalance)}
-                        </Text>
+            <ResponsiveGrid gap={16}>
+                <Card style={styles.balance}>
+                    <View style={styles.row}>
+                        <Text style={styles.caption}>{t('Saldo geral')}</Text>
+                        <AppIcon
+                            name="wallet"
+                            size={21}
+                            color={colors.primary}
+                        />
                     </View>
-                </View>
-            </Card>
-            <View style={styles.metrics}>
-                {(
-                    [
-                        [
-                            'income',
-                            'Receitas no mês',
-                            data?.summary.monthlyIncome,
-                        ],
-                        [
-                            'expense',
-                            'Despesas no mês',
-                            data?.summary.monthlyExpense,
-                        ],
-                    ] as const
-                ).map(([kind, label, amount]) => (
-                    <Card key={kind} style={styles.metric}>
-                        <View style={styles.metricLabel}>
-                            <AppIcon
-                                name={
-                                    kind === 'income'
-                                        ? 'arrow-down'
-                                        : 'arrow-up'
-                                }
-                                size={17}
-                                color={
-                                    kind === 'income'
-                                        ? colors.income
-                                        : colors.expense
-                                }
-                            />
-                            <Text style={styles.caption}>{t(label)}</Text>
+                    <Text
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        style={styles.balanceValue}
+                    >
+                        {value(data?.summary.overallBalance)}
+                    </Text>
+                    <Text style={styles.small}>
+                        {t(
+                            'Receitas menos despesas de todos os períodos, sem previsões da agenda.',
+                        )}
+                    </Text>
+                    <View style={styles.row}>
+                        <Text style={styles.caption}>
+                            {t('Todos os períodos')}
+                        </Text>
+                        <View>
+                            <Text style={[styles.caption, styles.right]}>
+                                {t('Saldo do mês')}
+                            </Text>
+                            <Text style={styles.monthBalance}>
+                                {value(data?.summary.monthlyBalance)}
+                            </Text>
                         </View>
-                        <Text
-                            numberOfLines={1}
-                            adjustsFontSizeToFit
-                            style={[
-                                styles.metricValue,
-                                {
-                                    color:
+                    </View>
+                </Card>
+                <View style={styles.metrics}>
+                    {(
+                        [
+                            [
+                                'income',
+                                'Receitas no mês',
+                                data?.summary.monthlyIncome,
+                            ],
+                            [
+                                'expense',
+                                'Despesas no mês',
+                                data?.summary.monthlyExpense,
+                            ],
+                        ] as const
+                    ).map(([kind, label, amount]) => (
+                        <Card key={kind} style={styles.metric}>
+                            <View style={styles.metricLabel}>
+                                <AppIcon
+                                    name={
+                                        kind === 'income'
+                                            ? 'arrow-down'
+                                            : 'arrow-up'
+                                    }
+                                    size={17}
+                                    color={
                                         kind === 'income'
                                             ? colors.income
-                                            : colors.expense,
-                                },
-                            ]}
-                        >
-                            {value(amount)}
-                        </Text>
-                        <Text style={styles.small}>
-                            {t('No período selecionado')}
-                        </Text>
-                    </Card>
-                ))}
-            </View>
-            <Card>
-                <SectionTitle title={t('Seu dinheiro ao longo do tempo')} />
-                {loading ? (
-                    <LoadingState label={t('Carregando resumo…')} />
-                ) : data?.hasTransactionsInChartRange ? (
-                    <MonthlyFlowChart
-                        data={data.monthlyTrend}
-                        hidden={hidden}
-                    />
-                ) : (
-                    <EmptyFinance>
-                        {t('Não há lançamentos neste período.')}
-                    </EmptyFinance>
-                )}
-            </Card>
-            <Card>
-                <SectionTitle
-                    title={t('Próximos lançamentos')}
-                    action={
-                        <Pressable
-                            accessibilityRole="button"
-                            onPress={() => router.navigate('/budgets')}
-                        >
-                            <Text style={styles.link}>{t('Ver todos')}</Text>
-                        </Pressable>
-                    }
-                />
-                <Text style={styles.small}>
-                    {t(
-                        'Próxima ocorrência de cada recorrência. Valores previstos, fora do saldo realizado.',
-                    )}
-                </Text>
-                {loading ? (
-                    <LoadingState label={t('Carregando resumo…')} />
-                ) : (
-                    <UpcomingList
-                        items={(data?.upcomingTransactions ?? []).slice(0, 3)}
-                        hidden={hidden}
-                    />
-                )}
-            </Card>
-            <Card>
-                <SectionTitle
-                    title={t('Limites de gastos')}
-                    action={
-                        <Pressable
-                            accessibilityRole="button"
-                            onPress={() => router.navigate('/budgets')}
-                        >
-                            <Text style={styles.link}>{t('Planejar')}</Text>
-                        </Pressable>
-                    }
-                />
-                {budgets.length ? (
-                    budgets.slice(0, 3).map((budget) => (
-                        <View key={budget.id} style={styles.budgetRow}>
-                            <View style={styles.row}>
-                                <Text style={styles.rowTitle}>
-                                    {budget.category_name}
-                                </Text>
-                                <Text
-                                    style={[
-                                        styles.caption,
-                                        {
-                                            color:
-                                                budget.status === 'ok'
-                                                    ? colors.muted
-                                                    : colors.warning,
-                                        },
-                                    ]}
-                                >
-                                    {Math.round(budget.percentage)}%
-                                </Text>
-                            </View>
-                            <ProgressBar
-                                value={budget.percentage}
-                                label={budget.category_name}
-                                color={
-                                    budget.status === 'ok'
-                                        ? colors.primary
-                                        : colors.warning
-                                }
-                            />
-                            <View style={styles.row}>
-                                <Text style={styles.small}>
-                                    {t('Gasto')}: {value(budget.spent)}
-                                </Text>
-                                <Text style={styles.small}>
-                                    {t('Limite')}: {value(budget.amount)}
-                                </Text>
-                            </View>
-                        </View>
-                    ))
-                ) : (
-                    <EmptyFinance>
-                        {t('Nenhuma meta cadastrada para este mês.')}
-                    </EmptyFinance>
-                )}
-            </Card>
-            <Card>
-                <SectionTitle
-                    title={t('Últimos lançamentos')}
-                    action={
-                        <Pressable
-                            accessibilityRole="button"
-                            onPress={() => router.navigate('/transactions')}
-                        >
-                            <Text style={styles.link}>{t('Ver todos')}</Text>
-                        </Pressable>
-                    }
-                />
-                {data?.recentTransactions.length ? (
-                    data.recentTransactions.map((transaction) => (
-                        <View style={styles.transaction} key={transaction.id}>
-                            <View style={styles.transactionCopy}>
-                                <Text style={styles.rowTitle}>
-                                    {transaction.description}
-                                </Text>
-                                <Text style={styles.small}>
-                                    {transaction.category} ·{' '}
-                                    {formatDate(transaction.date)}
-                                </Text>
+                                            : colors.expense
+                                    }
+                                />
+                                <Text style={styles.caption}>{t(label)}</Text>
                             </View>
                             <Text
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
                                 style={[
-                                    styles.rowAmount,
+                                    styles.metricValue,
                                     {
                                         color:
-                                            transaction.type === 'income'
+                                            kind === 'income'
                                                 ? colors.income
                                                 : colors.expense,
                                     },
                                 ]}
                             >
-                                {hidden
-                                    ? '••••'
-                                    : `${transaction.type === 'income' ? '+' : '−'} ${formatCurrency(transaction.amount)}`}
+                                {value(amount)}
                             </Text>
-                        </View>
-                    ))
-                ) : (
-                    <EmptyFinance>
-                        {t('Não há lançamentos neste período.')}
-                    </EmptyFinance>
-                )}
-            </Card>
+                            <Text style={styles.small}>
+                                {t('No período selecionado')}
+                            </Text>
+                        </Card>
+                    ))}
+                </View>
+                <Card>
+                    <SectionTitle title={t('Seu dinheiro ao longo do tempo')} />
+                    {loading ? (
+                        <LoadingState label={t('Carregando resumo…')} />
+                    ) : data?.hasTransactionsInChartRange ? (
+                        <MonthlyFlowChart
+                            data={data.monthlyTrend}
+                            hidden={hidden}
+                        />
+                    ) : (
+                        <EmptyFinance>
+                            {t('Não há lançamentos neste período.')}
+                        </EmptyFinance>
+                    )}
+                </Card>
+                <Card>
+                    <SectionTitle
+                        title={t('Próximos lançamentos')}
+                        action={
+                            <Pressable
+                                accessibilityRole="button"
+                                onPress={() => router.navigate('/budgets')}
+                            >
+                                <Text style={styles.link}>
+                                    {t('Ver todos')}
+                                </Text>
+                            </Pressable>
+                        }
+                    />
+                    <Text style={styles.small}>
+                        {t(
+                            'Próxima ocorrência de cada recorrência. Valores previstos, fora do saldo realizado.',
+                        )}
+                    </Text>
+                    {loading ? (
+                        <LoadingState label={t('Carregando resumo…')} />
+                    ) : (
+                        <UpcomingList
+                            items={(data?.upcomingTransactions ?? []).slice(
+                                0,
+                                3,
+                            )}
+                            hidden={hidden}
+                        />
+                    )}
+                </Card>
+                <Card>
+                    <SectionTitle
+                        title={t('Limites de gastos')}
+                        action={
+                            <Pressable
+                                accessibilityRole="button"
+                                onPress={() => router.navigate('/budgets')}
+                            >
+                                <Text style={styles.link}>{t('Planejar')}</Text>
+                            </Pressable>
+                        }
+                    />
+                    {budgets.length ? (
+                        budgets.slice(0, 3).map((budget) => (
+                            <View key={budget.id} style={styles.budgetRow}>
+                                <View style={styles.row}>
+                                    <Text style={styles.rowTitle}>
+                                        {budget.category_name}
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.caption,
+                                            {
+                                                color:
+                                                    budget.status === 'ok'
+                                                        ? colors.muted
+                                                        : colors.warning,
+                                            },
+                                        ]}
+                                    >
+                                        {Math.round(budget.percentage)}%
+                                    </Text>
+                                </View>
+                                <ProgressBar
+                                    value={budget.percentage}
+                                    label={budget.category_name}
+                                    color={
+                                        budget.status === 'ok'
+                                            ? colors.primary
+                                            : colors.warning
+                                    }
+                                />
+                                <View style={styles.row}>
+                                    <Text style={styles.small}>
+                                        {t('Gasto')}: {value(budget.spent)}
+                                    </Text>
+                                    <Text style={styles.small}>
+                                        {t('Limite')}: {value(budget.amount)}
+                                    </Text>
+                                </View>
+                            </View>
+                        ))
+                    ) : (
+                        <EmptyFinance>
+                            {t('Nenhuma meta cadastrada para este mês.')}
+                        </EmptyFinance>
+                    )}
+                </Card>
+                <Card>
+                    <SectionTitle
+                        title={t('Últimos lançamentos')}
+                        action={
+                            <Pressable
+                                accessibilityRole="button"
+                                onPress={() => router.navigate('/transactions')}
+                            >
+                                <Text style={styles.link}>
+                                    {t('Ver todos')}
+                                </Text>
+                            </Pressable>
+                        }
+                    />
+                    {data?.recentTransactions.length ? (
+                        data.recentTransactions.map((transaction) => (
+                            <View
+                                style={styles.transaction}
+                                key={transaction.id}
+                            >
+                                <View style={styles.transactionCopy}>
+                                    <Text style={styles.rowTitle}>
+                                        {transaction.description}
+                                    </Text>
+                                    <Text style={styles.small}>
+                                        {transaction.category} ·{' '}
+                                        {formatDate(transaction.date)}
+                                    </Text>
+                                </View>
+                                <Text
+                                    style={[
+                                        styles.rowAmount,
+                                        {
+                                            color:
+                                                transaction.type === 'income'
+                                                    ? colors.income
+                                                    : colors.expense,
+                                        },
+                                    ]}
+                                >
+                                    {hidden
+                                        ? '••••'
+                                        : `${transaction.type === 'income' ? '+' : '−'} ${formatCurrency(transaction.amount)}`}
+                                </Text>
+                            </View>
+                        ))
+                    ) : (
+                        <EmptyFinance>
+                            {t('Não há lançamentos neste período.')}
+                        </EmptyFinance>
+                    )}
+                </Card>
+            </ResponsiveGrid>
         </Page>
     );
 }

@@ -6,6 +6,7 @@ import {
     Card,
     Page,
     PageTitle,
+    ResponsiveGrid,
     SectionTitle,
 } from './components';
 import { usePreferences, useThemeStyles } from './PreferencesContext';
@@ -52,45 +53,47 @@ export default function HelpScreen() {
                     'Comece com três passos. Consulte esta ajuda sempre que precisar.',
                 )}
             />
-            {helpSteps.map((step) => (
-                <Card key={step.title}>
-                    <SectionTitle title={t(step.title)} />
-                    <Text style={styles.text}>{t(step.description)}</Text>
+            <ResponsiveGrid>
+                {helpSteps.map((step) => (
+                    <Card key={step.title}>
+                        <SectionTitle title={t(step.title)} />
+                        <Text style={styles.text}>{t(step.description)}</Text>
+                        <ActionButton
+                            variant="secondary"
+                            onPress={() => router.navigate(step.href)}
+                        >
+                            {t('Abrir')}
+                        </ActionButton>
+                    </Card>
+                ))}
+                {helpTopics.map((topic) => (
+                    <Card key={topic.title}>
+                        <SectionTitle title={t(topic.title)} />
+                        <Text style={styles.text}>{t(topic.description)}</Text>
+                        <ActionButton
+                            variant="quiet"
+                            onPress={() => router.navigate(topic.href)}
+                        >
+                            {t('Abrir')}
+                        </ActionButton>
+                    </Card>
+                ))}
+                <Card>
+                    <SectionTitle title={t('Guia completo em PDF')} />
+                    <Text style={styles.text}>
+                        {t(
+                            'Guia no idioma do aplicativo, com capturas em português. Escolha uma pasta para salvar o PDF. É preciso internet para baixar; depois você pode ler offline.',
+                        )}
+                    </Text>
                     <ActionButton
                         variant="secondary"
-                        onPress={() => router.navigate(step.href)}
+                        loading={downloading}
+                        onPress={() => void saveGuide()}
                     >
-                        {t('Abrir')}
+                        {t('Baixar guia em PDF')}
                     </ActionButton>
                 </Card>
-            ))}
-            {helpTopics.map((topic) => (
-                <Card key={topic.title}>
-                    <SectionTitle title={t(topic.title)} />
-                    <Text style={styles.text}>{t(topic.description)}</Text>
-                    <ActionButton
-                        variant="quiet"
-                        onPress={() => router.navigate(topic.href)}
-                    >
-                        {t('Abrir')}
-                    </ActionButton>
-                </Card>
-            ))}
-            <Card>
-                <SectionTitle title={t('Guia completo em PDF')} />
-                <Text style={styles.text}>
-                    {t(
-                        'Guia no idioma do aplicativo, com capturas em português. Escolha uma pasta para salvar o PDF. É preciso internet para baixar; depois você pode ler offline.',
-                    )}
-                </Text>
-                <ActionButton
-                    variant="secondary"
-                    loading={downloading}
-                    onPress={() => void saveGuide()}
-                >
-                    {t('Baixar guia em PDF')}
-                </ActionButton>
-            </Card>
+            </ResponsiveGrid>
         </Page>
     );
 }

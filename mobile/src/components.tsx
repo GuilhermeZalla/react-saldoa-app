@@ -2,6 +2,7 @@ import { usePreferences, useThemeStyles } from './PreferencesContext';
 import { useSegments } from 'expo-router';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 import type { PropsWithChildren, ReactElement, ReactNode, Ref } from 'react';
+import { Children, useState } from 'react';
 import {
     ActivityIndicator,
     Modal,
@@ -18,6 +19,7 @@ import {
 } from 'react-native';
 import { spacing, type ThemeColors } from './theme';
 import { AppIcon, type IconName } from './icons';
+import { useResponsiveLayout } from './responsive';
 
 export function LoadingState({ label }: { label: string }) {
     const { colors, styles } = useThemeStyles(createStyles);
@@ -46,8 +48,9 @@ export function Page({
 }>) {
     const { styles } = useThemeStyles(createStyles);
     const segments = useSegments();
+    const { isExpanded, hasSidebar } = useResponsiveLayout();
     const edges: Edge[] =
-        segments[0] === '(app)'
+        segments[0] === '(app)' && !hasSidebar
             ? ['top', 'left', 'right']
             : ['top', 'left', 'right', 'bottom'];
     if (!scroll) {
@@ -62,7 +65,11 @@ export function Page({
         <SafeAreaView edges={edges} style={styles.page}>
             <ScrollView
                 style={styles.page}
-                contentContainerStyle={[styles.pageContent, contentStyle]}
+                contentContainerStyle={[
+                    styles.pageContent,
+                    isExpanded && { maxWidth: 1200 },
+                    contentStyle,
+                ]}
                 keyboardShouldPersistTaps="handled"
                 automaticallyAdjustKeyboardInsets
                 refreshControl={refreshControl}
@@ -70,6 +77,44 @@ export function Page({
                 {children}
             </ScrollView>
         </SafeAreaView>
+    );
+}
+
+export function ResponsiveGrid({
+    children,
+    gap = 20,
+}: PropsWithChildren<{ gap?: number }>) {
+    const { isExpanded, fontScale } = useResponsiveLayout();
+    const [width, setWidth] = useState(0);
+    const twoColumns =
+        isExpanded && width >= 680 * Math.max(1, fontScale) + gap;
+
+    return (
+        <View
+            onLayout={(event) => {
+                const nextWidth = event.nativeEvent.layout.width;
+                setWidth((current) =>
+                    Math.abs(current - nextWidth) < 1 ? current : nextWidth,
+                );
+            }}
+            style={{ flexDirection: 'row', flexWrap: 'wrap', gap }}
+        >
+            {Children.toArray(children).map((child, index) => (
+                <View
+                    key={
+                        typeof child === 'object' && 'key' in child
+                            ? child.key
+                            : index
+                    }
+                    style={{
+                        minWidth: 0,
+                        width: twoColumns ? (width - gap) / 2 : '100%',
+                    }}
+                >
+                    {child}
+                </View>
+            ))}
+        </View>
     );
 }
 
@@ -249,14 +294,22 @@ export function PreferencesSheet({
 }) {
     const { t } = usePreferences();
     const { styles } = useThemeStyles(createStyles);
+    const { isExpanded } = useResponsiveLayout();
     return (
         <Modal
             visible={visible}
             transparent
             animationType="none"
+            supportedOrientations={[
+                'portrait',
+                'landscape-left',
+                'landscape-right',
+            ]}
             onRequestClose={onClose}
         >
-            <SafeAreaView style={styles.modalArea}>
+            <SafeAreaView
+                style={[styles.modalArea, isExpanded && styles.modalExpanded]}
+            >
                 <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={t('Fechar preferências')}
@@ -264,7 +317,7 @@ export function PreferencesSheet({
                     onPress={onClose}
                 />
                 <View
-                    style={styles.sheet}
+                    style={[styles.sheet, isExpanded && styles.sheetExpanded]}
                     accessibilityViewIsModal
                     onAccessibilityEscape={onClose}
                 >
@@ -653,6 +706,8 @@ const createStyles = (colors: ThemeColors) =>
             justifyContent: 'flex-end',
             backgroundColor: colors.backdrop,
         },
+        modalExpanded: { justifyContent: 'center', padding: 24 },
+        sheetExpanded: { borderRadius: 28 },
         sheet: {
             backgroundColor: colors.surface,
             borderTopLeftRadius: 28,

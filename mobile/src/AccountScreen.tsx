@@ -10,6 +10,7 @@ import {
     Card,
     Page,
     PageTitle,
+    ResponsiveGrid,
     PreferencesSheet,
     SettingsRow,
     SectionTitle,
@@ -143,149 +144,157 @@ export default function AccountScreen({
                 </View>
             ) : null}
 
-            <Card style={styles.profileCard}>
-                <UserAvatar name={session.user.name} />
-                <View style={styles.profileCopy}>
-                    <Text style={styles.name}>{session.user.name}</Text>
-                    <Text style={styles.email}>{session.user.email}</Text>
-                </View>
-            </Card>
-            <Card>
-                <SectionTitle title={t('Do seu jeito')} />
-                <SettingsRow
-                    icon="settings"
-                    title={t('Idioma e aparência')}
-                    subtitle={`${language === 'en' ? 'English' : 'Português'} · ${t(theme === 'light' ? 'Claro' : theme === 'dark' ? 'Escuro' : 'Sistema')}`}
-                    onPress={() => setPreferencesOpen(true)}
-                />
-                <SettingsRow
-                    icon="help"
-                    title={t('Política de Privacidade')}
-                    subtitle={t('Leia como seus dados são tratados.')}
-                    onPress={() => void openPrivacyPolicy()}
-                />
-            </Card>
-            {!session.isDemo ? (
+            <ResponsiveGrid>
+                <Card style={styles.profileCard}>
+                    <UserAvatar name={session.user.name} />
+                    <View style={styles.profileCopy}>
+                        <Text style={styles.name}>{session.user.name}</Text>
+                        <Text style={styles.email}>{session.user.email}</Text>
+                    </View>
+                </Card>
                 <Card>
-                    <SectionTitle title={t('Seus dados')} />
+                    <SectionTitle title={t('Do seu jeito')} />
                     <SettingsRow
-                        icon="download"
-                        title={t('Exportar todos os dados')}
-                        subtitle={t('Seu perfil e suas finanças em JSON.')}
-                        onPress={() =>
-                            void shareExport(
-                                '/account/export',
-                                t('Exportação Saldoa'),
-                            )
-                        }
-                        disabled={busy}
-                        loading={busy}
+                        icon="settings"
+                        title={t('Idioma e aparência')}
+                        subtitle={`${language === 'en' ? 'English' : 'Português'} · ${t(theme === 'light' ? 'Claro' : theme === 'dark' ? 'Escuro' : 'Sistema')}`}
+                        onPress={() => setPreferencesOpen(true)}
                     />
                     <SettingsRow
-                        icon="transactions"
-                        title={t('Exportar CSV do mês')}
-                        subtitle={t('Seus lançamentos em uma planilha.')}
-                        onPress={() =>
-                            void shareExport(
-                                `/transactions/export?month=${currentMonth()}`,
-                                t('Lançamentos Saldoa'),
-                            )
-                        }
-                        disabled={busy}
+                        icon="help"
+                        title={t('Política de Privacidade')}
+                        subtitle={t('Leia como seus dados são tratados.')}
+                        onPress={() => void openPrivacyPolicy()}
                     />
                 </Card>
-            ) : null}
-            {errorMessage ? (
-                <Text accessibilityRole="alert" style={styles.error}>
-                    {errorMessage}
-                </Text>
-            ) : null}
-
-            <Card>
-                <SectionTitle title={t('Segurança')} />
-                <Text style={styles.description}>
-                    {t('Sessão válida até')}{' '}
-                    {new Intl.DateTimeFormat(getLocale(), {
-                        dateStyle: 'medium',
-                        timeStyle: 'short',
-                    }).format(new Date(session.expiresAt))}
-                </Text>
                 {!session.isDemo ? (
-                    <SettingsRow
-                        icon="shield"
-                        title={t('Encerrar sessões em outros dispositivos')}
-                        onPress={() =>
-                            Alert.alert(
-                                t('Encerrar todas as sessões?'),
-                                t('Todos os dispositivos serão desconectados.'),
-                                [
-                                    { text: t('Cancelar'), style: 'cancel' },
-                                    {
-                                        text: t('Encerrar sessões'),
-                                        onPress: () => void revokeAllTokens(),
-                                    },
-                                ],
-                            )
-                        }
-                        disabled={busy}
-                    />
+                    <Card>
+                        <SectionTitle title={t('Seus dados')} />
+                        <SettingsRow
+                            icon="download"
+                            title={t('Exportar todos os dados')}
+                            subtitle={t('Seu perfil e suas finanças em JSON.')}
+                            onPress={() =>
+                                void shareExport(
+                                    '/account/export',
+                                    t('Exportação Saldoa'),
+                                )
+                            }
+                            disabled={busy}
+                            loading={busy}
+                        />
+                        <SettingsRow
+                            icon="transactions"
+                            title={t('Exportar CSV do mês')}
+                            subtitle={t('Seus lançamentos em uma planilha.')}
+                            onPress={() =>
+                                void shareExport(
+                                    `/transactions/export?month=${currentMonth()}`,
+                                    t('Lançamentos Saldoa'),
+                                )
+                            }
+                            disabled={busy}
+                        />
+                    </Card>
                 ) : null}
-                <SettingsRow
-                    icon="logout"
-                    title={t('Sair desta conta')}
-                    onPress={() => void onLogout()}
-                    disabled={busy}
-                />
-            </Card>
-            {!session.isDemo ? (
-                <Card style={styles.dangerCard}>
+                {errorMessage ? (
+                    <Text accessibilityRole="alert" style={styles.error}>
+                        {errorMessage}
+                    </Text>
+                ) : null}
+
+                <Card>
+                    <SectionTitle title={t('Segurança')} />
+                    <Text style={styles.description}>
+                        {t('Sessão válida até')}{' '}
+                        {new Intl.DateTimeFormat(getLocale(), {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                        }).format(new Date(session.expiresAt))}
+                    </Text>
+                    {!session.isDemo ? (
+                        <SettingsRow
+                            icon="shield"
+                            title={t('Encerrar sessões em outros dispositivos')}
+                            onPress={() =>
+                                Alert.alert(
+                                    t('Encerrar todas as sessões?'),
+                                    t(
+                                        'Todos os dispositivos serão desconectados.',
+                                    ),
+                                    [
+                                        {
+                                            text: t('Cancelar'),
+                                            style: 'cancel',
+                                        },
+                                        {
+                                            text: t('Encerrar sessões'),
+                                            onPress: () =>
+                                                void revokeAllTokens(),
+                                        },
+                                    ],
+                                )
+                            }
+                            disabled={busy}
+                        />
+                    ) : null}
                     <SettingsRow
-                        icon="trash"
-                        title={t('Excluir conta')}
-                        subtitle={t(
-                            'Gerenciar a exclusão permanente dos seus dados.',
-                        )}
-                        onPress={() => {
-                            setDeletionOpen(!deletionOpen);
-                            setPassword('');
-                        }}
+                        icon="logout"
+                        title={t('Sair desta conta')}
+                        onPress={() => void onLogout()}
                         disabled={busy}
                     />
-                    {deletionOpen ? (
-                        <View style={styles.deletionContent}>
-                            <Text style={styles.description}>
-                                {t(
-                                    'A exclusão remove permanentemente sua conta e os dados associados. Também é possível solicitar pelo site, sem o app.',
-                                )}
-                            </Text>
-                            <TextField
-                                label={t('Confirme sua senha')}
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry
-                                autoComplete="current-password"
-                                placeholder={t('Senha atual')}
-                            />
-                            <ActionButton
-                                onPress={confirmAccountDeletion}
-                                variant="danger"
-                                disabled={busy}
-                            >
-                                {t('Excluir minha conta')}
-                            </ActionButton>
-                            <ActionButton
-                                onPress={() => {
-                                    setDeletionOpen(false);
-                                    setPassword('');
-                                }}
-                                variant="quiet"
-                            >
-                                {t('Cancelar')}
-                            </ActionButton>
-                        </View>
-                    ) : null}
                 </Card>
-            ) : null}
+                {!session.isDemo ? (
+                    <Card style={styles.dangerCard}>
+                        <SettingsRow
+                            icon="trash"
+                            title={t('Excluir conta')}
+                            subtitle={t(
+                                'Gerenciar a exclusão permanente dos seus dados.',
+                            )}
+                            onPress={() => {
+                                setDeletionOpen(!deletionOpen);
+                                setPassword('');
+                            }}
+                            disabled={busy}
+                        />
+                        {deletionOpen ? (
+                            <View style={styles.deletionContent}>
+                                <Text style={styles.description}>
+                                    {t(
+                                        'A exclusão remove permanentemente sua conta e os dados associados. Também é possível solicitar pelo site, sem o app.',
+                                    )}
+                                </Text>
+                                <TextField
+                                    label={t('Confirme sua senha')}
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry
+                                    autoComplete="current-password"
+                                    placeholder={t('Senha atual')}
+                                />
+                                <ActionButton
+                                    onPress={confirmAccountDeletion}
+                                    variant="danger"
+                                    disabled={busy}
+                                >
+                                    {t('Excluir minha conta')}
+                                </ActionButton>
+                                <ActionButton
+                                    onPress={() => {
+                                        setDeletionOpen(false);
+                                        setPassword('');
+                                    }}
+                                    variant="quiet"
+                                >
+                                    {t('Cancelar')}
+                                </ActionButton>
+                            </View>
+                        ) : null}
+                    </Card>
+                ) : null}
+            </ResponsiveGrid>
             <PreferencesSheet
                 visible={preferencesOpen}
                 onClose={() => setPreferencesOpen(false)}

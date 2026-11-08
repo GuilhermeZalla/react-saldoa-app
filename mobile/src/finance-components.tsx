@@ -19,6 +19,7 @@ import { formatCurrency, shiftMonth } from './format';
 import { getLocale, t } from './i18n';
 import type { ThemeColors } from './theme';
 import type { Dashboard, UpcomingTransaction } from './types';
+import { useResponsiveLayout } from './responsive';
 
 export function FinanceCard({
     children,
@@ -150,18 +151,24 @@ export function FinanceSheet({
     children: ReactNode;
 }) {
     const { styles } = useThemeStyles(createStyles);
+    const { isExpanded } = useResponsiveLayout();
     return (
         <Modal
             visible={visible}
             transparent
             animationType="slide"
+            supportedOrientations={[
+                'portrait',
+                'landscape-left',
+                'landscape-right',
+            ]}
             onRequestClose={() => {
                 if (!busy) onClose();
             }}
         >
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                style={styles.modal}
+                style={[styles.modal, isExpanded && styles.modalExpanded]}
             >
                 <Pressable
                     style={StyleSheet.absoluteFill}
@@ -172,8 +179,12 @@ export function FinanceSheet({
                     accessibilityRole="button"
                 />
                 <SafeAreaView
-                    edges={['bottom', 'left', 'right']}
-                    style={styles.sheet}
+                    edges={
+                        isExpanded
+                            ? ['top', 'bottom', 'left', 'right']
+                            : ['bottom', 'left', 'right']
+                    }
+                    style={[styles.sheet, isExpanded && styles.sheetExpanded]}
                 >
                     <View style={styles.sheetHead}>
                         <Text
@@ -432,6 +443,8 @@ export const createStyles = (colors: ThemeColors) =>
             alignItems: 'center',
             backgroundColor: colors.backdrop,
         },
+        modalExpanded: { justifyContent: 'center', padding: 24 },
+        sheetExpanded: { borderRadius: 24 },
         sheet: {
             backgroundColor: colors.surface,
             width: '100%',

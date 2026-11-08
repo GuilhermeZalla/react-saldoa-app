@@ -10,7 +10,7 @@ export default function MoreRoute() {
     const [preferencesOpen, setPreferencesOpen] = useState(false);
     if (!session) return null;
     return (
-        <Page contentStyle={{ padding: 18, gap: 18 }}>
+        <Page contentStyle={{ padding: 18, gap: 18, maxWidth: 820 }}>
             <FinanceHeader
                 title={t('Seu Saldoa')}
                 subtitle={t('Organização, preferências e sua conta.')}

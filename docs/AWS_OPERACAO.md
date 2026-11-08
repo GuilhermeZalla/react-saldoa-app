@@ -15,7 +15,7 @@ Guia de consulta para acessar a máquina, verificar o aplicativo e cuidar do amb
 | Execução            | Docker Compose, arquivo `docker-compose.production.yml` |
 | Banco               | MySQL 8.4 em container e volume persistente na EC2      |
 
-Versão atual: **1.1.0**, publicada em 05/11/2026. Imagens app/web com tag `1.1.0-05fd8c1`; o arquivo `/opt/saldoa/.deployed-commit` identifica o código ativo. O checkout Git da EC2 conserva o histórico antigo: continue usando publicação manual, sem `git pull`/reset direto. Código e configuração anteriores estão em `/var/backups/saldoa-deploy/pre-1.1.0`, e as imagens de retorno têm tag `rollback-pre-1.1.0`.
+Versão do app: **1.1.0**. Último deploy web/API em 08/11/2026, commit `11ea50d9afb1d0199ea1f886f7cac458d7999b0a`, imagens `saldoa-app:1.1.0-11ea50d` e `saldoa-web:1.1.0-11ea50d`; build isolado em `/opt/saldoa-builds/1.1.0-11ea50d`. O arquivo `/opt/saldoa/.deployed-commit` identifica o código ativo. App, web, worker e scheduler atualizados; banco, volumes e checkout Git operacional preservados, sem migrations. As imagens anteriores `saldoa-app:1.1.0-05fd8c1` e `saldoa-web:1.1.0-05fd8c1` continuam disponíveis para retorno. O checkout Git da EC2 conserva histórico e alterações próprias: continue usando publicação manual em diretório isolado, sem `git pull`/reset direto.
 
 O site e a API estão no mesmo Laravel. O APK instalado contém a interface mobile e faz chamadas HTTPS à API. Ele não se conecta diretamente ao MySQL. O banco da AWS é separado do banco do notebook.
 

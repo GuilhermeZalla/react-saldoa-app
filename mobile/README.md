@@ -24,6 +24,12 @@ Dashboard, income and expenses, categories, spending budgets, recurring transact
 
 More screens: [Sign up](../docs/screenshots/mobile-register-expo.png) · [Transactions](../docs/screenshots/mobile-transactions-expo.png) · [Transaction form](../docs/screenshots/mobile-transaction-form-expo.png) · [Categories](../docs/screenshots/mobile-categories-expo.png) · [Recurring transactions](../docs/screenshots/mobile-recurring-expo.png) · [Account](../docs/screenshots/mobile-account-expo.png) · [Preferences in English](../docs/screenshots/mobile-preferences-en.png) · [Dashboard in English](../docs/screenshots/mobile-dashboard-en.png).
 
+The app adapts to tablet-sized windows in portrait and landscape. Wide screens use a sidebar with direct access to finance, account, preferences, and help; narrow windows keep the four bottom tabs and the More menu. Cards use two columns where space allows. Forms remain scrollable and use a bounded, centered panel on larger screens. The existing theme, fonts, languages, and financial features are preserved.
+
+Tablet layout: [landscape preview with sample data](../docs/screenshots/mobile-dashboard-tablet-expo.png).
+
+This tablet adaptation is included in the local `test7` APK (versionCode 8), not in the GitHub Release linked above. The app's web preview has been checked, including navigation, short windows, and orientation-sized resizes with an unsaved form. Native rotation, keyboard behavior, and dialogs still need a tablet check. See [project status](../docs/STATUS.md) for the build and verification details.
+
 ## Install
 
 1. Download the APK from GitHub Releases on your Android phone.

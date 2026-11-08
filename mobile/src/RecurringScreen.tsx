@@ -11,6 +11,7 @@ import {
     ChoiceChips,
     Page,
     PageTitle,
+    ResponsiveGrid,
     SectionTitle,
     TextField,
     useCommonStyles,
@@ -216,136 +217,147 @@ export default function RecurringScreen({ session }: Props) {
                 </Text>
             ) : null}
 
-            {!session.isDemo ? (
-                <Card>
-                    <SectionTitle title={t('Nova recorrência')} />
-                    <TextField
-                        label={t('Descrição')}
-                        value={description}
-                        onChangeText={setDescription}
-                        maxLength={255}
-                        placeholder={t('Ex.: Mensalidade')}
-                    />
-                    <TextField
-                        label={t('Valor')}
-                        value={amount}
-                        onChangeText={(value) =>
-                            setAmount(formatMoneyInput(value))
-                        }
-                        keyboardType="number-pad"
-                        placeholder="0,00"
-                    />
-                    <ChoiceChips
-                        selected={type}
-                        onSelect={(value) => {
-                            const nextType = value as 'income' | 'expense';
-                            setType(nextType);
-                            setCategoryId(
-                                categories.find(
-                                    (category) => category.type === nextType,
-                                )?.id ?? null,
-                            );
-                        }}
-                        options={[
-                            { value: 'expense', label: t('Despesa') },
-                            { value: 'income', label: t('Receita') },
-                        ]}
-                    />
-                    <Text style={styles.fieldLabel}>{t('Categoria')}</Text>
-                    {availableCategories.length ? (
+            <ResponsiveGrid>
+                {!session.isDemo ? (
+                    <Card>
+                        <SectionTitle title={t('Nova recorrência')} />
+                        <TextField
+                            label={t('Descrição')}
+                            value={description}
+                            onChangeText={setDescription}
+                            maxLength={255}
+                            placeholder={t('Ex.: Mensalidade')}
+                        />
+                        <TextField
+                            label={t('Valor')}
+                            value={amount}
+                            onChangeText={(value) =>
+                                setAmount(formatMoneyInput(value))
+                            }
+                            keyboardType="number-pad"
+                            placeholder="0,00"
+                        />
                         <ChoiceChips
-                            selected={categoryId?.toString() ?? ''}
-                            onSelect={(value) => setCategoryId(Number(value))}
-                            options={availableCategories.map((category) => ({
-                                value: category.id.toString(),
-                                label: category.name,
+                            selected={type}
+                            onSelect={(value) => {
+                                const nextType = value as 'income' | 'expense';
+                                setType(nextType);
+                                setCategoryId(
+                                    categories.find(
+                                        (category) =>
+                                            category.type === nextType,
+                                    )?.id ?? null,
+                                );
+                            }}
+                            options={[
+                                { value: 'expense', label: t('Despesa') },
+                                { value: 'income', label: t('Receita') },
+                            ]}
+                        />
+                        <Text style={styles.fieldLabel}>{t('Categoria')}</Text>
+                        {availableCategories.length ? (
+                            <ChoiceChips
+                                selected={categoryId?.toString() ?? ''}
+                                onSelect={(value) =>
+                                    setCategoryId(Number(value))
+                                }
+                                options={availableCategories.map(
+                                    (category) => ({
+                                        value: category.id.toString(),
+                                        label: category.name,
+                                    }),
+                                )}
+                            />
+                        ) : (
+                            <Text style={commonStyles.muted}>
+                                {t(
+                                    'Crie uma categoria desse tipo antes de continuar.',
+                                )}
+                            </Text>
+                        )}
+                        <Text style={styles.fieldLabel}>{t('Frequência')}</Text>
+                        <ChoiceChips
+                            selected={frequency}
+                            onSelect={(value) =>
+                                setFrequency(value as Frequency)
+                            }
+                            options={frequencies.map((item) => ({
+                                ...item,
+                                label: t(item.label),
                             }))}
                         />
+                        <TextField
+                            label={t('Data de início (DD/MM/AAAA)')}
+                            value={formatDateForInput(startDate)}
+                            onChangeText={setStartDate}
+                            autoCapitalize="none"
+                            placeholder={t('DD/MM/AAAA')}
+                            maxLength={10}
+                        />
+                        <ActionButton
+                            onPress={() => void createRecurring()}
+                            disabled={saving}
+                            loading={saving}
+                        >
+                            {t('Criar recorrência')}
+                        </ActionButton>
+                    </Card>
+                ) : null}
+
+                <Card>
+                    <SectionTitle title={t('Regras cadastradas')} />
+                    {loading ? (
+                        <LoadingState label={t('Carregando recorrências…')} />
+                    ) : items.length ? (
+                        items.map((item) => (
+                            <View key={item.id} style={styles.row}>
+                                <View style={styles.itemInfo}>
+                                    <Text style={styles.name}>
+                                        {item.description}
+                                    </Text>
+                                    <Text style={styles.meta}>
+                                        {item.category.name} ·{' '}
+                                        {frequencyLabel(item.frequency)}
+                                    </Text>
+                                    <Text style={styles.meta}>
+                                        {t('Próxima:')}{' '}
+                                        {item.next_occurrence_date
+                                            ? formatDate(
+                                                  item.next_occurrence_date,
+                                              )
+                                            : t('não agendada')}
+                                    </Text>
+                                </View>
+                                <View style={styles.itemActions}>
+                                    <Text
+                                        style={[
+                                            styles.amount,
+                                            item.type === 'income'
+                                                ? styles.income
+                                                : styles.expense,
+                                        ]}
+                                    >
+                                        {formatCurrency(item.amount)}
+                                    </Text>
+                                    {!session.isDemo ? (
+                                        <ActionButton
+                                            onPress={() => askToDelete(item)}
+                                            variant="quiet"
+                                            compact
+                                        >
+                                            {t('Excluir')}
+                                        </ActionButton>
+                                    ) : null}
+                                </View>
+                            </View>
+                        ))
                     ) : (
                         <Text style={commonStyles.muted}>
-                            {t(
-                                'Crie uma categoria desse tipo antes de continuar.',
-                            )}
+                            {t('Nenhuma recorrência cadastrada.')}
                         </Text>
                     )}
-                    <Text style={styles.fieldLabel}>{t('Frequência')}</Text>
-                    <ChoiceChips
-                        selected={frequency}
-                        onSelect={(value) => setFrequency(value as Frequency)}
-                        options={frequencies.map((item) => ({
-                            ...item,
-                            label: t(item.label),
-                        }))}
-                    />
-                    <TextField
-                        label={t('Data de início (DD/MM/AAAA)')}
-                        value={formatDateForInput(startDate)}
-                        onChangeText={setStartDate}
-                        autoCapitalize="none"
-                        placeholder={t('DD/MM/AAAA')}
-                        maxLength={10}
-                    />
-                    <ActionButton
-                        onPress={() => void createRecurring()}
-                        disabled={saving}
-                        loading={saving}
-                    >
-                        {t('Criar recorrência')}
-                    </ActionButton>
                 </Card>
-            ) : null}
-
-            <Card>
-                <SectionTitle title={t('Regras cadastradas')} />
-                {loading ? (
-                    <LoadingState label={t('Carregando recorrências…')} />
-                ) : items.length ? (
-                    items.map((item) => (
-                        <View key={item.id} style={styles.row}>
-                            <View style={styles.itemInfo}>
-                                <Text style={styles.name}>
-                                    {item.description}
-                                </Text>
-                                <Text style={styles.meta}>
-                                    {item.category.name} ·{' '}
-                                    {frequencyLabel(item.frequency)}
-                                </Text>
-                                <Text style={styles.meta}>
-                                    {t('Próxima:')}{' '}
-                                    {item.next_occurrence_date
-                                        ? formatDate(item.next_occurrence_date)
-                                        : t('não agendada')}
-                                </Text>
-                            </View>
-                            <View style={styles.itemActions}>
-                                <Text
-                                    style={[
-                                        styles.amount,
-                                        item.type === 'income'
-                                            ? styles.income
-                                            : styles.expense,
-                                    ]}
-                                >
-                                    {formatCurrency(item.amount)}
-                                </Text>
-                                {!session.isDemo ? (
-                                    <ActionButton
-                                        onPress={() => askToDelete(item)}
-                                        variant="quiet"
-                                        compact
-                                    >
-                                        {t('Excluir')}
-                                    </ActionButton>
-                                ) : null}
-                            </View>
-                        </View>
-                    ))
-                ) : (
-                    <Text style={commonStyles.muted}>
-                        {t('Nenhuma recorrência cadastrada.')}
-                    </Text>
-                )}
-            </Card>
+            </ResponsiveGrid>
         </Page>
     );
 }

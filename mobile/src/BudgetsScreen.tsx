@@ -11,6 +11,7 @@ import {
     ChoiceChips,
     Page,
     ProgressBar,
+    ResponsiveGrid,
     SectionTitle,
     TextField,
     useCommonStyles,
@@ -317,16 +318,18 @@ export default function BudgetsScreen({ session }: Props) {
                 (loading ? (
                     <LoadingState label={t('Carregando metas…')} />
                 ) : budgets.length ? (
-                    budgets.map((budget) => (
-                        <Card key={budget.id}>
-                            <BudgetRow
-                                budget={budget}
-                                readOnly={session.isDemo}
-                                onEdit={() => editBudget(budget)}
-                                onDelete={() => askToDelete(budget)}
-                            />
-                        </Card>
-                    ))
+                    <ResponsiveGrid gap={16}>
+                        {budgets.map((budget) => (
+                            <Card key={budget.id}>
+                                <BudgetRow
+                                    budget={budget}
+                                    readOnly={session.isDemo}
+                                    onEdit={() => editBudget(budget)}
+                                    onDelete={() => askToDelete(budget)}
+                                />
+                            </Card>
+                        ))}
+                    </ResponsiveGrid>
                 ) : (
                     <Card>
                         <EmptyFinance>

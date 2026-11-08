@@ -360,6 +360,8 @@ export const english: Record<string, string> = {
     'Recorr.': 'Repeat',
     'Carregando Saldoa…': 'Loading Saldoa…',
     Preferências: 'Preferences',
+    Finanças: 'Finances',
+    'Conta e ajuda': 'Account and help',
     Idioma: 'Language',
     Aparência: 'Appearance',
     Claro: 'Light',

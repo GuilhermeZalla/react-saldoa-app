@@ -11,6 +11,7 @@ import {
     ChoiceChips,
     Page,
     PageTitle,
+    ResponsiveGrid,
     SectionTitle,
     TextField,
     useCommonStyles,
@@ -148,84 +149,89 @@ export default function CategoriesScreen({ session }: Props) {
                 </Text>
             ) : null}
 
-            {!session.isDemo ? (
-                <Card>
-                    <SectionTitle title={t('Nova categoria')} />
-                    <TextField
-                        label={t('Nome')}
-                        inputRef={nameInput}
-                        value={name}
-                        onChangeText={setName}
-                        maxLength={255}
-                        placeholder={t('Ex.: Moradia')}
-                    />
-                    <ChoiceChips
-                        selected={type}
-                        onSelect={(value) =>
-                            setType(value as 'income' | 'expense')
-                        }
-                        options={[
-                            { value: 'expense', label: t('Despesa') },
-                            { value: 'income', label: t('Receita') },
-                        ]}
-                    />
-                    <ActionButton
-                        onPress={() => void createCategory()}
-                        loading={saving}
-                        disabled={saving}
-                    >
-                        {t('Adicionar categoria')}
-                    </ActionButton>
-                </Card>
-            ) : null}
+            <ResponsiveGrid>
+                {!session.isDemo ? (
+                    <Card>
+                        <SectionTitle title={t('Nova categoria')} />
+                        <TextField
+                            label={t('Nome')}
+                            inputRef={nameInput}
+                            value={name}
+                            onChangeText={setName}
+                            maxLength={255}
+                            placeholder={t('Ex.: Moradia')}
+                        />
+                        <ChoiceChips
+                            selected={type}
+                            onSelect={(value) =>
+                                setType(value as 'income' | 'expense')
+                            }
+                            options={[
+                                { value: 'expense', label: t('Despesa') },
+                                { value: 'income', label: t('Receita') },
+                            ]}
+                        />
+                        <ActionButton
+                            onPress={() => void createCategory()}
+                            loading={saving}
+                            disabled={saving}
+                        >
+                            {t('Adicionar categoria')}
+                        </ActionButton>
+                    </Card>
+                ) : null}
 
-            <Card>
-                <SectionTitle title={t('Suas categorias')} />
-                {loading ? (
-                    <LoadingState label={t('Carregando categorias…')} />
-                ) : categories.length ? (
-                    categories.map((category) => (
-                        <View key={category.id} style={styles.row}>
-                            <View style={styles.categoryInfo}>
-                                <Text style={styles.name}>{category.name}</Text>
-                                <Text style={styles.meta}>
-                                    {category.type === 'income'
-                                        ? t('Receita')
-                                        : t('Despesa')}
-                                    {category.transactions_count === undefined
-                                        ? ''
-                                        : ` · ${t('{count} lançamentos', { count: category.transactions_count ?? 0 })}`}
-                                </Text>
+                <Card>
+                    <SectionTitle title={t('Suas categorias')} />
+                    {loading ? (
+                        <LoadingState label={t('Carregando categorias…')} />
+                    ) : categories.length ? (
+                        categories.map((category) => (
+                            <View key={category.id} style={styles.row}>
+                                <View style={styles.categoryInfo}>
+                                    <Text style={styles.name}>
+                                        {category.name}
+                                    </Text>
+                                    <Text style={styles.meta}>
+                                        {category.type === 'income'
+                                            ? t('Receita')
+                                            : t('Despesa')}
+                                        {category.transactions_count ===
+                                        undefined
+                                            ? ''
+                                            : ` · ${t('{count} lançamentos', { count: category.transactions_count ?? 0 })}`}
+                                    </Text>
+                                </View>
+                                {!session.isDemo ? (
+                                    <ActionButton
+                                        onPress={() => askToDelete(category)}
+                                        variant="quiet"
+                                        compact
+                                    >
+                                        {t('Excluir')}
+                                    </ActionButton>
+                                ) : null}
                             </View>
-                            {!session.isDemo ? (
+                        ))
+                    ) : (
+                        <View style={{ gap: 12 }}>
+                            <Text style={commonStyles.muted}>
+                                {t(
+                                    'Crie uma categoria, como Moradia ou Salário, e escolha se ela organiza receitas ou despesas.',
+                                )}
+                            </Text>
+                            {!session.isDemo && !errorMessage && (
                                 <ActionButton
-                                    onPress={() => askToDelete(category)}
-                                    variant="quiet"
-                                    compact
+                                    variant="secondary"
+                                    onPress={() => nameInput.current?.focus()}
                                 >
-                                    {t('Excluir')}
+                                    {t('Criar primeira categoria')}
                                 </ActionButton>
-                            ) : null}
-                        </View>
-                    ))
-                ) : (
-                    <View style={{ gap: 12 }}>
-                        <Text style={commonStyles.muted}>
-                            {t(
-                                'Crie uma categoria, como Moradia ou Salário, e escolha se ela organiza receitas ou despesas.',
                             )}
-                        </Text>
-                        {!session.isDemo && !errorMessage && (
-                            <ActionButton
-                                variant="secondary"
-                                onPress={() => nameInput.current?.focus()}
-                            >
-                                {t('Criar primeira categoria')}
-                            </ActionButton>
-                        )}
-                    </View>
-                )}
-            </Card>
+                        </View>
+                    )}
+                </Card>
+            </ResponsiveGrid>
         </Page>
     );
 }
