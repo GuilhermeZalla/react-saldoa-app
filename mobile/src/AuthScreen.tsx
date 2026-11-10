@@ -265,6 +265,13 @@ export default function AuthScreen({ onAuthenticated }: Props) {
                         placeholder={t('Sua senha')}
                     />
                     {mode === 'register' && (
+                        <Text style={styles.passwordHint}>
+                            {t(
+                                'A senha deve ter pelo menos 8 caracteres, contendo letras e números.',
+                            )}
+                        </Text>
+                    )}
+                    {mode === 'register' && (
                         <TextField
                             label={t('Confirmar senha')}
                             value={passwordConfirmation}
@@ -412,6 +419,13 @@ const createStyles = (colors: ThemeColors) =>
             textAlign: 'center',
         },
         form: { padding: 22, gap: 18 },
+        passwordHint: {
+            fontFamily: 'DMSans',
+            color: colors.muted,
+            fontSize: 12,
+            lineHeight: 16,
+            marginTop: -8,
+        },
         error: {
             fontFamily: 'DMSans',
             backgroundColor: colors.surfaceMuted,

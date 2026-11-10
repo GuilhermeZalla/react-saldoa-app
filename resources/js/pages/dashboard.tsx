@@ -148,7 +148,7 @@ export default function Dashboard({
                     }
                 />
                 <section
-                    className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+                    className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
                     aria-label="Resumo financeiro"
                 >
                     {cards.map((card) => (
@@ -192,7 +192,7 @@ export default function Dashboard({
                         </Card>
                     ))}
                 </section>
-                <div className="grid items-start gap-5 xl:grid-cols-[1.45fr_1fr]">
+                <div className="grid items-start gap-5 md:grid-cols-2 xl:grid-cols-[1.45fr_1fr]">
                     <div className={hidden ? 'finance-chart-private' : ''}>
                         <DashboardCharts {...chartProps} mode="trend" />
                     </div>
@@ -202,7 +202,7 @@ export default function Dashboard({
                         compact
                     />
                 </div>
-                <div className="grid items-start gap-5 xl:grid-cols-[1.45fr_1fr]">
+                <div className="grid items-start gap-5 md:grid-cols-2 xl:grid-cols-[1.45fr_1fr]">
                     <Card className="finance-surface">
                         <CardHeader className="flex-row items-center justify-between gap-3">
                             <CardTitle>Limites de gastos</CardTitle>

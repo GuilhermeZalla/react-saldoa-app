@@ -36,7 +36,7 @@ export default function AuthSimpleLayout({
 
             <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 sm:px-6">
                 <section className="my-auto grid flex-1 place-items-center py-10 sm:py-14">
-                    <Card className="w-full max-w-md gap-0 rounded-2xl border-border/80 bg-card p-6 shadow-sm sm:p-8">
+                    <Card className="w-full max-w-md gap-0 rounded-2xl border-border/80 bg-card p-6 shadow-sm sm:p-8 md:max-w-lg">
                         <div className="mb-8 space-y-2.5">
                             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
                                 {title}

@@ -2,6 +2,8 @@ export type Locale = 'pt-BR' | 'en';
 let currentLocale: Locale = 'pt-BR';
 
 export const english: Record<string, string> = {
+    'A senha deve ter pelo menos 8 caracteres, contendo letras e números.':
+        'Password must be at least 8 characters long, containing letters and numbers.',
     'Conta criada com sucesso!': 'Account created successfully!',
     'Seu Saldoa está pronto. Vamos organizar suas finanças, um passo de cada vez.':
         'Your Saldoa is ready. Let’s organize your finances, one step at a time.',

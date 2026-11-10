@@ -13,6 +13,9 @@ Atualizado em 08/11/2026. Projeto de controle financeiro pessoal e portfólio. *
 - Play Store: processo iniciado em 08/11/2026, antes da fase de testes, a pedido do titular. A verificação de identidade da conta de desenvolvedor está pendente. Concluir preparação de privacidade, ficha da loja e assinatura antes de abrir uma faixa de teste no Console.
 - Monetização: direção solicitada de plano App e Pro com acesso adicional ao site. [Proposta documentada](MONETIZATION_DRAFT.md): App a R$ 29,90/ano, Pro a R$ 49,90/ano, sem anúncios, download gratuito e avaliação Pro de sete dias sem cobrança automática. Valores e regras recomendados para aprovação; sem cobrança ou restrição de acesso implementada. Se forem adotados para a primeira publicação, há uma nova etapa de integração e testes antes do AAB para o Console.
 - Tablets: adaptação com menu lateral completo aprovada e implementada em 08/11/2026. O novo APK `test7` inclui orientação horizontal e vertical; a validação em aparelho ainda precisa conferir rotação, teclado, barras, diálogos e download do guia. O `test6` anterior não contém esta adaptação.
+- Releases do APK no GitHub: atualizar as releases no GitHub seguindo a documentação mobile existente.
+- Envio real de e-mails: configurar `MAIL_MAILER=smtp` e credenciais no `.env` para recuperação de senha e confirmação de exclusão de conta; testar o envio real.
+- Gerar um APK mais atual para distribuição e testes.
 
 ## Produto e versão publicada
 
@@ -40,6 +43,7 @@ Atualizado em 08/11/2026. Projeto de controle financeiro pessoal e portfólio. *
 - Avaliar login social opcional, começando por “Continuar com Google”; considerar Apple se houver versão para iOS. Manter e-mail/senha como alternativa. Não bloqueia a publicação atual.
 - Confirmação do endereço de e-mail registrada como pendência para depois da primeira publicação, conforme decisão do titular; não bloqueia o lançamento atual. Cadastro web e mobile não enviam mensagem de confirmação e permitem entrar imediatamente. O banco possui `email_verified_at`, mas isso não significa que a verificação esteja ativa. Definir a experiência e os requisitos de entrega antes de implementar.
 - O cadastro atual solicita nome, e-mail e senha. Isso é suficiente para criar uma conta pessoal; não há necessidade aparente de pedir mais dados neste momento. Reavaliar apenas se surgir uma necessidade concreta de produto ou legal.
+- **Pendente: melhorar o layout da dashboard principal, login e cadastro para telas de tablet (768px+) na versão web**, usando melhor a largura disponível com sidebar fixa à esquerda e conteúdo ocupando 100% do espaço restante. Um prévio foi criado em `preview-tablet.html` para aprovação antes da implementação.
 
 ## Melhorias de usabilidade — 07/11/2026
 

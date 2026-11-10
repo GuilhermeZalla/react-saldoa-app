@@ -13,6 +13,24 @@ type Props = {
     passwordRules: string;
 };
 
+function passwordRequirementsText(rules: string): string {
+    const minMatch = rules.match(/minlength:\s*(\d+)/);
+    const min = minMatch ? Number(minMatch[1]) : 8;
+    const hasLetters = rules.includes('letters');
+    const hasNumbers = rules.includes('numbers');
+
+    let text = `De ${min} caracteres`;
+    if (hasLetters && hasNumbers) {
+        text += ', contendo letras e números';
+    } else if (hasLetters) {
+        text += ', contendo letras';
+    } else if (hasNumbers) {
+        text += ', contendo números';
+    }
+
+    return `${text}. Não há limite máximo de caracteres.`;
+}
+
 export default function Register({ passwordRules }: Props) {
     return (
         <>
@@ -69,6 +87,9 @@ export default function Register({ passwordRules }: Props) {
                                     placeholder="Senha"
                                     passwordrules={passwordRules}
                                 />
+                                <p className="text-xs text-muted-foreground">
+                                    {passwordRequirementsText(passwordRules)}
+                                </p>
                                 <InputError message={errors.password} />
                             </div>
 
