@@ -97,15 +97,9 @@ php artisan test --compact
 
 Laravel tests use a separate test environment. Mobile-specific checks are documented in the [mobile guide](mobile/README.md).
 
-## Version 1.1.1
-
-Version 1.1.1 completes the tablet improvements in the Android app: responsive sign-in/sign-up screens, a collapsible sidebar, corrected dashboard columns, and password visibility controls. It retains the financial dashboard, transaction history, planning, month navigation, search, pagination, and upcoming recurring transactions introduced in 1.1.0.
-
-See the [changelog](CHANGELOG.md) for the version history and the [latest release](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.1) for the Android download and release notes.
-
 ## Release scope
 
-Version 1.1.0 builds on the web and mobile finance features introduced in 1.0. The public deployment uses HTTPS and Gmail SMTP. Encrypted backups are sent to the owner every 15 days, and recovery was verified in isolated containers using a copy received by email. Releases are deployed manually; pushing to GitHub runs checks but does not update the server.
+The public deployment uses HTTPS and Gmail SMTP. Encrypted backups are sent to the owner every 15 days, and recovery was verified in isolated containers using a copy received by email. Releases are deployed manually; pushing to GitHub runs checks but does not update the server.
 
 The Android APK currently uses a debug signing key and supports ARM64 devices. Google Play publishing, distribution signing, and automatic deployment are outside this release's scope.
 

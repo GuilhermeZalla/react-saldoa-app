@@ -1,6 +1,6 @@
 # API móvel
 
-Esta API fornece o backend JSON autenticado por tokens Sanctum para o aplicativo Expo/React Native em `mobile/`. A interface nativa cobre autenticação, leitura do dashboard e gestão de lançamentos, categorias, metas e recorrências, além de exportação e gestão da conta. Há um APK de teste publicado com a API pública HTTPS. O titular confirmou o APK com a marca Fluxo no aparelho, sem problemas nos fluxos funcionais, temas e idiomas. Para instalação e uso, consulte [mobile/README.md](../mobile/README.md).
+Esta API fornece o backend JSON autenticado por tokens Sanctum para o aplicativo Expo/React Native em `mobile/`. A interface nativa cobre autenticação, leitura do dashboard e gestão de lançamentos, categorias, metas e recorrências, além de exportação e gestão da conta. A release estável Android usa a API pública HTTPS; versão, download e validações estão no status do projeto. Para instalação e uso, consulte [mobile/README.md](../mobile/README.md).
 
 ## Endereços e instâncias
 
@@ -11,19 +11,13 @@ Use uma implantação e um banco separados para cada ambiente:
 
 O cliente oferece o link discreto **Experimentar sem criar conta** abaixo do formulário, somente quando `EXPO_PUBLIC_API_URL_DEMO` contém uma URL válida para o build. A ausência de configuração oculta o link, sem mostrar instruções técnicas ao usuário. Isso se aplica a APKs locais e de distribuição: a demo não depende do tipo de APK. O endereço deve apontar para uma instância disponível com a demonstração habilitada; a presença do link não é uma verificação de saúde do servidor. Antes de autenticar, o cliente usa a URL demo. A sessão salva o host de origem junto com o token para impedir que um token demo seja enviado ao host de produção ou vice-versa. A instância demo deve usar `DEMO_INSTANCE=true` e `DEMO_LOGIN_ENABLED=true`; nunca deve compartilhar banco, credenciais, backups ou acesso administrativo com a produção.
 
-Para desenvolvimento local, copie `mobile/.env.example` para `mobile/.env` e configure as URLs base sem `/api/v1`. No Android Emulator, o Laravel na máquina hospedeira costuma ser acessível em `http://10.0.2.2:8000`; em dispositivo físico, use o IP LAN do computador. Builds públicos exigem HTTPS. O comando `npm run apk:local` é uma exceção para testes locais: habilita HTTP no Android apenas para o host privado configurado, compila `arm64-v8a` e usa a chave de depuração. Esse APK não serve para a Play Store e depende da mesma rede local e da API em execução com `php artisan serve --host=0.0.0.0 --port=8000`.
+As URLs base são configuradas sem `/api/v1` e incorporadas ao APK durante o build. Alterar `mobile/.env` não muda um APK já instalado. Configuração local, conectividade e comandos de build estão no [README mobile](../mobile/README.md).
 
-O endereço configurado em `mobile/.env` é incorporado ao APK durante o build. Alterar esse arquivo ou iniciar o Laravel não muda o endereço de um APK já instalado. Se o computador trocar de rede ou receber outro IP, volte à rede/endereço usado no build ou atualize as URLs e gere outro APK. Antes de recompilar, confirme no navegador do celular que `http://<IP-do-computador>:8000/up` abre com os dois aparelhos na mesma rede; se não abrir, resolva conectividade/firewall primeiro. Uma URL pública HTTPS estável elimina essa dependência da rede local.
+## Idioma e formatos do cliente
 
-## Interface, preferências e idioma
+O cliente envia `Accept-Language` em português ou inglês. O backend não negocia o idioma das validações: em português o app preserva os detalhes recebidos; em inglês mostra os nomes traduzidos dos campos inválidos. Conteúdo criado pelo usuário não é traduzido. A moeda permanece BRL; datas editáveis usam dia/mês/ano e são normalizadas para ISO antes do envio.
 
-O cliente acompanha a identidade desktop com a marca Fluxo do Saldoa, DM Sans, Space Grotesk e temas laranja/cinza. Português e inglês e a aparência claro/escuro/sistema podem ser escolhidos no painel de preferências: botão de ajustes no topo do login/cadastro ou opção **Idioma e aparência** em Conta. O painel respeita áreas seguras, permite rolagem em telas baixas e fecha pelo botão, pelo fundo ou pela ação de voltar do sistema. Preferências são locais ao dispositivo, salvas no SecureStore, sem alterar o perfil ou o contrato da API; na prévia web, ficam no localStorage, separado do token que continua em memória. A moeda permanece BRL nos dois idiomas.
-
-O login/cadastro usa uma ilustração vetorial local, reduzida no cadastro, em telas baixas ou quando o teclado nativo abre. A tela de acesso não exibe hosts nem nomes de variáveis de ambiente. O dashboard usa somente os dados já recebidos da API, com atalhos para telas existentes, barras de distribuição das despesas e movimentações recentes. Metas mostram gasto, limite e disponibilidade/excesso; o formulário abre ao criar ou editar. Conta agrupa preferências, exportação e segurança; a exclusão fica recolhida e mantém senha e confirmação final. Nenhum endpoint ou regra de autorização foi alterado por esse redesign.
-
-O cliente envia `Accept-Language` e apresenta mensagens de autenticação, rede, permissão e limite de tentativas no idioma selecionado. O backend atual não negocia o idioma das validações: em português são preservados os detalhes recebidos; em inglês o cliente mostra os nomes traduzidos dos campos inválidos. Conteúdo criado pelo usuário não é traduzido. Datas editáveis de lançamentos e recorrências usam dia/mês/ano e são normalizadas para ISO antes do envio.
-
-O limite de 15 segundos nas requisições evita carregamento sem fim quando a API local não está acessível. Verifique servidor, IP LAN, Wi-Fi e firewall se o aparelho não conectar. As barras do Android são ocultadas por componentes nativos do Expo SDK 58; áreas seguras e espaçamento inferior continuam sendo respeitados. Validar isso em navegador não substitui o teste do APK no aparelho.
+Tema e idioma são preferências locais ao dispositivo. Tokens são guardados no SecureStore no Android; na prévia web o token fica em memória. A sessão mantém o host de origem para separar produção e demonstração.
 
 ## Autenticação
 
@@ -67,7 +61,13 @@ Todos os recursos exigem token, exceto os endpoints de autenticação listados a
 
 As respostas de valores monetários usam strings decimais, por exemplo `"1234.56"`, para evitar perda de precisão no cliente. Datas são ISO (`AAAA-MM-DD` ou timestamp ISO, conforme o campo). Listagens paginadas seguem o envelope de resources do Laravel.
 
+O dashboard inclui `data.upcomingTransactions`: até 20 próximas ocorrências de recorrências do próprio usuário, ordenadas por data e ID, com `id`, `description`, `amount`, `type`, `date` e `category`. A agenda considera a próxima ocorrência a partir de hoje, no mês selecionado e respeitando `end_date`; não cria lançamentos nem altera saldos. O cliente trata o campo como opcional.
+
+O histórico aceita `month`, `type`, `search` e `page`; busca é por descrição e exportação mantém os mesmos filtros da consulta.
+
 Erros da API têm o formato `{"error":{"code":"...","message":"...","details":...}}`. Validação usa HTTP 422; não autenticado 401; não autorizado 403; recurso inexistente 404; limite excedido 429. Login com credenciais inválidas responde 401.
+
+Falhas temporárias de rede/servidor ao restaurar a sessão preservam o token salvo; uma resposta 401 invalida a sessão local. O limite de 15 segundos inclui leitura do corpo JSON/texto, e o temporizador é limpo em todos os caminhos. JSON inválido e interrupções da resposta resultam em erros locais traduzidos. A exportação mensal usa o calendário local.
 
 Na instância demo, as respostas de leitura continuam disponíveis, mas requisições de escrita com o usuário demo são bloqueadas por middleware. Logout e rotação de token continuam disponíveis para o cliente.
 
@@ -77,35 +77,8 @@ O endpoint autenticado `DELETE /api/v1/account` reutiliza a Action compartilhada
 
 O pedido público de exclusão responde de forma igual para e-mails existentes e inexistentes, com limite de 3 solicitações por hora por e-mail normalizado + IP; abrir ou confirmar links tem limite de 10/min por IP.
 
-Antes de publicar ou iniciar teste fechado na Play Store:
+A política de privacidade já está publicada em `/privacy-policy`, com `?lang=en` para inglês; o texto é mantido em [privacy-policy.tsx](../resources/js/pages/privacy-policy.tsx). A exclusão do banco ativo não remove imediatamente os backups históricos. Revisão da retenção e declarações da Play Store permanecem nas [pendências do projeto](STATUS.md#pendências).
 
-- publique a API principal e a página pública de exclusão em HTTPS;
-- mantenha a exclusão por e-mail validada: ensaio com conta descartável confirmado pelo titular em 05/11/2026;
-- publique uma política de privacidade acessível por URL pública e use a mesma URL nos metadados da Play Store;
-- confirme o conteúdo da política com os dados reais coletados, finalidades, retenção, fornecedores e procedimentos de exclusão. Este repositório não contém uma política publicada e não substitui essa confirmação;
-- informe a URL da página `/account-deletion` como mecanismo de solicitação de exclusão disponível fora do app.
+## Implantação e desenvolvimento
 
-## Deploy e operação
-
-A API está publicada em `https://saldoa-app.duckdns.org`, numa EC2 com Docker Compose, PHP 8.4, MySQL 8.4, Caddy, worker e scheduler. O ambiente público usa configuração e banco separados do notebook, sem demonstração habilitada.
-
-A instalação e reconstrução do servidor estão em [AWS_DEPLOY.md](AWS_DEPLOY.md); o acesso diário, logs e banco estão em [AWS_OPERACAO.md](AWS_OPERACAO.md). As instruções de instalação e build do aplicativo estão em [mobile/README.md](../mobile/README.md), evitando repetir procedimentos operacionais neste contrato da API.
-
-A versão funcional 1.0 usa `com.saldoa.app`, com a marca Fluxo. A distribuição direta pelo GitHub mantém a assinatura de depuração e a arquitetura ARM64; isso não representa assinatura de distribuição para a loja. Ainda não foi gerado um AAB de distribuição nem concluídos assinatura de produção, política de privacidade e requisitos de publicação na Play Store. SMTP Gmail validado em 05/11/2026, com recebimento confirmado. Backup criptografado copiado para o notebook e SQL restaurado em container isolado; backup por Gmail a cada 15 dias habilitado, com cópia recebida e recuperação completa em containers isolados validadas.
-
-## APK de teste com HTTPS público — 04/11/2026
-
-O script aceita `--public-api` para compilar localmente sem a exceção de HTTP privado. Informe `EXPO_PUBLIC_API_URL` e `EXPO_PUBLIC_WEB_URL` como `https://saldoa-app.duckdns.org` no ambiente do processo e mantenha a URL demo vazia. O modo exige HTTPS; assinatura de depuração e arquitetura ARM64 permanecem. Consulte o comando completo no README. O banco da AWS é independente do banco local. O Gmail teve envio e recebimento de teste confirmados em 05/11/2026.
-
-## Robustez do cliente — 04/11/2026
-
-Falhas temporárias de rede/servidor ao restaurar a sessão preservam o token salvo; uma resposta 401 ainda invalida a sessão local. O limite de 15 segundos inclui leitura do corpo JSON/texto, e o temporizador é limpo em todos os caminhos. JSON inválido e interrupção da resposta resultam em erros locais traduzidos. A exportação mensal usa o calendário local, sem alterar endpoints ou contratos de API. A notificação pública de exclusão é processada pela fila existente; o Gmail teve envio e recebimento de teste confirmados. O titular confirmou os dois fluxos completos no site com uma conta descartável em 05/11/2026.
-
-## Evolução das telas internas — versão de teste 1.1
-
-- `/api/v1/dashboard?month=AAAA-MM` preserva os campos existentes e acrescenta `data.upcomingTransactions`: até 20 próximas ocorrências de regras recorrentes do próprio usuário, ordenadas por data e ID. Cada item contém `id` da recorrência, `description`, `amount`, `type`, `date` e `category`. O APK antigo ignora o campo adicional.
-- A agenda considera a próxima ocorrência de cada regra a partir de hoje, dentro do mês selecionado e respeitando `end_date`. Não cria lançamentos, não altera saldos e não representa um controle novo de contas pendentes/pagas. Esse controle completo permanece uma evolução futura.
-- O cliente 1.1 trata o campo como opcional para continuar abrindo com a API 1.0. Para exibir a agenda, o backend atualizado precisa ser publicado junto ao web; sem o campo, a seção fica sem previsões.
-- Histórico mobile usa os filtros e a paginação já existentes (`month`, `type`, `search`, `page`). Busca é por descrição; exportação mantém os mesmos filtros da consulta. Datas e valores continuam nos formatos já documentados.
-- Corrigidas as traduções de complexidade de senha em `lang/pt_BR/validation.php`. A política de produção permanece com mínimo de 12 caracteres, maiúsculas/minúsculas, números, símbolos e verificação de vazamentos. O mobile traduz os detalhes conhecidos e usa uma orientação legível se uma API antiga devolver uma chave técnica como `string.min.value`.
-- O teste local usa versão Android `1.1.0`, código `3`, mesma identificação `com.saldoa.app`, arquitetura ARM64 e assinatura de depuração. APK aprovado no aparelho e publicado na Release `v1.1.0`; backend/web atualizados na AWS. Publicação na loja permanece para uma etapa posterior.
+A API principal está em `https://saldoa-app.duckdns.org`. Procedimentos de servidor estão em [AWS_DEPLOY.md](AWS_DEPLOY.md) e [AWS_OPERACAO.md](AWS_OPERACAO.md). Instalação, configuração e build do cliente estão no [README mobile](../mobile/README.md); versões e validações ficam no [STATUS.md](STATUS.md).

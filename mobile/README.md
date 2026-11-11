@@ -6,7 +6,7 @@ A personal finance app created in **2026**, extending the Saldoa web application
 
 Version **1.1.1** is the stable Android release with password visibility controls, tablet sign-in/sign-up layouts, a collapsible sidebar, and corrected dashboard columns. It retains the dashboard, transaction history, planning, search, pagination, and Portuguese/English support.
 
-See the [changelog](../CHANGELOG.md) for the complete version history. The author confirmed that test8 works and approved the corrected tablet preview. Version **1.1.1**, Android version code **12**, is the current stable release; previous test builds remain in the release history. Complete native-device validation remains separate.
+See the [changelog](../CHANGELOG.md) for version history and [project status](../docs/STATUS.md) for validation and remaining work.
 
 ## Preview
 
@@ -27,8 +27,6 @@ More screens: [Sign up](../docs/screenshots/mobile-register-expo.png) · [Transa
 The app adapts to tablet-sized windows in portrait and landscape. Wide screens use a sidebar with direct access to finance, account, preferences, and help; narrow windows keep the four bottom tabs and the More menu. Cards use two columns where space allows. Forms remain scrollable and use a bounded, centered panel on larger screens. The existing theme, fonts, languages, and financial features are preserved.
 
 Tablet layout: [landscape preview with sample data](../docs/screenshots/mobile-dashboard-tablet-expo.png).
-
-The tablet improvements are included in the stable **1.1.1** APK (versionCode 12), available as a [regular release](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.1). [Download the APK](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.1/saldoa-android-v1.1.1.apk). It adds show/hide password controls, wider sign-in/sign-up layouts, a sidebar that collapses to icons, and dashboard cards that fill both columns without wrapping into half-width rows. It uses the same signing certificate as `test8` and can update the previous installation without uninstalling. The web preview passed 24 theme/language/width combinations; 528 Yoga layout checks covered fractional widths, densities, and font scaling. Native rotation, keyboard behavior, dialogs, and guide downloads still need a device check. See [project status](../docs/STATUS.md) for the build and verification details. Google Play and monetization remain pending.
 
 ## Install
 

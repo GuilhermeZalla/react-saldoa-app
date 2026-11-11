@@ -15,7 +15,7 @@ Guia de consulta para acessar a máquina, verificar o aplicativo e cuidar do amb
 | Execução            | Docker Compose, arquivo `docker-compose.production.yml` |
 | Banco               | MySQL 8.4 em container e volume persistente na EC2      |
 
-Versão do app: **1.1.0**. Último deploy web/API em **11/11/2026**, commit `fb0945f18fc136d97ce1733d36edd162d0779794`, com [CI aprovado](https://github.com/GuilhermeZalla/react-saldoa-app/actions/runs/43067505989). Imagens `saldoa-app:1.1.0-fb0945f` e `saldoa-web:1.1.0-fb0945f`, construídas em `/opt/saldoa-builds/1.1.0-review-20261111-435a6af6b6`. `/opt/saldoa/.deployed-commit` e `.deployed-build` identificam a versão e o diretório ativo; `SALDOA_IMAGE_TAG` na configuração privada foi atualizado para a tag ativa. App, web, worker e scheduler atualizados; banco, volumes e checkout Git operacional preservados, sem migrations. As imagens anteriores `saldoa-app:1.1.0-11ea50d` e `saldoa-web:1.1.0-11ea50d` continuam disponíveis, também com aliases `rollback-before-fb0945f`; configuração anterior preservada em `/var/backups/saldoa-deploy/pre-fb0945f`. O checkout Git da EC2 conserva histórico e alterações próprias: continue usando publicação manual em diretório isolado, sem `git pull`/reset direto.
+Versão das imagens web/API: **1.1.0**. A versão Android distribuída está no [status do projeto](STATUS.md#entrega-atual). Último deploy web/API em **11/11/2026**, commit `fb0945f18fc136d97ce1733d36edd162d0779794`, com [CI aprovado](https://github.com/GuilhermeZalla/react-saldoa-app/actions/runs/43067505989). Imagens `saldoa-app:1.1.0-fb0945f` e `saldoa-web:1.1.0-fb0945f`, construídas em `/opt/saldoa-builds/1.1.0-review-20261111-435a6af6b6`. `/opt/saldoa/.deployed-commit` e `.deployed-build` identificam a versão e o diretório ativo; `SALDOA_IMAGE_TAG` na configuração privada foi atualizado para a tag ativa. App, web, worker e scheduler atualizados; banco, volumes e checkout Git operacional preservados, sem migrations. As imagens anteriores `saldoa-app:1.1.0-11ea50d` e `saldoa-web:1.1.0-11ea50d` continuam disponíveis, também com aliases `rollback-before-fb0945f`; configuração anterior preservada em `/var/backups/saldoa-deploy/pre-fb0945f`. O checkout Git da EC2 conserva histórico e alterações próprias: continue usando publicação manual em diretório isolado, sem `git pull`/reset direto.
 
 Verificação após a publicação: cinco serviços ativos, MySQL saudável, login/cadastro/política PT/EN/ícone/assets por HTTPS, API sem token 401, quatro PDFs com checksums idênticos aos locais e nenhum indicador de erro nos logs consultados. Duas prévias dos templates transacionais foram autorizadas e processadas sem falha pela fila após autenticação SMTP; os links eram fictícios e não alteraram contas. Recebimento na caixa de entrada continua sendo confirmação do titular. Disco: 55% usado, cerca de 13 GB livres; não foi necessário apagar caches, imagens, volumes ou backups.
 
@@ -251,6 +251,8 @@ Uma instância ligada e sem visitas ainda consome recursos. Parar a EC2 interrom
 
 ### Os US$ 100 em créditos
 
+Referência histórica informada pelo titular em 08/11/2026, sem consulta autenticada pelo agente: US$ 97,49 de crédito, 179 dias restantes, encerramento indicado em 04/05/2027 e custo do mês de US$ 2,19. Esses valores descrevem aquela consulta; confira o painel para o saldo atual.
+
 Os créditos abatem consumo elegível; não tornam a hospedagem gratuita para sempre. O valor informado pelo titular não foi conferido diretamente no Billing. No plano Free atual, o prazo é de até seis meses ou até acabar o crédito, o que ocorrer primeiro. O plano Paid tem regras de cobrança próprias, inclusive depois dos créditos.
 
 Na experiência simplificada atual, comece por **AWS Settings → Billing** para conferir créditos, prazo e custos por projeto. Algumas ferramentas do console convencional podem exigir recursos avançados; o titular decidiu manter a modalidade atual.
@@ -273,6 +275,6 @@ Referências oficiais consultadas em 04/11/2026: [EC2](https://aws.amazon.com/ec
 | SSH não conecta          | Região, estado da EC2, IP atual e regra 22 para a origem correta                   |
 | Site fora do ar          | `dc ps`, `/up`, logs de web/app, DNS e portas 80/443                               |
 | APK não conecta          | Abrir `/up` no celular e confirmar que o APK usa a URL pública                     |
-| E-mail não chega         | Configuração SMTP e logs do worker; Sandbox não entrega aos destinatários          |
+| E-mail não chega         | Configuração SMTP, logs do worker e espaço disponível na caixa Gmail               |
 | Dados parecem diferentes | Confirmar se o ambiente é local ou AWS e qual usuário está conectado               |
 | Disco enchendo           | `df -h /`, backups acumulados e uso das imagens/volumes; não apagar dados às cegas |

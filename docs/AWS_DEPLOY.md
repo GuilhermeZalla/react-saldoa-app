@@ -144,15 +144,13 @@ A VM deve manter Docker habilitado na inicialização (`sudo systemctl enable do
 - Verifique fila e scheduler com `docker compose ... logs --tail=100 worker scheduler`, sem publicar tokens ou conteúdo sensível dos logs.
 - Confirme certificado válido e ausência de acesso às portas 3306/9000 pela internet. Consulte `docker compose ... ps`; somente `web` deve publicar 80/443.
 - Configure no build mobile `EXPO_PUBLIC_API_URL=https://HOST` e `EXPO_PUBLIC_WEB_URL=https://HOST`, sem `/api/v1`. A demo permanece vazia até existir uma segunda instância realmente isolada.
-- Para um APK de teste compilado localmente com HTTPS público, use `npm run apk:local -- --public-api` com as URLs no ambiente do processo, conforme [mobile/README.md](../mobile/README.md). O comando sem essa opção continua restrito ao HTTP privado. Assinatura de distribuição, EAS/AAB, política de privacidade e exigências da Play Store são uma etapa posterior.
+- Para um APK de teste compilado localmente com HTTPS público, use `npm run apk:local -- --public-api` com as URLs no ambiente do processo, conforme [mobile/README.md](../mobile/README.md). O comando sem essa opção continua restrito ao HTTP privado. Assinatura de distribuição, EAS/AAB e exigências da Play Store são uma etapa posterior; a política de privacidade já está publicada em `/privacy-policy`.
 
 ## 6. Backups e recuperação
 
 A EC2 já possui `/usr/local/sbin/saldoa-backup`, instalado de `docker/backup-encrypted.sh`. Ele gera SQL, storage e configuração, verifica integridade e cifra com AES-256-GCM/RSA. A chave pública fica em `/etc/saldoa/backup-public-cert.pem`; a privada permanece no notebook e precisa de uma segunda cópia segura fora dele.
 
-Em 05/11/2026, uma cópia recebida pelo Gmail teve checksum e autenticação criptográfica conferidos e foi restaurada em containers isolados. Foram recuperados SQL, storage e APP_KEY; a aplicação respondeu a cadastro, autenticação, lançamento, dashboard, exportação e exclusão. O ensaio não utilizou os volumes de produção, não publicou portas e não tinha acesso à internet.
-
-O backup é enviado a cada **15 dias por Gmail**. O timer `saldoa-backup.timer` verifica diariamente às 06:30 UTC (03:30 em São Paulo), com até dez minutos de atraso aleatório; `backup-due.py`, usado em `ExecCondition`, só permite gerar e enviar a cópia quando passaram 15 dias de calendário UTC desde a data da última execução bem-sucedida em `/var/backups/saldoa/last-success`. Reinícios preservam essa contagem; sem registro anterior, o primeiro disparo gera uma cópia. Falhas de backup são tentadas novamente no dia seguinte. O comando direto `/usr/local/sbin/saldoa-backup` continua permitindo uma cópia manual imediata e reinicia a contagem após sucesso. A configuração privada está em `/etc/saldoa/backup.env`; o envio usa TLS e rejeita anexos acima de 15 MiB e arquivos sem o envelope de criptografia autenticada. Cópias locais antigas só são removidas após aceitação SMTP. O titular deve acompanhar os e-mails e a capacidade da caixa; a retenção no Gmail é manual.
+A rotina adotada envia uma cópia por Gmail a cada 15 dias. Agendamento, retenção, limites de anexo e ensaio de recuperação estão no [guia operacional](AWS_OPERACAO.md#6-backup-e-e-mails).
 
 Para instalar os helpers numa reconstrução, copie `docker/backup-due.py`, `docker/send-backup.py` e `docker/verify-restored-app.py` para `/usr/local/lib/saldoa/`, os scripts Bash para `/usr/local/sbin/saldoa-backup` e `/usr/local/sbin/saldoa-verify-backup`, e os units para `/etc/systemd/system/`. Preserve a configuração privada e instale **somente o certificado público** na EC2. A chave privada de recuperação continua fora do servidor.
 
@@ -169,11 +167,3 @@ Os rascunhos de automação foram arquivados localmente em `.secrets/deferred-de
 Antes de atualizar manualmente, confira o CI, preserve credenciais/ajustes locais, faça backup com cópia externa e mantenha as imagens anteriores. Compile a nova versão e atualize somente os serviços necessários; valide saúde, autenticação, assets e logs. Não execute migrations ou restauração sobre o banco ativo como parte de uma atualização de rotina.
 
 O checkout da EC2 contém alterações diretas e histórico anterior à reescrita publicada. A sincronização exige revisão específica, preservando esses ajustes; não usar `git pull` ou reset indiscriminadamente. O roteiro operacional está no [guia de operação](AWS_OPERACAO.md#7-deploy-manual).
-
-## Atualização de identidade e revisão — 04/11/2026
-
-Marca Fluxo e título `Bem-vindo - Saldoa` publicados por atualização manual dos arquivos e recompilação das imagens. As imagens anteriores foram preservadas como `saldoa-app:pre-flow` e `saldoa-web:pre-flow`. A notificação de exclusão usa a fila existente; o worker permanece responsável por tentativas/erros de SMTP. O SMTP real foi configurado e teve recebimento de teste confirmado em 05/11/2026. Nenhuma migration foi executada nesta atualização. O checkout da EC2 contém alterações diretas e precisa ser sincronizado com o próximo commit antes de uma atualização via Git; não executar `git reset --hard` para descartar essas mudanças.
-
-## Fechamento operacional — 11/11/2026
-
-Publicado o commit `fb0945f18fc136d97ce1733d36edd162d0779794` após CI aprovado, preparação isolada das imagens e backup criptografado com cópia externa conferida. App/web usam `1.1.0-fb0945f`; o diretório ativo é `/opt/saldoa-builds/1.1.0-review-20261111-435a6af6b6`, registrado em `/opt/saldoa/.deployed-build`. A configuração privada mantém a mesma tag das imagens ativas. Banco e volumes preservados; nenhuma migration ou restauração. Retorno preparado em `/var/backups/saldoa-deploy/pre-fb0945f` e tags `rollback-before-fb0945f`. Saúde, autenticação pública, assets, política e quatro guias por HTTPS conferidos; duas prévias de e-mail autorizadas processadas sem falha pela fila. Veja o estado atual e os limites de confirmação em [AWS_OPERACAO.md](AWS_OPERACAO.md).

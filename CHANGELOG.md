@@ -1,6 +1,6 @@
 # Changelog
 
-Release notes for the Saldoa website and Android app. Dates below follow the published release date in UTC.
+Release history for the Saldoa website and Android app. Test builds are identified separately from stable releases.
 
 ## [1.1.1] - 2026-11-11
 
@@ -42,23 +42,6 @@ Release notes for the Saldoa website and Android app. Dates below follow the pub
 - Updated the approved Vite+ toolchain to 1.6.0; production and complete web npm audits report zero vulnerabilities.
 - Repaired the missing indirect TypeScript entry in the mobile lockfile and added mobile tests, type checks, and lint to CI. Existing mobile dependency versions are unchanged.
 - Local validation: 174 PHP tests passed, two skipped, 35 mobile tests passed, static analysis/types/lint/builds passed, and 48 visual checks passed. Production image preparation also passed on Linux; these checks do not replace native APK validation.
-
-## [1.1.1-preview] - 2026-11-08
-
-### Added
-
-- Templates customizados de e-mail transacional para recuperação de senha e confirmação de exclusão de conta, seguindo a identidade visual da Saldoa (logo Fluxo, laranja de destaque, DM Sans no corpo, Space Grotesk nos títulos).
-- Classes Mailable `PasswordResetLink` e `AccountDeletionConfirmation` em `app/Mail/`, com views Blade em `resources/views/emails/`.
-- Override de `sendPasswordResetNotification` no modelo `User` para enviar o e-mail de redefinição com o novo template.
-
-### Improved
-
-- E-mails de recuperação de senha e exclusão de conta agora usam layout próprio com botões de ação, avisos de expiração e rodapé da marca, em vez do template padrão do Laravel.
-
-### Compatibility and validation
-
-- 176 testes PHP aprovados (174 passaram, 2 ignorados por 2FA desabilitada), 1.472 assertions.
-- Pint, PHPStan e builds aprovados.
 
 ## [1.1.0] - 2026-11-02
 
