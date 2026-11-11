@@ -139,7 +139,7 @@ A VM deve manter Docker habilitado na inicialização (`sudo systemctl enable do
 
 - `https://HOST/up` deve responder 200. Esse teste só comprova o boot do Laravel; não comprova banco nem e-mail.
 - `GET https://HOST/api/v1/auth/me` sem token deve responder 401 JSON.
-- Abra o site/login, crie uma conta de teste e confirme cadastro/login, isolamento dos dados, lançamento, meta, exportação e logout. Em produção, a política de senha é mais exigente.
+- Abra o site/login, crie uma conta de teste e confirme cadastro/login, isolamento dos dados, lançamento, meta, exportação e logout. Confira se a orientação de senha exibida corresponde às regras efetivas de produção.
 - Valide no site o e-mail de recuperação e o fluxo `/account-deletion`, inclusive recebimento e confirmação por POST com uma conta descartável. Não use uma conta com dados que queira manter.
 - Verifique fila e scheduler com `docker compose ... logs --tail=100 worker scheduler`, sem publicar tokens ou conteúdo sensível dos logs.
 - Confirme certificado válido e ausência de acesso às portas 3306/9000 pela internet. Consulte `docker compose ... ps`; somente `web` deve publicar 80/443.
@@ -173,3 +173,7 @@ O checkout da EC2 contém alterações diretas e histórico anterior à reescrit
 ## Atualização de identidade e revisão — 04/11/2026
 
 Marca Fluxo e título `Bem-vindo - Saldoa` publicados por atualização manual dos arquivos e recompilação das imagens. As imagens anteriores foram preservadas como `saldoa-app:pre-flow` e `saldoa-web:pre-flow`. A notificação de exclusão usa a fila existente; o worker permanece responsável por tentativas/erros de SMTP. O SMTP real foi configurado e teve recebimento de teste confirmado em 05/11/2026. Nenhuma migration foi executada nesta atualização. O checkout da EC2 contém alterações diretas e precisa ser sincronizado com o próximo commit antes de uma atualização via Git; não executar `git reset --hard` para descartar essas mudanças.
+
+## Fechamento operacional — 11/11/2026
+
+Publicado o commit `fb0945f18fc136d97ce1733d36edd162d0779794` após CI aprovado, preparação isolada das imagens e backup criptografado com cópia externa conferida. App/web usam `1.1.0-fb0945f`; o diretório ativo é `/opt/saldoa-builds/1.1.0-review-20261111-435a6af6b6`, registrado em `/opt/saldoa/.deployed-build`. A configuração privada mantém a mesma tag das imagens ativas. Banco e volumes preservados; nenhuma migration ou restauração. Retorno preparado em `/var/backups/saldoa-deploy/pre-fb0945f` e tags `rollback-before-fb0945f`. Saúde, autenticação pública, assets, política e quatro guias por HTTPS conferidos; duas prévias de e-mail autorizadas processadas sem falha pela fila. Veja o estado atual e os limites de confirmação em [AWS_OPERACAO.md](AWS_OPERACAO.md).
