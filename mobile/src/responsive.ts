@@ -5,7 +5,7 @@ export function useResponsiveLayout() {
 
     return {
         isExpanded: width >= 768,
-        hasSidebar: width >= 1000,
+        hasSidebar: width >= 768,
         fontScale,
     };
 }

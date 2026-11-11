@@ -51,7 +51,8 @@ export default function AuthScreen({ onAuthenticated }: Props) {
     const [createdSession, setCreatedSession] = useState<Session | null>(null);
     const [preferencesOpen, setPreferencesOpen] = useState(false);
     const [keyboardVisible, setKeyboardVisible] = useState(false);
-    const { height } = useWindowDimensions();
+    const { height, width, fontScale } = useWindowDimensions();
+    const isWide = width >= 768 && width / Math.max(1, fontScale) >= 700;
     useEffect(() => {
         const show = Keyboard.addListener('keyboardDidShow', () =>
             setKeyboardVisible(true),
@@ -194,7 +195,12 @@ export default function AuthScreen({ onAuthenticated }: Props) {
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             style={styles.keyboard}
         >
-            <Page contentStyle={styles.authContent}>
+            <Page
+                contentStyle={[
+                    styles.authContent,
+                    width >= 768 && styles.tabletContent,
+                ]}
+            >
                 <View style={styles.toolbar}>
                     <View style={styles.brand}>
                         <View style={styles.logoMark}>
@@ -215,138 +221,164 @@ export default function AuthScreen({ onAuthenticated }: Props) {
                         }}
                     />
                 </View>
-                <FinanceIllustration
-                    compact={
-                        keyboardVisible || mode === 'register' || height < 700
-                    }
-                />
-                <View style={styles.heading}>
-                    <Text accessibilityRole="header" style={styles.title}>
-                        {mode === 'login'
-                            ? t('Bem-vindo de volta')
-                            : t('Criar conta')}
-                    </Text>
-                    <Text style={styles.subtitle}>
-                        {mode === 'login'
-                            ? t('Suas finanças, com mais clareza.')
-                            : t('Organize suas finanças em um só lugar.')}
-                    </Text>
-                </View>
-                <Card style={styles.form}>
-                    {mode === 'register' && (
-                        <TextField
-                            label={t('Nome')}
-                            value={name}
-                            onChangeText={setName}
-                            autoCapitalize="words"
-                            autoComplete="name"
-                            placeholder={t('Seu nome')}
+                <View style={[styles.authBody, isWide && styles.authBodyWide]}>
+                    <View
+                        style={[
+                            styles.introduction,
+                            isWide && styles.introductionWide,
+                        ]}
+                    >
+                        <FinanceIllustration
+                            compact={
+                                keyboardVisible ||
+                                (!isWide &&
+                                    (mode === 'register' || height < 700))
+                            }
                         />
-                    )}
-                    <TextField
-                        label={t('E-mail')}
-                        value={email}
-                        onChangeText={setEmail}
-                        autoCapitalize="none"
-                        autoComplete="email"
-                        keyboardType="email-address"
-                        placeholder="voce@exemplo.com"
-                    />
-                    <TextField
-                        label={t('Senha')}
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                        autoComplete={
-                            mode === 'login'
-                                ? 'current-password'
-                                : 'new-password'
-                        }
-                        placeholder={t('Sua senha')}
-                    />
-                    {mode === 'register' && (
-                        <Text style={styles.passwordHint}>
-                            {t(
-                                'A senha deve ter pelo menos 8 caracteres, contendo letras e números.',
+                        <View style={styles.heading}>
+                            <Text
+                                accessibilityRole="header"
+                                style={styles.title}
+                            >
+                                {mode === 'login'
+                                    ? t('Bem-vindo de volta')
+                                    : t('Criar conta')}
+                            </Text>
+                            <Text style={styles.subtitle}>
+                                {mode === 'login'
+                                    ? t('Suas finanças, com mais clareza.')
+                                    : t(
+                                          'Organize suas finanças em um só lugar.',
+                                      )}
+                            </Text>
+                        </View>
+                    </View>
+                    <View
+                        style={[styles.formArea, isWide && styles.formAreaWide]}
+                    >
+                        <Card style={styles.form}>
+                            {mode === 'register' && (
+                                <TextField
+                                    label={t('Nome')}
+                                    value={name}
+                                    onChangeText={setName}
+                                    autoCapitalize="words"
+                                    autoComplete="name"
+                                    placeholder={t('Seu nome')}
+                                />
                             )}
-                        </Text>
-                    )}
-                    {mode === 'register' && (
-                        <TextField
-                            label={t('Confirmar senha')}
-                            value={passwordConfirmation}
-                            onChangeText={setPasswordConfirmation}
-                            secureTextEntry
-                            autoComplete="new-password"
-                            placeholder={t('Repita sua senha')}
-                        />
-                    )}
+                            <TextField
+                                label={t('E-mail')}
+                                value={email}
+                                onChangeText={setEmail}
+                                autoCapitalize="none"
+                                autoComplete="email"
+                                keyboardType="email-address"
+                                placeholder="voce@exemplo.com"
+                            />
+                            <TextField
+                                key={`${mode}-password`}
+                                label={t('Senha')}
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                                autoComplete={
+                                    mode === 'login'
+                                        ? 'current-password'
+                                        : 'new-password'
+                                }
+                                placeholder={t('Sua senha')}
+                            />
+                            {mode === 'register' && (
+                                <Text style={styles.passwordHint}>
+                                    {t(
+                                        'A senha deve ter pelo menos 8 caracteres, contendo letras e números.',
+                                    )}
+                                </Text>
+                            )}
+                            {mode === 'register' && (
+                                <TextField
+                                    label={t('Confirmar senha')}
+                                    value={passwordConfirmation}
+                                    onChangeText={setPasswordConfirmation}
+                                    secureTextEntry
+                                    autoComplete="new-password"
+                                    placeholder={t('Repita sua senha')}
+                                />
+                            )}
 
-                    {errorMessage ? (
-                        <Text accessibilityRole="alert" style={styles.error}>
-                            {errorMessage}
-                        </Text>
-                    ) : null}
+                            {errorMessage ? (
+                                <Text
+                                    accessibilityRole="alert"
+                                    style={styles.error}
+                                >
+                                    {errorMessage}
+                                </Text>
+                            ) : null}
 
-                    <ActionButton
-                        onPress={() => void authenticate()}
-                        disabled={
-                            busy ||
-                            !email.trim() ||
-                            !password ||
-                            (mode === 'register' &&
-                                (!name.trim() || !passwordConfirmation))
-                        }
-                        loading={busy}
-                    >
-                        {mode === 'login'
-                            ? t('Entrar')
-                            : t('Criar minha conta')}
-                    </ActionButton>
+                            <ActionButton
+                                onPress={() => void authenticate()}
+                                disabled={
+                                    busy ||
+                                    !email.trim() ||
+                                    !password ||
+                                    (mode === 'register' &&
+                                        (!name.trim() || !passwordConfirmation))
+                                }
+                                loading={busy}
+                            >
+                                {mode === 'login'
+                                    ? t('Entrar')
+                                    : t('Criar minha conta')}
+                            </ActionButton>
 
-                    <ActionButton
-                        onPress={() => {
-                            setMode((currentMode) =>
-                                currentMode === 'login' ? 'register' : 'login',
-                            );
-                            setErrorMessage('');
-                        }}
-                        disabled={busy}
-                        variant="quiet"
-                    >
-                        {mode === 'login'
-                            ? t('Ainda não tenho uma conta')
-                            : t('Já tenho uma conta')}
-                    </ActionButton>
-                </Card>
+                            <ActionButton
+                                onPress={() => {
+                                    setMode((currentMode) =>
+                                        currentMode === 'login'
+                                            ? 'register'
+                                            : 'login',
+                                    );
+                                    setErrorMessage('');
+                                }}
+                                disabled={busy}
+                                variant="quiet"
+                            >
+                                {mode === 'login'
+                                    ? t('Ainda não tenho uma conta')
+                                    : t('Já tenho uma conta')}
+                            </ActionButton>
+                        </Card>
 
-                {mode === 'login' ? (
-                    <ActionButton
-                        onPress={() => void openPasswordRecovery()}
-                        variant="quiet"
-                        compact
-                    >
-                        {t('Esqueci minha senha')}
-                    </ActionButton>
-                ) : null}
-                {demoApiUrl !== null ? (
-                    <ActionButton
-                        onPress={() => void authenticate(true)}
-                        variant="quiet"
-                        disabled={busy}
-                        loading={busy}
-                        compact
-                    >
-                        {t('Experimentar sem criar conta')}
-                    </ActionButton>
-                ) : null}
-                <ActionButton
-                    onPress={() => void openPrivacyPolicy()}
-                    variant="quiet"
-                    compact
-                >
-                    {t('Política de Privacidade')}
-                </ActionButton>
+                        {mode === 'login' ? (
+                            <ActionButton
+                                onPress={() => void openPasswordRecovery()}
+                                variant="quiet"
+                                compact
+                            >
+                                {t('Esqueci minha senha')}
+                            </ActionButton>
+                        ) : null}
+                        {demoApiUrl !== null ? (
+                            <ActionButton
+                                onPress={() => void authenticate(true)}
+                                variant="quiet"
+                                disabled={busy}
+                                loading={busy}
+                                compact
+                            >
+                                {t('Experimentar sem criar conta')}
+                            </ActionButton>
+                        ) : null}
+                        <ActionButton
+                            onPress={() => void openPrivacyPolicy()}
+                            variant="quiet"
+                            compact
+                        >
+                            {t('Política de Privacidade')}
+                        </ActionButton>
+                    </View>
+                </View>
             </Page>
             <PreferencesSheet
                 visible={preferencesOpen}
@@ -380,7 +412,19 @@ export default function AuthScreen({ onAuthenticated }: Props) {
 const createStyles = (colors: ThemeColors) =>
     StyleSheet.create({
         keyboard: { flex: 1 },
-        authContent: { maxWidth: 480, gap: 14, paddingBottom: 24 },
+        authContent: { maxWidth: 480, gap: 14, paddingBottom: 24, flexGrow: 1 },
+        tabletContent: { maxWidth: 1280, padding: 32 },
+        authBody: { gap: 14 },
+        authBodyWide: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 32,
+            flexGrow: 1,
+        },
+        introduction: { gap: 14 },
+        introductionWide: { flex: 1, minWidth: 0 },
+        formArea: { gap: 14 },
+        formAreaWide: { flex: 1.15, minWidth: 0 },
         toolbar: {
             flexDirection: 'row',
             alignItems: 'center',

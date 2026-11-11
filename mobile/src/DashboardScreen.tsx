@@ -180,7 +180,7 @@ export default function DashboardScreen({ session }: { session: Session }) {
                     {t('Tentar novamente')}
                 </ActionButton>
             )}
-            <ResponsiveGrid gap={16}>
+            <ResponsiveGrid gap={16} minColumnWidth={300}>
                 <Card style={styles.balance}>
                     <View style={styles.row}>
                         <Text style={styles.caption}>{t('Saldo geral')}</Text>
@@ -431,7 +431,7 @@ export default function DashboardScreen({ session }: { session: Session }) {
 }
 const createStyles = (colors: ThemeColors) =>
     StyleSheet.create({
-        page: { padding: 18, gap: 16 },
+        page: { padding: 18, gap: 16, maxWidth: '100%' },
         toolbar: {
             flexDirection: 'row',
             alignItems: 'center',

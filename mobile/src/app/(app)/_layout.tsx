@@ -28,6 +28,7 @@ export default function MainTabsLayout() {
     const insets = useSafeAreaInsets();
     const { hasSidebar } = useResponsiveLayout();
     const [preferencesOpen, setPreferencesOpen] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     if (loading) {
         return (
@@ -53,6 +54,10 @@ export default function MainTabsLayout() {
                     hasSidebar ? (
                         <TabletSidebar
                             {...props}
+                            collapsed={sidebarCollapsed}
+                            onToggle={() =>
+                                setSidebarCollapsed((collapsed) => !collapsed)
+                            }
                             onOpenPreferences={() => setPreferencesOpen(true)}
                         />
                     ) : (
@@ -87,8 +92,8 @@ export default function MainTabsLayout() {
                             paddingBottom: Math.max(8, insets.bottom),
                         },
                         hasSidebar && {
-                            width: 216,
-                            minWidth: 216,
+                            width: sidebarCollapsed ? 72 + insets.left : 216,
+                            minWidth: sidebarCollapsed ? 72 + insets.left : 216,
                             height: '100%',
                             borderTopWidth: 0,
                             borderRightColor: colors.border,

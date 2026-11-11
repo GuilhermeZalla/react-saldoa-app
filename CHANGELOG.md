@@ -2,6 +2,22 @@
 
 Release notes for the Saldoa website and Android app. Dates below follow the published release date in UTC.
 
+## [1.1.0-test10] - 2026-11-11
+
+### Android tablet improvements
+
+- Added accessible show/hide password controls to sign-in and sign-up in Portuguese and English, with passwords hidden initially.
+- Adapted tablet sign-in and sign-up to use side-by-side presentation and form areas when width and font scaling permit.
+- Added a collapsible tablet sidebar from 768 points, preserving its state during navigation and window resizing.
+- Fixed dashboard cards wrapping into separate half-width rows because of fractional native layout measurements. The dashboard now uses the available width, with two columns where space allows and a single column for narrow windows or larger fonts.
+- Internal version 1.1.0, Android version code 11, ARM64, public HTTPS API, and the same signing certificate as test8. The earlier test9 was local and does not contain the final grid fix.
+
+### Validation and scope
+
+- 35 mobile tests, type checks, lint, and the Android release build passed. APK integrity, package, signing certificate, and public API configuration were verified.
+- 24 web-preview combinations passed across both themes/languages and six widths. All 528 Yoga layout checks passed; the previous style reproduced 192 unwanted wraps.
+- The author approved the tablet preview. These checks do not replace complete native-device testing. Google Play publication and monetization remain pending.
+
 ## [1.1.0-test8] - 2026-11-11
 
 ### Android validation build

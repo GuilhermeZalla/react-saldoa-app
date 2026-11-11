@@ -83,11 +83,13 @@ export function Page({
 export function ResponsiveGrid({
     children,
     gap = 20,
-}: PropsWithChildren<{ gap?: number }>) {
+    minColumnWidth = 340,
+}: PropsWithChildren<{ gap?: number; minColumnWidth?: number }>) {
     const { isExpanded, fontScale } = useResponsiveLayout();
     const [width, setWidth] = useState(0);
     const twoColumns =
-        isExpanded && width >= 680 * Math.max(1, fontScale) + gap;
+        isExpanded &&
+        width >= minColumnWidth * 2 * Math.max(1, fontScale) + gap;
 
     return (
         <View
@@ -108,7 +110,12 @@ export function ResponsiveGrid({
                     }
                     style={{
                         minWidth: 0,
-                        width: twoColumns ? (width - gap) / 2 : '100%',
+                        flexBasis: twoColumns ? '45%' : '100%',
+                        flexGrow: 1,
+                        flexShrink: 1,
+                        maxWidth: twoColumns
+                            ? Math.floor((width - gap) / 2)
+                            : '100%',
                     }}
                 >
                     {child}
@@ -407,6 +414,7 @@ export function TextField({
     error,
     style,
     inputRef,
+    secureTextEntry = false,
     ...inputProps
 }: TextInputProps & {
     label: string;
@@ -414,18 +422,53 @@ export function TextField({
     inputRef?: Ref<TextInputInstance>;
 }) {
     const { colors, styles } = useThemeStyles(createStyles);
+    const { t } = usePreferences();
+    const [passwordVisible, setPasswordVisible] = useState(false);
     return (
         <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>{label}</Text>
-            <TextInput
-                {...inputProps}
-                ref={inputRef}
-                accessibilityLabel={inputProps.accessibilityLabel ?? label}
-                placeholderTextColor={colors.muted}
-                selectionColor={colors.primary}
-                cursorColor={colors.primary}
-                style={[styles.input, style]}
-            />
+            <View>
+                <TextInput
+                    {...inputProps}
+                    secureTextEntry={secureTextEntry && !passwordVisible}
+                    ref={inputRef}
+                    accessibilityLabel={inputProps.accessibilityLabel ?? label}
+                    placeholderTextColor={colors.muted}
+                    selectionColor={colors.primary}
+                    cursorColor={colors.primary}
+                    style={[
+                        styles.input,
+                        secureTextEntry && { paddingRight: 60 },
+                        style,
+                    ]}
+                />
+                {secureTextEntry && (
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t(
+                            passwordVisible ? 'Ocultar senha' : 'Mostrar senha',
+                        )}
+                        onPress={() =>
+                            setPasswordVisible((visible) => !visible)
+                        }
+                        style={{
+                            position: 'absolute',
+                            right: 4,
+                            top: 4,
+                            width: 44,
+                            height: 44,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <AppIcon
+                            name={passwordVisible ? 'eye-off' : 'eye'}
+                            color={colors.muted}
+                            size={22}
+                        />
+                    </Pressable>
+                )}
+            </View>
             {error ? <Text style={styles.fieldError}>{error}</Text> : null}
         </View>
     );

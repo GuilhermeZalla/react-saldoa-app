@@ -2,6 +2,10 @@ export type Locale = 'pt-BR' | 'en';
 let currentLocale: Locale = 'pt-BR';
 
 export const english: Record<string, string> = {
+    'Mostrar senha': 'Show password',
+    'Ocultar senha': 'Hide password',
+    'Recolher navegação': 'Collapse navigation',
+    'Expandir navegação': 'Expand navigation',
     'A senha deve ter pelo menos 8 caracteres, contendo letras e números.':
         'Password must be at least 8 characters long, containing letters and numbers.',
     'Conta criada com sucesso!': 'Account created successfully!',

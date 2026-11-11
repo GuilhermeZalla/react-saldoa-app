@@ -18,7 +18,13 @@ export function TabletSidebar({
     navigateToTab,
     insets,
     onOpenPreferences,
-}: BottomTabBarProps & { onOpenPreferences: () => void }) {
+    collapsed,
+    onToggle,
+}: BottomTabBarProps & {
+    onOpenPreferences: () => void;
+    collapsed: boolean;
+    onToggle: () => void;
+}) {
     const { t } = usePreferences();
     const { colors, styles } = useThemeStyles(createStyles);
     const activeRoute = state.routes[state.index];
@@ -59,21 +65,23 @@ export function TabletSidebar({
                     size={22}
                     color={selected ? colors.primary : colors.muted}
                 />
-                <Text
-                    style={[
-                        styles.label,
-                        { color: selected ? colors.primary : colors.text },
-                    ]}
-                >
-                    {t(label)}
-                </Text>
+                {!collapsed && (
+                    <Text
+                        style={[
+                            styles.label,
+                            { color: selected ? colors.primary : colors.text },
+                        ]}
+                    >
+                        {t(label)}
+                    </Text>
+                )}
             </Pressable>
         );
     }
 
     return (
         <ScrollView
-            style={styles.sidebar}
+            style={[styles.sidebar, collapsed && { width: 72 + insets.left }]}
             contentContainerStyle={[
                 styles.content,
                 {
@@ -83,20 +91,54 @@ export function TabletSidebar({
                 },
             ]}
         >
-            <View style={styles.brand}>
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t(
+                    collapsed ? 'Expandir navegação' : 'Recolher navegação',
+                )}
+                accessibilityState={{ expanded: !collapsed }}
+                onPress={onToggle}
+                style={[
+                    styles.item,
+                    { justifyContent: 'center', marginBottom: 16 },
+                ]}
+            >
+                <View
+                    style={{
+                        transform: [{ rotate: collapsed ? '0deg' : '180deg' }],
+                    }}
+                >
+                    <AppIcon name="chevron" size={22} color={colors.primary} />
+                </View>
+            </Pressable>
+            <View
+                style={[
+                    styles.brand,
+                    collapsed && {
+                        paddingHorizontal: 0,
+                        justifyContent: 'center',
+                    },
+                ]}
+            >
                 <AppIcon name="brand" size={32} color={colors.primary} />
-                <Text style={[styles.brandText, { color: colors.text }]}>
-                    Saldoa
-                </Text>
+                {!collapsed && (
+                    <Text style={[styles.brandText, { color: colors.text }]}>
+                        Saldoa
+                    </Text>
+                )}
             </View>
-            <Text style={[styles.heading, { color: colors.muted }]}>
-                {t('Finanças').toLocaleUpperCase()}
-            </Text>
+            {!collapsed && (
+                <Text style={[styles.heading, { color: colors.muted }]}>
+                    {t('Finanças').toLocaleUpperCase()}
+                </Text>
+            )}
             {financeItems.map(([name, label, icon]) => item(name, label, icon))}
             <View style={[styles.secondary, { borderTopColor: colors.border }]}>
-                <Text style={[styles.heading, { color: colors.muted }]}>
-                    {t('Conta e ajuda').toLocaleUpperCase()}
-                </Text>
+                {!collapsed && (
+                    <Text style={[styles.heading, { color: colors.muted }]}>
+                        {t('Conta e ajuda').toLocaleUpperCase()}
+                    </Text>
+                )}
                 {item('account', 'Minha conta', 'user')}
                 <Pressable
                     accessibilityRole="button"
@@ -112,9 +154,11 @@ export function TabletSidebar({
                     ]}
                 >
                     <AppIcon name="settings" size={22} color={colors.muted} />
-                    <Text style={[styles.label, { color: colors.text }]}>
-                        {t('Preferências')}
-                    </Text>
+                    {!collapsed && (
+                        <Text style={[styles.label, { color: colors.text }]}>
+                            {t('Preferências')}
+                        </Text>
+                    )}
                 </Pressable>
                 {item('help', 'Como usar o Saldoa', 'help')}
             </View>
