@@ -38,6 +38,13 @@ jobs:
         working-directory: mobile
         run: npm ci --ignore-scripts
 
+      - name: Check Mobile Application
+        working-directory: mobile
+        run: |
+          npm test
+          npm run types:check
+          npm run lint
+
       - name: Check backup script syntax
         run: |
           bash -n docker/backup-encrypted.sh

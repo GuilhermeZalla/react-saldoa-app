@@ -6,7 +6,7 @@ A personal finance app created in **2026**, extending the Saldoa web application
 
 Version **1.1.0** refreshes the dashboard, transaction history, and planning screens. It adds month navigation, search, pagination, and four main tabs. The sign-in and registration design is preserved. Navigation from More and password-validation messages have also been improved.
 
-See the [changelog](../CHANGELOG.md) for the complete version history. Android version code **3** was tested on a physical device by the author.
+See the [changelog](../CHANGELOG.md) for the complete version history. Earlier builds were tested on a physical device by the author; this does not validate the newer tablet builds. The main release currently contains `test7` (versionCode 8), while `test8` (versionCode 9) is available separately for the next device check.
 
 ## Preview
 
@@ -28,7 +28,7 @@ The app adapts to tablet-sized windows in portrait and landscape. Wide screens u
 
 Tablet layout: [landscape preview with sample data](../docs/screenshots/mobile-dashboard-tablet-expo.png).
 
-This tablet adaptation is included in the local `test7` APK (versionCode 8), not in the GitHub Release linked above. The app's web preview has been checked, including navigation, short windows, and orientation-sized resizes with an unsaved form. Native rotation, keyboard behavior, and dialogs still need a tablet check. See [project status](../docs/STATUS.md) for the build and verification details.
+This tablet adaptation is included in the `test8` APK (versionCode 9), generated on November 11, 2026, and available as a [separate prerelease](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0-test8). [Download the test APK](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.0-test8/saldoa-android-v1.1.0-test8.apk). It uses the same signing certificate as `test7`. The app's web preview has been checked, including navigation, short windows, and orientation-sized resizes with an unsaved form. Native rotation, keyboard behavior, dialogs, and guide downloads still need a device check. See [project status](../docs/STATUS.md) for the build and verification details.
 
 ## Install
 

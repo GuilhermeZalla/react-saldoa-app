@@ -2,6 +2,21 @@
 
 Release notes for the Saldoa website and Android app. Dates below follow the published release date in UTC.
 
+## [1.1.0-test8] - 2026-11-11
+
+### Android validation build
+
+- Published a separate prerelease with internal version 1.1.0, Android version code 9, tablet support, and the latest registration password guidance. Physical-device confirmation is pending.
+- Corrected the filename, checksum, and description of the existing test7 attachment in the main 1.1.0 release without changing its bytes. Preserved the previous checksum attachment.
+
+### Web and delivery fixes
+
+- Fixed financial summary values and compressed dashboard descriptions at tablet widths with the sidebar open. Verified dashboard, login, and registration in both themes.
+- Replaced the plain letter in transactional emails with the existing Fluxo mark, used presentation tables, and corrected mobile sizing and colors.
+- Updated the approved Vite+ toolchain to 1.6.0; production and complete web npm audits report zero vulnerabilities.
+- Repaired the missing indirect TypeScript entry in the mobile lockfile and added mobile tests, type checks, and lint to CI. Existing mobile dependency versions are unchanged.
+- Local validation: 174 PHP tests passed, two skipped, 35 mobile tests passed, static analysis/types/lint/builds passed, and 48 visual checks passed. Production image preparation also passed on Linux; these checks do not replace native APK validation.
+
 ## [1.1.1-preview] - 2026-11-08
 
 ### Added

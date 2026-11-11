@@ -45,6 +45,8 @@ The **web application was completed in 2025**. In **2026**, Saldoa gained a mobi
 
 The APK connects to the public API over Wi-Fi or mobile data. Your computer does not need to be running. It supports Android ARM64 and is distributed directly through GitHub; it is not on Google Play. See the [mobile guide](mobile/README.md) for installation, development, and build instructions.
 
+The latest phone/tablet validation build is [1.1.0 test8, Android version code 9](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0-test8). Physical-device confirmation is still pending. It is separate from the main release and is not a Play Store build.
+
 Private screens use sample data. Mobile screenshots were captured in the app's web preview. The web interface is in Portuguese; the mobile app supports Portuguese and English.
 
 ## Built with
@@ -60,7 +62,7 @@ Private screens use sample data. Mobile screenshots were captured in the app's w
 
 ## Run locally
 
-Requirements: PHP 8.4, Composer, Node.js 22.13 or later, and npm. Enable SQLite, OpenSSL, mbstring, intl, and the PHP extensions required by Composer.
+Requirements: PHP 8.4, Composer, Node.js 22.18+ (22.x) or 24.11+ (24.x), and npm. Enable SQLite, OpenSSL, mbstring, intl, and the PHP extensions required by Composer.
 
 For the first installation in a fresh checkout, use PowerShell:
 

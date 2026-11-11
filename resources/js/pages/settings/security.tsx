@@ -12,7 +12,7 @@ import { edit } from '@/routes/security';
 type Props = {
     passwordRules: string;
     isDemoUser: boolean;
-} ;
+};
 
 export default function Security(props: Props) {
     const { isDemoUser } = usePage<Props>().props;

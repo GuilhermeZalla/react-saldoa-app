@@ -6,9 +6,9 @@
 
     <p>Recebemos uma solicitação para excluir sua conta Saldoa e todos os dados financeiros associados.</p>
 
-    <a href="{{ $confirmationUrl }}" class="button button--destructive">Confirmar exclusão da conta</a>
+    <a href="{{ $confirmationUrl }}" class="button">Confirmar exclusão da conta</a>
 
-    <div class="notice notice--warning">
+    <div class="notice">
         <p>Esta solicitação expira em uma hora. Se você não fez este pedido, ignore esta mensagem e sua conta permanecerá intacta.</p>
     </div>
 

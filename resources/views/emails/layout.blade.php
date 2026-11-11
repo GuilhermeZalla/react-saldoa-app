@@ -7,6 +7,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
 
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -18,8 +22,11 @@
 
         .wrapper {
             width: 100%;
-            padding: 32px 16px;
             background-color: #f4f5f7;
+        }
+
+        .wrapper-cell {
+            padding: 32px 16px;
         }
 
         .card {
@@ -36,24 +43,11 @@
             background-color: #ffffff;
         }
 
-        .logo {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-
         .logo-mark {
-            width: 32px;
-            height: 32px;
+            display: block;
+            width: 36px;
+            height: 36px;
             border-radius: 8px;
-            background: linear-gradient(135deg, #c85f00, #d46a00);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
-            font-weight: 600;
-            font-size: 16px;
         }
 
         .app-name {
@@ -99,10 +93,6 @@
             margin-bottom: 24px;
         }
 
-        .button--destructive {
-            background-color: #d51f28;
-        }
-
         .notice {
             background-color: #eceff2;
             border-radius: 10px;
@@ -114,14 +104,6 @@
             margin: 0;
             font-size: 14px;
             color: #535d68;
-        }
-
-        .notice--warning {
-            background-color: #fdf3e3;
-        }
-
-        .notice--warning p {
-            color: #b45309;
         }
 
         .footer {
@@ -141,7 +123,7 @@
         }
 
         @media (max-width: 480px) {
-            .wrapper {
+            .wrapper-cell {
                 padding: 16px 12px;
             }
 
@@ -169,30 +151,42 @@
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <div class="card">
-            <div class="header">
-                <div class="logo">
-                    <div class="logo-mark">S</div>
-                    <span class="app-name">Saldoa</span>
-                </div>
-            </div>
-
-            <div class="content">
-                {{ $slot }}
-            </div>
-
-            <div class="footer">
-                @isset($footerNotes)
-                    @foreach($footerNotes as $note)
-                        <p>{{ $note }}</p>
-                    @endforeach
-                @else
-                    <p>Saldoa &mdash; Controle financeiro pessoal</p>
-                    <p>Se você não solicitou esta ação, ignore esta mensagem.</p>
-                @endisset
-            </div>
-        </div>
-    </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="wrapper">
+        <tr>
+            <td align="center" class="wrapper-cell">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="card" style="max-width: 600px; background-color: #ffffff; border: 1px solid #d9dee5; border-radius: 16px;">
+                    <tr>
+                        <td class="header">
+                            <table role="presentation" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="48" valign="middle">
+                                        <img src="{{ url('/apple-touch-icon.png') }}" alt="Marca Fluxo do Saldoa" width="36" height="36" class="logo-mark" style="display: block; border: 0; border-radius: 8px;">
+                                    </td>
+                                    <td valign="middle" class="app-name">Saldoa</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="content">
+                            {{ $slot }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="footer">
+                            @isset($footerNotes)
+                                @foreach($footerNotes as $note)
+                                    <p>{{ $note }}</p>
+                                @endforeach
+                            @else
+                                <p>Saldoa &mdash; Controle financeiro pessoal</p>
+                                <p>Se você não solicitou esta ação, ignore esta mensagem.</p>
+                            @endisset
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
