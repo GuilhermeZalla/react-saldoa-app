@@ -2,6 +2,14 @@
 
 Atualizado em 11/11/2026. Projeto de controle financeiro pessoal e portfólio. **Web iniciado em 2025; mobile criado em 2026**, conforme informação do autor.
 
+## Release final 1.1.1 — 11/11/2026
+
+- O titular solicitou uma release final, sem identificação de teste. Preparada a versão `1.1.1`, versionCode `12`, para publicação regular em `v1.1.1` como versão mais recente do GitHub. Mantidas as funcionalidades do test10; alterações do app limitadas à numeração, sem mudança de dependências.
+- APK final gerado: `saldoa-android-v1.1.1.apk`, versão `1.1.1`, versionCode `12`, pacote `com.saldoa.app`, ARM64, 30.730.006 bytes. SHA-256 `b40fbb9489455dad6e434014655ca70059275619ca499e0251764465a9148174`. Integridade do arquivo, API pública HTTPS e mesmo certificado do test10 conferidos; permite atualização sem desinstalar. Build concluída em 4m33s (603 tarefas). Checksum e cópia privada em `.secrets/release-v1.1.1/`; unidades temporárias removidas e autolinking restaurado aos caminhos absolutos.
+- READMEs e changelog apontam à distribuição final. Histórico de pré-lançamentos preservado. Publicação será confirmada depois do CI e da conferência remota dos anexos.
+- Verificações da versão final: 35 testes mobile, tipos, lint e `npm run check` aprovados. Comparação semântica do lockfile confirmou que apenas a versão do projeto mudou; dependências e código de interface permanecem iguais ao test10.
+- Play Store e monetização continuam pendentes. A assinatura de distribuição para a loja permanece para essa etapa; a distribuição direta mantém o certificado existente para permitir atualização sobre as versões anteriores. Testes nativos completos e conferências operacionais do titular continuam conforme os registros abaixo.
+
 ## Encerramento autorizado e pendências — 11/11/2026
 
 - O titular aprovou a prévia corrigida do tablet e autorizou registrar as correções no GitHub, aguardar o CI e publicar o APK `test10` em pré-lançamento separado. A confirmação da prévia não foi tratada como teste completo do Android nativo.

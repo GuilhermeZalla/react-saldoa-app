@@ -2,7 +2,7 @@
 
 Personal finance tracking for income, expenses, and budgets, on the web and on your phone.
 
-**[Visit the website](https://saldoa-app.duckdns.org)** · **[Download the Android APK (test10)](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.0-test10/saldoa-android-v1.1.0-test10.apk)** · [Release notes](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0-test10)
+**[Visit the website](https://saldoa-app.duckdns.org)** · **[Download the Android APK](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.1/saldoa-android-v1.1.1.apk)** · [Release notes](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.1)
 
 The **web application was completed in 2025**. In **2026**, Saldoa gained a mobile app that shares the same backend. This is a learning and portfolio project, with a live website hosted on AWS and an Android APK available for direct installation.
 
@@ -45,7 +45,7 @@ The **web application was completed in 2025**. In **2026**, Saldoa gained a mobi
 
 The APK connects to the public API over Wi-Fi or mobile data. Your computer does not need to be running. It supports Android ARM64 and is distributed directly through GitHub; it is not on Google Play. See the [mobile guide](mobile/README.md) for installation, development, and build instructions.
 
-The latest phone/tablet validation build is [1.1.0 test10, Android version code 11](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0-test10). [Download the test10 APK](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.0-test10/saldoa-android-v1.1.0-test10.apk). It adds password visibility controls, tablet sign-in/sign-up layouts, a collapsible sidebar, and corrected dashboard columns. The tablet preview was approved by the author; complete native-device validation remains separate. Google Play and monetization remain pending.
+The latest stable Android release is [Saldoa 1.1.1, Android version code 12](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.1). [Download the APK](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.1/saldoa-android-v1.1.1.apk). It includes password visibility controls, tablet sign-in/sign-up layouts, a collapsible sidebar, and corrected dashboard columns. The tablet preview was approved by the author; complete native-device validation remains separate. Google Play and monetization remain pending.
 
 Private screens use sample data. Mobile screenshots were captured in the app's web preview. The web interface is in Portuguese; the mobile app supports Portuguese and English.
 
@@ -97,11 +97,11 @@ php artisan test --compact
 
 Laravel tests use a separate test environment. Mobile-specific checks are documented in the [mobile guide](mobile/README.md).
 
-## Version 1.1.0
+## Version 1.1.1
 
-Version 1.1.0 refreshes the signed-in dashboard, transaction history, and planning screens on web and mobile. The app adds month navigation, search, pagination, and a four-tab navigation bar. Upcoming recurring transactions are shown separately from recorded balances. Public home and authentication screens keep their current design.
+Version 1.1.1 completes the tablet improvements in the Android app: responsive sign-in/sign-up screens, a collapsible sidebar, corrected dashboard columns, and password visibility controls. It retains the financial dashboard, transaction history, planning, month navigation, search, pagination, and upcoming recurring transactions introduced in 1.1.0.
 
-See the [changelog](CHANGELOG.md) for the version history and the [latest release](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0) for the Android download and release notes.
+See the [changelog](CHANGELOG.md) for the version history and the [latest release](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.1) for the Android download and release notes.
 
 ## Release scope
 

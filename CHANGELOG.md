@@ -2,6 +2,16 @@
 
 Release notes for the Saldoa website and Android app. Dates below follow the published release date in UTC.
 
+## [1.1.1] - 2026-11-11
+
+### Stable Android release
+
+- Released the approved tablet improvements as a regular GitHub release, without a test or prerelease label.
+- Android version 1.1.1, version code 12, ARM64. Retains the password visibility controls, responsive sign-in/sign-up layouts, collapsible sidebar, and corrected dashboard columns from test10.
+- Preserved the signing certificate so existing installations can update without uninstalling. APK and SHA256SUMS are provided with the release.
+- Updated the main download links to the stable release and preserved previous versions in the release history.
+- Google Play publication and monetization remain pending. The release label does not imply additional native-device tests beyond those recorded in the project status.
+
 ## [1.1.0-test10] - 2026-11-11
 
 ### Android tablet improvements

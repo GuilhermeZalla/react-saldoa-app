@@ -2,11 +2,11 @@
 
 A personal finance app created in **2026**, extending the Saldoa web application completed in **2025**.
 
-**[Download the Android APK (test10)](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.0-test10/saldoa-android-v1.1.0-test10.apk)** · [Release notes](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0-test10) · [Visit the web application](https://saldoa-app.duckdns.org)
+**[Download the Android APK](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.1/saldoa-android-v1.1.1.apk)** · [Release notes](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.1) · [Visit the web application](https://saldoa-app.duckdns.org)
 
-Version **1.1.0** refreshes the dashboard, transaction history, and planning screens. It adds month navigation, search, pagination, and four main tabs. The sign-in and registration design is preserved. Navigation from More and password-validation messages have also been improved.
+Version **1.1.1** is the stable Android release with password visibility controls, tablet sign-in/sign-up layouts, a collapsible sidebar, and corrected dashboard columns. It retains the dashboard, transaction history, planning, search, pagination, and Portuguese/English support.
 
-See the [changelog](../CHANGELOG.md) for the complete version history. The author confirmed that `test8` works and approved the corrected tablet preview. The main release contains `test7` (versionCode 8); the latest separate prerelease is `test10` (versionCode 11). Complete native-device validation of the new build remains separate.
+See the [changelog](../CHANGELOG.md) for the complete version history. The author confirmed that test8 works and approved the corrected tablet preview. Version **1.1.1**, Android version code **12**, is the current stable release; previous test builds remain in the release history. Complete native-device validation remains separate.
 
 ## Preview
 
@@ -28,7 +28,7 @@ The app adapts to tablet-sized windows in portrait and landscape. Wide screens u
 
 Tablet layout: [landscape preview with sample data](../docs/screenshots/mobile-dashboard-tablet-expo.png).
 
-The latest tablet improvements are included in the `test10` APK (versionCode 11), generated on November 11, 2026, and available as a [separate prerelease](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0-test10). [Download the test10 APK](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.0-test10/saldoa-android-v1.1.0-test10.apk). It adds show/hide password controls, wider sign-in/sign-up layouts, a sidebar that collapses to icons, and dashboard cards that fill both columns without wrapping into half-width rows. It uses the same signing certificate as `test8` and can update the previous installation without uninstalling. The web preview passed 24 theme/language/width combinations; 528 Yoga layout checks covered fractional widths, densities, and font scaling. Native rotation, keyboard behavior, dialogs, and guide downloads still need a device check. See [project status](../docs/STATUS.md) for the build and verification details. Google Play and monetization remain pending.
+The tablet improvements are included in the stable **1.1.1** APK (versionCode 12), available as a [regular release](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.1). [Download the APK](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.1/saldoa-android-v1.1.1.apk). It adds show/hide password controls, wider sign-in/sign-up layouts, a sidebar that collapses to icons, and dashboard cards that fill both columns without wrapping into half-width rows. It uses the same signing certificate as `test8` and can update the previous installation without uninstalling. The web preview passed 24 theme/language/width combinations; 528 Yoga layout checks covered fractional widths, densities, and font scaling. Native rotation, keyboard behavior, dialogs, and guide downloads still need a device check. See [project status](../docs/STATUS.md) for the build and verification details. Google Play and monetization remain pending.
 
 ## Install
 
