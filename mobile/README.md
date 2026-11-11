@@ -2,7 +2,7 @@
 
 A personal finance app created in **2026**, extending the Saldoa web application completed in **2025**.
 
-**[Download the Android APK](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.0/saldoa-android-v1.1.0.apk)** · [Release notes](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0) · [Visit the web application](https://saldoa-app.duckdns.org)
+**[Download the Android APK (test10)](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.0-test10/saldoa-android-v1.1.0-test10.apk)** · [Release notes](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0-test10) · [Visit the web application](https://saldoa-app.duckdns.org)
 
 Version **1.1.0** refreshes the dashboard, transaction history, and planning screens. It adds month navigation, search, pagination, and four main tabs. The sign-in and registration design is preserved. Navigation from More and password-validation messages have also been improved.
 

@@ -2,7 +2,7 @@
 
 Personal finance tracking for income, expenses, and budgets, on the web and on your phone.
 
-**[Visit the website](https://saldoa-app.duckdns.org)** · **[Download the Android APK](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.0/saldoa-android-v1.1.0.apk)** · [Release notes](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0)
+**[Visit the website](https://saldoa-app.duckdns.org)** · **[Download the Android APK (test10)](https://github.com/GuilhermeZalla/react-saldoa-app/releases/download/v1.1.0-test10/saldoa-android-v1.1.0-test10.apk)** · [Release notes](https://github.com/GuilhermeZalla/react-saldoa-app/releases/tag/v1.1.0-test10)
 
 The **web application was completed in 2025**. In **2026**, Saldoa gained a mobile app that shares the same backend. This is a learning and portfolio project, with a live website hosted on AWS and an Android APK available for direct installation.
 
